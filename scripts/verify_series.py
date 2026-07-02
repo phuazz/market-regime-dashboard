@@ -75,11 +75,27 @@ def check_bls_vs_fred() -> tuple[bool, str]:
     return ok, detail
 
 
+def check_gspc_vs_fred() -> tuple[bool, str]:
+    from sources.prices import fetch_yahoo_daily
+
+    dates, closes = fetch_yahoo_daily("^GSPC", period1=1600000000)  # 2020 onwards
+    fred = dict(zip(*clean_series(*fetch_series("SP500"))))
+    common = [(d, c) for d, c in zip(dates, closes) if d in fred][-20:]
+    if len(common) < 10:
+        return False, f"only {len(common)} common sessions between Yahoo ^GSPC and FRED SP500"
+    worst = max(abs(c - fred[d]) / fred[d] * 100.0 for d, c in common)
+    return worst <= 0.05, (
+        f"^GSPC (Yahoo) vs FRED SP500 over {len(common)} common sessions: "
+        f"max relative difference {worst:.3f}%"
+    )
+
+
 def main() -> int:
     checks = [
         ("T10Y3M identity (spread equals components)", check_t10y3m_identity),
         ("Sahm recomputation from UNRATE", check_sahm_recompute),
         ("BLS API vs FRED labour series", check_bls_vs_fred),
+        ("S&P 500 price feeds agree", check_gspc_vs_fred),
     ]
     failed = 0
     for name, check in checks:

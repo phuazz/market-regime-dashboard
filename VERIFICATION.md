@@ -190,8 +190,28 @@ output of 2026-07-02: all three checks PASS.
 
 ---
 
+## ^GSPC — S&P 500 daily closes (Lens 3)
+
+- **Verified:** 2026-07-02 (scripted, repeatable — verify_series.py check 4)
+- **Primary:** Yahoo Finance chart API (`query1.finance.yahoo.com/v8/finance/chart/^GSPC`,
+  the same endpoint the yfinance library wraps). Daily history from
+  1970-01-02; the final bar is dropped when its UTC date equals the run date
+  because the US session may still be open.
+- **Secondary:** FRED `SP500` — the official S&P 500 close, ten-year window —
+  https://fred.stlouisfed.org/series/SP500
+- **Value checks:** the two feeds agree **exactly (0.000% max relative
+  difference) over the latest 20 common sessions**, including 2026-06-26
+  (7,354.02), 2026-06-29 (7,440.43), 2026-06-30 (7,499.36), and 2026-07-01
+  (7,483.23). The builder also re-runs this comparison on every pipeline run
+  and refuses to publish when the feeds disagree by more than 0.05%.
+- **Source change vs SPEC:** SPEC.md section 6 named Stooq as an option; the
+  Stooq CSV endpoint now sits behind a JavaScript proof-of-work challenge and
+  is not automatable, so FRED `SP500` serves as the second feed instead.
+
+---
+
 ## Pending verification (later phases — do not use before logging here)
 
 `NFCI` / `ANFCI`, `DRTSCILM` (SLOOS), `UMCSENT`, `CPIAUCSL`, `USREC`, AAII
 survey values, the NAAIM Exposure Index, multpl trailing P/E, IPO-count
-proxy, and all price feeds (`^GSPC`, RPV/RPG) with their second feeds.
+proxy, and the Value-vs-Growth price pair (RPV/RPG) with second feeds.
