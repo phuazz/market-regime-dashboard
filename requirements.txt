@@ -1,0 +1,4 @@
+# Date arithmetic only through a date library (CLAUDE.md). No other runtime
+# dependencies: the pipeline deliberately uses the standard library plus
+# python-dateutil so GitHub Actions installs stay minimal.
+python-dateutil>=2.9

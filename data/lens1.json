@@ -1,0 +1,21 @@
+{
+  "lens": 1,
+  "title": "Recession risk",
+  "subtitle": "Leading and coincident indicators of an economic downturn.",
+  "updated_at": "2026-07-02T14:04:19Z",
+  "indicators": [
+    {
+      "id": "yield_curve_10y3m",
+      "name": "Yield Curve (10yr - 3mo)",
+      "lens": 1,
+      "value": 0.63,
+      "unit": "pct",
+      "as_of": "2026-07-01",
+      "status": "benign",
+      "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign. Navigo-chosen parameters, pending confirmation.",
+      "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
+      "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
+      "notes": "The spread is positive (+0.63) and no sustained inversion ended within the trailing 12 months. Series identity verified against two independent sources on 2026-07-02 (see VERIFICATION.md). History file: data/history/t10y3m.json."
+    }
+  ]
+}
