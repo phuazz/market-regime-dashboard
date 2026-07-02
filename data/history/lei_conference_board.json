@@ -1,0 +1,15 @@
+{
+  "series_id": "CB_US_LEI_HEADLINE",
+  "name": "Conference Board US LEI (public headline)",
+  "unit": "index",
+  "source_url": "https://www.conference-board.org/topics/us-leading-indicators",
+  "collection": "Accumulated from monthly public press headlines; no licensed history is redistributed.",
+  "points": [
+    {
+      "as_of": "2026-05-01",
+      "value": 99.3,
+      "recorded_at": "2026-07-02T14:58:47Z"
+    }
+  ],
+  "updated_at": "2026-07-02T15:01:56Z"
+}

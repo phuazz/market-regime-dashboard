@@ -1,0 +1,21 @@
+{
+  "series_id": "SPGLOBAL_US_MFG_PMI",
+  "name": "S&P Global US Manufacturing PMI (headline)",
+  "unit": "index",
+  "source_url": "https://www.pmi.spglobal.com/",
+  "collection": "Accumulated from monthly public press headlines; no licensed history is redistributed.",
+  "updated_at": "2026-07-02T15:01:53Z",
+  "points": [
+    {
+      "as_of": "2026-05-01",
+      "value": 55.1,
+      "recorded_at": "2026-07-02T15:00:00Z",
+      "note": "Seeded from the June 2026 release coverage (May final 55.1); see VERIFICATION.md."
+    },
+    {
+      "as_of": "2026-06-01",
+      "value": 53.9,
+      "recorded_at": "2026-07-02T14:58:45Z"
+    }
+  ]
+}

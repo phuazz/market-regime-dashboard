@@ -3,7 +3,7 @@
   "name": "Yield Curve (10yr - 3mo)",
   "unit": "pct",
   "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
-  "updated_at": "2026-07-02T14:04:19Z",
+  "updated_at": "2026-07-02T15:01:34Z",
   "dates": [
     "1982-01-04",
     "1982-01-05",

@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from update_data import classify_yield_curve, find_sustained_inversions
+from lens1 import classify_yield_curve, find_sustained_inversions
 
 
 def days_ending(end: date, count: int) -> list[date]:

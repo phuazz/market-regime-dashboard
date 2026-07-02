@@ -1,0 +1,15 @@
+{
+  "series_id": "MULTPL_SHILLER_CAPE",
+  "name": "Shiller CAPE (multpl daily print)",
+  "unit": "ratio",
+  "source_url": "https://www.multpl.com/shiller-pe",
+  "collection": "Accumulated from multpl.com daily prints (latest-price basis).",
+  "points": [
+    {
+      "as_of": "2026-07-01",
+      "value": 41.66,
+      "recorded_at": "2026-07-02T14:58:47Z"
+    }
+  ],
+  "updated_at": "2026-07-02T15:01:56Z"
+}
