@@ -17,8 +17,15 @@ from __future__ import annotations
 
 import argparse
 
-from lens1 import CANONICAL_ORDER, GROUPS, LENS_TITLES
-from util import DATA_DIR, ROOT, dump_json, load_json, utc_now_iso
+import lens1
+import lens3
+from util import CANONICAL_ORDER, DATA_DIR, LENS_TITLES, ROOT, dump_json, load_json, utc_now_iso
+
+# One registry across all lens modules, keyed by cadence group.
+GROUPS: dict[str, list] = {
+    group: lens1.GROUPS[group] + lens3.GROUPS[group]
+    for group in ("daily", "monthly", "quarterly")
+}
 
 
 def update_lens_file(lens: int, built: list[dict]) -> str:

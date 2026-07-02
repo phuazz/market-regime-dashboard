@@ -27,26 +27,6 @@ from util import (
 
 VERIFIED_NOTE = "Series identity verified against two sources (VERIFICATION.md)."
 
-LENS_TITLES = {
-    1: ("Recession risk", "Leading and coincident indicators of an economic downturn."),
-    2: ("Market-peak froth", "Public-data gauges of euphoria and complacency."),
-    3: ("Price trend", "Confirmation that the market is actually rolling over."),
-}
-
-CANONICAL_ORDER = {
-    1: [
-        "yield_curve_10y3m",
-        "sahm_rule",
-        "hy_credit_spreads",
-        "pmi_manufacturing_proxy",
-        "leading_indicators",
-        "labour_market",
-        "shiller_cape",
-    ],
-    2: [],
-    3: [],
-}
-
 
 # ---------------------------------------------------------------------------
 # Yield curve (10yr - 3mo)

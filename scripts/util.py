@@ -9,6 +9,27 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 HISTORY_DIR = DATA_DIR / "history"
 
+LENS_TITLES = {
+    1: ("Recession risk", "Leading and coincident indicators of an economic downturn."),
+    2: ("Market-peak froth", "Public-data gauges of euphoria and complacency."),
+    3: ("Price trend", "Confirmation that the market is actually rolling over."),
+}
+
+# Canonical row order per lens. Extended as later phases add indicators.
+CANONICAL_ORDER = {
+    1: [
+        "yield_curve_10y3m",
+        "sahm_rule",
+        "hy_credit_spreads",
+        "pmi_manufacturing_proxy",
+        "leading_indicators",
+        "labour_market",
+        "shiller_cape",
+    ],
+    2: [],
+    3: ["sma_trend_sp500"],
+}
+
 
 def load_json(path: Path) -> dict | None:
     if not path.exists():
