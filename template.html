@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recession &amp; Market-Peak Dashboard — Navigo</title>
+<!-- Fonts and :root tokens copied verbatim from C:\dev\design.md (PCC DNA). -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* surfaces */
+  --bg: #fafaf8;        /* page background — warm off-white */
+  --bg2: #ffffff;       /* cards, raised surfaces */
+  --bg3: #f5f5f0;       /* table headers, inset chips */
+  --bg4: #eeeee8;       /* progress tracks, deep insets */
+  --bg-hover: #f0f0ea;  /* row / cell hover */
+  /* borders */
+  --bd: #e2e0d8;        /* default hairline */
+  --bd2: #d5d3ca;       /* medium */
+  --bd-strong: #c0beb5; /* emphasis / axis lines */
+  /* text */
+  --t1: #1a1a18;        /* primary — near-black */
+  --t2: #5c5c56;        /* secondary */
+  --t3: #8a8a82;        /* tertiary / labels */
+  --t4: #b0b0a8;        /* disabled / faint */
+  /* semantic: green = gain/long, red = loss/short */
+  --g: #1a8754;  --g2: #22a366;  --g-bg: rgba(26,135,84,0.07);  --g-bg2: rgba(26,135,84,0.14);
+  --r: #c0392b;  --r2: #e74c3c;  --r-bg: rgba(192,57,43,0.07);  --r-bg2: rgba(192,57,43,0.14);
+  /* accents: blue = neutral/benchmark, amber = caution, purple = cost, cyan = info, pink = alt */
+  --b: #2563eb;  --b2: #3b82f6;  --b-bg: rgba(37,99,235,0.06);  --b-bg2: rgba(37,99,235,0.12);
+  --a: #b45309;  --a-bg: rgba(180,83,9,0.07);
+  --p: #7c3aed;  --p-bg: rgba(124,58,237,0.06);
+  --c: #0891b2;  --c-bg: rgba(8,145,178,0.06);
+  --pk: #be185d; --pk-bg: rgba(190,24,93,0.06);
+  /* type */
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
+  /* elevation */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.06), 0 4px 6px rgba(0,0,0,0.04);
+  /* radius */
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--t1); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+a { color: var(--b); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.shell { max-width: 1520px; margin: 0 auto; padding: 20px 32px 60px; }
+.col { max-width: 1040px; margin: 0 auto; }
+
+/* Masthead (design.md pattern) */
+.masthead { padding: 28px 0 22px; border-bottom: 2px solid var(--t1); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.masthead-left h1 { font-family: var(--serif); font-size: 32px; font-weight: 400; letter-spacing: -0.5px; }
+.masthead-left h1 em { font-style: italic; color: var(--t3); }
+.masthead-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; }
+.pill-date { background: var(--bg3); border: 1px solid var(--bd2); color: var(--t2); font-family: var(--mono); font-weight: 500; }
+.pill-phase { background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); text-transform: uppercase; }
+
+.intro { padding: 14px 0 0; color: var(--t2); max-width: 860px; }
+.intro strong { color: var(--t1); }
+.intro-meta { margin-top: 6px; font-size: 12px; color: var(--t3); }
+
+/* Cards */
+.card { background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--radius-lg); box-shadow: var(--shadow); margin-top: 24px; overflow: hidden; }
+.card-head { padding: 14px 20px 12px; border-bottom: 1px solid var(--bd); }
+.card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--t2); }
+.card-sub { font-size: 12px; color: var(--t3); margin-top: 2px; }
+.card-body { padding: 8px 20px 16px; }
+
+/* Overall read */
+.combined-note { font-size: 13px; color: var(--t2); padding: 12px 0 4px; max-width: 860px; }
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--bd); border: 1px solid var(--bd); border-radius: var(--radius-lg); overflow: hidden; margin-top: 12px; }
+.slot { background: var(--bg2); padding: 14px 16px; }
+.slot-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; color: var(--t3); }
+.slot-status { margin-top: 8px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.slot-detail { margin-top: 4px; font-size: 11px; color: var(--t3); }
+
+/* Status semantics: green = benign, amber = watch, red = elevated */
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.status-benign .dot, .dot-benign { background: var(--g); }
+.status-watch .dot, .dot-watch { background: var(--a); }
+.status-elevated .dot, .dot-elevated { background: var(--r); }
+.status-pending .dot, .dot-pending { background: var(--t4); }
+.status-benign { color: var(--g); }
+.status-watch { color: var(--a); }
+.status-elevated { color: var(--r); }
+.status-pending { color: var(--t3); }
+
+/* Legend */
+.legend { display: flex; gap: 18px; padding: 10px 0 2px; font-size: 12px; color: var(--t2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Indicator rows */
+.row { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--bd); align-items: flex-start; }
+.row:last-child { border-bottom: none; }
+.row .dot { margin-top: 6px; }
+.row-main { flex: 1 1 auto; min-width: 0; }
+.row-name { font-size: 15px; font-weight: 600; }
+.row-name .qualifier { color: var(--t3); font-weight: 400; }
+.row-desc { font-size: 13px; color: var(--t2); margin-top: 2px; max-width: 640px; }
+.row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
+.chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); margin-left: 6px; vertical-align: 1px; }
+.row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
+.row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
+.row-value { text-align: right; flex: none; }
+.row-value .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.row-value .stat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
+.card-foot { font-size: 11px; color: var(--t3); padding: 10px 0 2px; border-top: 1px dashed var(--bd); margin-top: 4px; }
+
+/* Error strip */
+.error-strip { display: none; margin-top: 24px; padding: 12px 16px; border: 1px solid rgba(192,57,43,0.25); background: var(--r-bg); color: var(--r); border-radius: var(--radius); font-size: 13px; }
+
+/* Footer */
+.footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--bd); font-size: 12px; color: var(--t3); }
+.disclaimer-placeholder { margin-top: 10px; padding: 10px 14px; border: 1px dashed var(--bd-strong); background: var(--bg3); border-radius: var(--radius); color: var(--t2); font-size: 12px; }
+.build-stamp { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--t4); }
+
+@media (max-width: 768px) {
+  .shell { padding: 12px 16px 40px; }
+  .slots { grid-template-columns: 1fr; }
+  .row { flex-wrap: wrap; }
+  .row-value { text-align: left; width: 100%; padding-left: 23px; }
+}
+</style>
+</head>
+<body>
+<div class="shell"><div class="col">
+
+  <header class="masthead">
+    <div class="masthead-left">
+      <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
+    </div>
+    <div class="masthead-right">
+      <span class="pill pill-phase">Build phase 1 of 7</span>
+      <span class="pill pill-date" id="asof-pill">Data as of —</span>
+    </div>
+  </header>
+
+  <p class="intro">
+    <strong>Recession risk</strong> (is the economy turning?), <strong>market-peak froth</strong>
+    (is the market priced and positioned like a top?), and <strong>price trend</strong>
+    (is the market actually rolling over?). A single lens firing is not an act signal:
+    the act rule is Lens&nbsp;1 elevated <strong>or</strong> Lens&nbsp;2 at or above its alarm level,
+    <strong>then confirmed by</strong> Lens&nbsp;3. When the combination confirms, the action is to
+    reduce risk, not liquidate — the signals carry false positives.
+  </p>
+  <p class="intro-meta">
+    Every value is from sourced public data with a primary and secondary source per data point.
+    Every threshold is a Navigo-chosen parameter, pending confirmation. Nothing on this page is a
+    third-party proprietary figure.
+  </p>
+
+  <div class="error-strip" id="error-strip"></div>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-title">Overall read</div>
+      <div class="card-sub">The combined read activates once all three lenses are live.</div>
+    </div>
+    <div class="card-body">
+      <div class="slots" id="slots"></div>
+      <p class="combined-note">
+        Lens&nbsp;2 arrives in phase 4 and Lens&nbsp;3 in phase 3; until then this panel reports
+        lens-level status only and no combined signal is computed.
+      </p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-title" id="lens1-title">Lens 1 · Recession risk</div>
+      <div class="card-sub" id="lens1-sub"></div>
+    </div>
+    <div class="card-body">
+      <div class="legend">
+        <span><span class="dot dot-benign"></span>Benign</span>
+        <span><span class="dot dot-watch"></span>Watch</span>
+        <span><span class="dot dot-elevated"></span>Elevated</span>
+      </div>
+      <div id="lens1-rows"></div>
+      <div class="card-foot">
+        The remaining Lens&nbsp;1 indicators (Sahm Rule, high-yield spreads, manufacturing survey
+        proxy, leading indicators, labour market, valuation context) arrive in phase 2, each
+        verified against two sources before first use.
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>
+      Navigo Investment Management Pte. Ltd. — internal investment-committee dashboard.
+      All displayed values carry a primary source, a secondary source, and an as-of date.
+    </div>
+    <div class="disclaimer-placeholder">
+      [DISCLAIMER PLACEHOLDER — compliance and disclosure language to be drafted and approved
+      before any client-facing distribution. Do not circulate externally until completed.]
+    </div>
+    <div class="build-stamp" id="build-stamp">Loading…</div>
+  </footer>
+
+</div></div>
+
+<script>
+"use strict";
+/* Injected by scripts/build.py; stays null during template development so the
+   fetch fallback below loads data/ directly. */
+window.__DATA__ = null; /*DATA_INJECT*/
+
+/* All date rendering goes through Intl with an explicit UTC time zone.
+   JavaScript Date months are 0-indexed, so no month arithmetic is done by
+   hand anywhere in this file — ISO strings are parsed as UTC and formatted
+   by the library only. */
+const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+});
+
+function formatIsoDate(iso) {
+  return DATE_FORMAT.format(new Date(iso + "T00:00:00Z"));
+}
+
+function formatIsoInstant(iso) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short",
+  }).format(new Date(iso));
+}
+
+const STATUS_RANK = { benign: 0, watch: 1, elevated: 2 };
+const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated" };
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function formatValue(value, unit) {
+  const sign = value >= 0 ? "+" : "";
+  if (unit === "pct") return sign + value.toFixed(2) + "%";
+  return sign + String(value);
+}
+
+function worstStatus(indicators) {
+  return indicators.reduce(
+    (worst, ind) => (STATUS_RANK[ind.status] > STATUS_RANK[worst] ? ind.status : worst),
+    "benign"
+  );
+}
+
+function renderSlots(lens1) {
+  const slots = document.getElementById("slots");
+  slots.replaceChildren();
+
+  const status = worstStatus(lens1.indicators);
+  const live = lens1.indicators.length;
+  const defs = [
+    {
+      label: "Lens 1 · Recession risk",
+      status: status,
+      statusText: STATUS_LABEL[status] + " · partial",
+      detail: live + " of 7 indicators live (phase 2 completes the set)",
+    },
+    { label: "Lens 2 · Market-peak froth", status: "pending", statusText: "Pending", detail: "Arrives in phase 4" },
+    { label: "Lens 3 · Price trend", status: "pending", statusText: "Pending", detail: "Arrives in phase 3" },
+  ];
+  for (const def of defs) {
+    const slot = el("div", "slot");
+    slot.appendChild(el("div", "slot-label", def.label));
+    const stat = el("div", "slot-status status-" + def.status);
+    stat.appendChild(el("span", "dot"));
+    stat.appendChild(el("span", null, def.statusText));
+    slot.appendChild(stat);
+    slot.appendChild(el("div", "slot-detail", def.detail));
+    slots.appendChild(slot);
+  }
+}
+
+function renderLens1(lens1) {
+  document.getElementById("lens1-sub").textContent = lens1.subtitle || "";
+  const rows = document.getElementById("lens1-rows");
+  rows.replaceChildren();
+
+  for (const ind of lens1.indicators) {
+    const row = el("div", "row");
+    row.appendChild(el("span", "dot dot-" + ind.status));
+
+    const main = el("div", "row-main");
+    const name = el("div", "row-name", ind.name);
+    main.appendChild(name);
+    if (ind.notes) main.appendChild(el("div", "row-desc", ind.notes));
+
+    const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
+    threshold.appendChild(el("span", "chip", "Navigo-chosen · pending confirmation"));
+    main.appendChild(threshold);
+
+    const sources = el("div", "row-sources");
+    sources.appendChild(document.createTextNode("Source: "));
+    const primary = el("a", null, "primary");
+    primary.href = ind.source_url; primary.target = "_blank"; primary.rel = "noopener";
+    sources.appendChild(primary);
+    sources.appendChild(document.createTextNode(" · Cross-check: "));
+    const secondary = el("a", null, "secondary");
+    secondary.href = ind.secondary_source_url; secondary.target = "_blank"; secondary.rel = "noopener";
+    sources.appendChild(secondary);
+    sources.appendChild(document.createTextNode(" · As of " + formatIsoDate(ind.as_of)));
+    main.appendChild(sources);
+    row.appendChild(main);
+
+    const valueBlock = el("div", "row-value");
+    valueBlock.appendChild(el("div", "val status-" + ind.status, formatValue(ind.value, ind.unit)));
+    valueBlock.appendChild(el("div", "stat status-" + ind.status, STATUS_LABEL[ind.status]));
+    row.appendChild(valueBlock);
+
+    rows.appendChild(row);
+  }
+}
+
+function render(data) {
+  const lens1 = data.lens1;
+  const latest = lens1.indicators.map((i) => i.as_of).sort().at(-1);
+  document.getElementById("asof-pill").textContent = "Data as of " + formatIsoDate(latest);
+  renderSlots(lens1);
+  renderLens1(lens1);
+  document.getElementById("build-stamp").textContent = data.generated_at
+    ? "Page generated " + formatIsoInstant(data.generated_at) + " by scripts/build.py"
+    : "Development preview — data loaded via fetch fallback from data/.";
+}
+
+function showError(message) {
+  const strip = document.getElementById("error-strip");
+  strip.textContent = message;
+  strip.style.display = "block";
+  document.getElementById("build-stamp").textContent = "Data failed to load.";
+}
+
+if (window.__DATA__) {
+  render(window.__DATA__);
+} else {
+  /* Fetch fallback: template.html works standalone when served from the
+     project root (npx serve .), reading data/ directly. */
+  fetch("data/lens1.json")
+    .then((response) => {
+      if (!response.ok) throw new Error("HTTP " + response.status + " loading data/lens1.json");
+      return response.json();
+    })
+    .then((lens1) => render({ lens1: lens1, generated_at: null }))
+    .catch((error) =>
+      showError(
+        "Data failed to load (" + error.message + "). Serve the project root — for example " +
+        "npx serve . — so that data/ is reachable, then reload."
+      )
+    );
+}
+</script>
+</body>
+</html>

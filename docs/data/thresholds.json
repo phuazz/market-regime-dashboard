@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party.",
+    "last_updated": "2026-07-02"
+  },
+  "yield_curve_10y3m": {
+    "watch_rule": "Latest spread below zero (curve inverted).",
+    "elevated_rule": "Spread at or above zero within elevated_window_months after the end of a sustained inversion (a run of at least sustained_inversion_min_observations consecutive daily observations below zero).",
+    "benign_rule": "Anything else.",
+    "sustained_inversion_min_observations": 60,
+    "elevated_window_months": 12,
+    "confirmed_by_zh": false
+  }
+}
