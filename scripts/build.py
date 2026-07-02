@@ -45,6 +45,7 @@ def main() -> int:
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "lens1": load_json("lens1.json"),
+        "lens3": load_json("lens3.json"),
         "thresholds": load_json("thresholds.json"),
     }
     # "</" is escaped so no JSON string can terminate the surrounding

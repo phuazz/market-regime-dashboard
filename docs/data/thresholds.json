@@ -53,6 +53,15 @@
     "watch_ccsa_26wk_pct": 5,
     "confirmed_by_zh": false
   },
+  "sma_trend_sp500": {
+    "benign_rule": "50-day SMA at or above the 150-day SMA.",
+    "watch_rule": "50-day SMA below the 150-day SMA without slope confirmation.",
+    "elevated_rule": "50-day SMA below the 150-day SMA and both SMAs flat or falling over slope_lookback_trading_days (change at or below flat_tolerance_pct). This is the bear trigger that confirms Lens 1 or Lens 2.",
+    "context_rule": "The 200-day SMA is displayed for context and adds a note when the index closes below it; it does not drive the status.",
+    "slope_lookback_trading_days": 20,
+    "flat_tolerance_pct": 0.1,
+    "confirmed_by_zh": false
+  },
   "shiller_cape": {
     "status_rule": "Context only; never a timing trigger (SPEC.md section 4). Status is always 'context' and it does not feed the lens roll-up.",
     "note_rule": "Flag when above flag_level as a long-run return caveat.",

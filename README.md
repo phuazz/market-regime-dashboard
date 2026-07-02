@@ -13,13 +13,13 @@ from public data. No proprietary third-party values are reproduced.
 
 ## Status
 
-Phase 2 of 7 complete (2026-07-02): Lens 1 is fully live — seven indicators,
-each verified against two sources before first use, with scripted
-re-verification for the automatable checks. Current read: five benign, LEI
-on watch (six-month change negative), valuation shown as context only.
-Phases 3–7 (Lens 3 trend, Lens 2 froth composite, conditional forward
-returns, signal map, GitHub Actions automation) are planned and not yet
-built.
+Phase 3 of 7 complete (2026-07-02): Lens 1 fully live (seven indicators) and
+Lens 3 live (50-day vs 150-day SMA on the S&P 500 with an inline-SVG chart;
+Yahoo feed cross-checked against FRED `SP500` on every run). Current read:
+Lens 1 watch (driven by the LEI six-month change), Lens 3 benign (uptrend
+intact, 50-day 7,386 above 150-day 7,014). Phases 4–7 (Lens 2 froth
+composite, conditional forward returns, signal map, GitHub Actions
+automation) are planned and not yet built.
 
 All status thresholds are Navigo-chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
@@ -37,6 +37,7 @@ data/history/          Series histories (fetched at runtime, never inlined).
                        period because no licensed history is redistributed.
 scripts/update_data.py Refreshes data/ (--group daily|monthly|quarterly)
 scripts/lens1.py       Lens 1 classifiers and builders (pure logic + fetch)
+scripts/lens3.py       Lens 3 SMA trend logic (ported from equity-defense-dashboard)
 scripts/verify_series.py Repeatable two-source verification checks
 scripts/build.py       Injects data/ JSON into template.html -> docs/index.html
 docs/                  GitHub Pages output. Generated, never hand-edited.
@@ -67,6 +68,7 @@ npx serve docs                                # test the built output
 | Leading indicators | Conference Board LEI public headline | PR Newswire release | Monthly |
 | Labour market | FRED `UNRATE`, `PAYEMS`, `UEMP27OV`, `CCSA` | BLS public API; DOL release coverage | Monthly / weekly |
 | Valuation (Shiller CAPE) | multpl.com daily print | GuruFocus monthly print | Daily (context only) |
+| S&P 500 trend (Lens 3) | Yahoo chart API `^GSPC` (daily, from 1970) | FRED `SP500`, checked on every run | Daily |
 
 Planned sources for later phases are listed in SPEC.md sections 5–6 and must
 be verified per VERIFICATION.md before first use.
@@ -103,5 +105,10 @@ be verified per VERIFICATION.md before first use.
    (source_url records which supplier actually served each value).
 5. **Lens 2 alarm level** — deliberately unset; ZH to choose in phase 4 from
    percentile-derived candidates.
+6. **Stooq blocked** — the Stooq CSV endpoint named in SPEC.md now requires a
+   JavaScript proof-of-work and is not automatable; FRED `SP500` serves as
+   the S&P second feed instead (exact agreement with Yahoo; see
+   VERIFICATION.md). Price history starts 1970 (Yahoo daily), which covers
+   the phase 5–6 studies.
 
 *Last updated: 2026-07-02.*

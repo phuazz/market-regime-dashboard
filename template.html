@@ -117,6 +117,14 @@ a:hover { text-decoration: underline; }
 .row-value .stat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
 .card-foot { font-size: 11px; color: var(--t3); padding: 10px 0 2px; border-top: 1px dashed var(--bd); margin-top: 4px; }
 
+/* Chart */
+.chart-wrap { margin-top: 14px; }
+.chart-legend { display: flex; gap: 16px; font-family: var(--mono); font-size: 10px; color: var(--t2); margin-bottom: 6px; flex-wrap: wrap; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.chart-legend i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; }
+.chart-note { font-size: 11px; color: var(--t3); margin-top: 6px; }
+#lens3-chart { width: 100%; height: auto; display: block; }
+
 /* Error strip */
 .error-strip { display: none; margin-top: 24px; padding: 12px 16px; border: 1px solid rgba(192,57,43,0.25); background: var(--r-bg); color: var(--r); border-radius: var(--radius); font-size: 13px; }
 
@@ -141,7 +149,7 @@ a:hover { text-decoration: underline; }
       <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
     </div>
     <div class="masthead-right">
-      <span class="pill pill-phase">Build phase 2 of 7</span>
+      <span class="pill pill-phase">Build phase 3 of 7</span>
       <span class="pill pill-date" id="asof-pill">Data as of —</span>
     </div>
   </header>
@@ -170,8 +178,8 @@ a:hover { text-decoration: underline; }
     <div class="card-body">
       <div class="slots" id="slots"></div>
       <p class="combined-note">
-        Lens&nbsp;2 arrives in phase 4 and Lens&nbsp;3 in phase 3; until then this panel reports
-        lens-level status only and no combined signal is computed.
+        Lens&nbsp;2 arrives in phase 4; until then this panel reports lens-level status only and
+        no combined signal is computed.
       </p>
     </div>
   </section>
@@ -192,8 +200,29 @@ a:hover { text-decoration: underline; }
       <div class="card-foot">
         All seven Lens&nbsp;1 rows are live, each verified against two sources before first use
         (VERIFICATION.md). The PMI and LEI rows use documented free proxies for licensed headline
-        series; valuation is context only and does not feed the lens status. Lens&nbsp;3 arrives in
-        phase 3 and Lens&nbsp;2 in phase 4.
+        series; valuation is context only and does not feed the lens status. Lens&nbsp;2 arrives
+        in phase 4.
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-title">Lens 3 · Price trend</div>
+      <div class="card-sub" id="lens3-sub"></div>
+    </div>
+    <div class="card-body">
+      <div id="lens3-rows"></div>
+      <div class="chart-wrap">
+        <div class="chart-legend">
+          <span><i style="border-color:#1a1a18"></i>S&amp;P 500 close</span>
+          <span><i style="border-color:#2563eb"></i>50-day SMA</span>
+          <span><i style="border-color:#b45309"></i>150-day SMA</span>
+          <span><i style="border-color:#8a8a82;border-top-style:dashed"></i>200-day SMA (context)</span>
+        </div>
+        <svg id="lens3-chart" viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" role="img"
+             aria-label="S&amp;P 500 with 50, 150, and 200-day simple moving averages, three-year window"></svg>
+        <div class="chart-note" id="lens3-chart-note">Loading chart data…</div>
       </div>
     </div>
   </section>
@@ -261,7 +290,9 @@ function el(tag, className, text) {
 
 function formatValue(ind) {
   const decimals = ind.decimals === undefined ? 2 : ind.decimals;
-  const magnitude = ind.value.toFixed(decimals);
+  const magnitude = ind.value.toLocaleString("en-GB", {
+    minimumFractionDigits: decimals, maximumFractionDigits: decimals,
+  });
   const sign = ind.signed && ind.value >= 0 ? "+" : "";
   if (ind.unit === "pct") return sign + magnitude + "%";
   if (ind.unit === "pp") return sign + magnitude + " pp";
@@ -277,29 +308,35 @@ function worstStatus(indicators) {
   );
 }
 
-function renderSlots(lens1) {
-  const slots = document.getElementById("slots");
-  slots.replaceChildren();
-
-  const status = worstStatus(lens1.indicators);
-  const statusCount = lens1.indicators.filter((i) => i.status in STATUS_RANK).length;
-  const contextCount = lens1.indicators.length - statusCount;
-  const worstRows = lens1.indicators
+function lensSlotDef(label, lensData, pendingText) {
+  if (!lensData || !lensData.indicators || !lensData.indicators.length) {
+    return { label: label, status: "pending", statusText: "Pending", detail: pendingText };
+  }
+  const status = worstStatus(lensData.indicators);
+  const statusCount = lensData.indicators.filter((i) => i.status in STATUS_RANK).length;
+  const contextCount = lensData.indicators.length - statusCount;
+  const worstRows = lensData.indicators
     .filter((i) => i.status === status)
     .map((i) => i.name)
     .join(", ");
+  return {
+    label: label,
+    status: status,
+    statusText: STATUS_LABEL[status],
+    detail:
+      statusCount + (statusCount === 1 ? " status indicator" : " status indicators") +
+      (contextCount ? " · " + contextCount + " context row" : "") +
+      (status !== "benign" ? " · driven by: " + worstRows : ""),
+  };
+}
+
+function renderSlots(data) {
+  const slots = document.getElementById("slots");
+  slots.replaceChildren();
   const defs = [
-    {
-      label: "Lens 1 · Recession risk",
-      status: status,
-      statusText: STATUS_LABEL[status],
-      detail:
-        statusCount + " status indicators" +
-        (contextCount ? " · " + contextCount + " context row" : "") +
-        (status !== "benign" ? " · driven by: " + worstRows : ""),
-    },
-    { label: "Lens 2 · Market-peak froth", status: "pending", statusText: "Pending", detail: "Arrives in phase 4" },
-    { label: "Lens 3 · Price trend", status: "pending", statusText: "Pending", detail: "Arrives in phase 3" },
+    lensSlotDef("Lens 1 · Recession risk", data.lens1, "Pending"),
+    lensSlotDef("Lens 2 · Market-peak froth", data.lens2, "Arrives in phase 4"),
+    lensSlotDef("Lens 3 · Price trend", data.lens3, "Pending"),
   ];
   for (const def of defs) {
     const slot = el("div", "slot");
@@ -313,12 +350,12 @@ function renderSlots(lens1) {
   }
 }
 
-function renderLens1(lens1) {
-  document.getElementById("lens1-sub").textContent = lens1.subtitle || "";
-  const rows = document.getElementById("lens1-rows");
+function renderLensRows(rowsId, subId, lensData) {
+  document.getElementById(subId).textContent = lensData.subtitle || "";
+  const rows = document.getElementById(rowsId);
   rows.replaceChildren();
 
-  for (const ind of lens1.indicators) {
+  for (const ind of lensData.indicators) {
     const row = el("div", "row");
     row.appendChild(el("span", "dot dot-" + ind.status));
 
@@ -355,12 +392,141 @@ function renderLens1(lens1) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Lens 3 chart: inline SVG, no charting dependency. Conventions per   */
+/* design.md — y-axis on the right, monospaced ticks, no vertical      */
+/* gridlines, month-year x labels.                                     */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const CHART = { width: 960, height: 320, top: 14, right: 68, bottom: 26, left: 10 };
+const CHART_SHORT_MONTH = new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" });
+
+function svgEl(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const key in attrs) node.setAttribute(key, attrs[key]);
+  return node;
+}
+
+function linePath(xs, ys) {
+  const parts = [];
+  for (let i = 0; i < xs.length; i++) {
+    if (ys[i] === null) continue;
+    parts.push((parts.length ? "L" : "M") + xs[i].toFixed(1) + " " + ys[i].toFixed(1));
+  }
+  return parts.join(" ");
+}
+
+function renderChart(chart, statusColour) {
+  const svg = document.getElementById("lens3-chart");
+  svg.replaceChildren();
+  const n = chart.dates.length;
+  const plotW = CHART.width - CHART.left - CHART.right;
+  const plotH = CHART.height - CHART.top - CHART.bottom;
+
+  const series = [chart.close, chart.sma50, chart.sma150, chart.sma200];
+  let lo = Infinity, hi = -Infinity;
+  for (const s of series) {
+    for (const v of s) {
+      if (v === null) continue;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+  }
+  const pad = (hi - lo) * 0.04;
+  lo -= pad; hi += pad;
+
+  const x = (i) => CHART.left + (i / (n - 1)) * plotW;
+  const y = (v) => CHART.top + (1 - (v - lo) / (hi - lo)) * plotH;
+  const xs = chart.dates.map((_, i) => x(i));
+
+  for (let t = 0; t <= 4; t++) {
+    const value = lo + ((hi - lo) * t) / 4;
+    const yy = y(value);
+    svg.appendChild(svgEl("line", {
+      x1: CHART.left, x2: CHART.left + plotW, y1: yy, y2: yy,
+      stroke: "#f0f0ea", "stroke-width": 1,
+    }));
+    const label = svgEl("text", {
+      x: CHART.left + plotW + 6, y: yy + 3, "font-size": 9,
+      "font-family": "JetBrains Mono, monospace", fill: "#8a8a82",
+    });
+    label.textContent = Math.round(value).toLocaleString("en-GB");
+    svg.appendChild(label);
+  }
+
+  /* One x label at each January and July (month parsing via Date + Intl,
+     UTC; JavaScript months are 0-indexed so no manual month names). */
+  let previousMonth = null;
+  for (let i = 0; i < n; i++) {
+    const parsed = new Date(chart.dates[i] + "T00:00:00Z");
+    const month = parsed.getUTCMonth();
+    if (previousMonth !== null && month !== previousMonth && (month === 0 || month === 6)) {
+      const label = svgEl("text", {
+        x: x(i), y: CHART.height - 8, "font-size": 9, "text-anchor": "middle",
+        "font-family": "DM Sans, sans-serif", fill: "#8a8a82",
+      });
+      label.textContent = CHART_SHORT_MONTH.format(parsed) + " '" + chart.dates[i].slice(2, 4);
+      svg.appendChild(label);
+    }
+    previousMonth = month;
+  }
+
+  const styles = [
+    { key: "sma200", colour: "#8a8a82", width: 1.2, dash: "4 3" },
+    { key: "sma150", colour: "#b45309", width: 1.2, dash: null },
+    { key: "sma50", colour: "#2563eb", width: 1.2, dash: null },
+    { key: "close", colour: "#1a1a18", width: 1.6, dash: null },
+  ];
+  for (const s of styles) {
+    const attrs = {
+      d: linePath(xs, chart[s.key].map((v) => (v === null ? null : y(v)))),
+      fill: "none", stroke: s.colour, "stroke-width": s.width,
+    };
+    if (s.dash) attrs["stroke-dasharray"] = s.dash;
+    svg.appendChild(svgEl("path", attrs));
+  }
+
+  /* NOW marker at the latest close (design.md convention). */
+  const lastClose = chart.close[n - 1];
+  svg.appendChild(svgEl("circle", { cx: x(n - 1), cy: y(lastClose), r: 3, fill: statusColour }));
+  const now = svgEl("text", {
+    x: CHART.left + plotW + 6, y: y(lastClose) - 6, "font-size": 9, "font-weight": 700,
+    "font-family": "JetBrains Mono, monospace", fill: statusColour,
+  });
+  now.textContent = Math.round(lastClose).toLocaleString("en-GB");
+  svg.appendChild(now);
+}
+
+function loadChart(lens3) {
+  const note = document.getElementById("lens3-chart-note");
+  const statusColours = { benign: "#1a8754", watch: "#b45309", elevated: "#c0392b" };
+  const status = lens3 && lens3.indicators.length ? lens3.indicators[0].status : "benign";
+  fetch("data/history/gspc_chart.json")
+    .then((response) => {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    })
+    .then((chart) => {
+      renderChart(chart, statusColours[status] || "#1a8754");
+      note.textContent =
+        "Three-year window, trading days, linear scale. Source: Yahoo Finance ^GSPC, " +
+        "cross-checked against FRED SP500. Chart data: data/history/gspc_chart.json.";
+    })
+    .catch((error) => {
+      note.textContent = "Chart data failed to load (" + error.message + ").";
+    });
+}
+
 function render(data) {
-  const lens1 = data.lens1;
-  const latest = lens1.indicators.map((i) => i.as_of).sort().at(-1);
+  const indicators = data.lens1.indicators.concat(data.lens3 ? data.lens3.indicators : []);
+  const latest = indicators.map((i) => i.as_of).sort().at(-1);
   document.getElementById("asof-pill").textContent = "Data as of " + formatIsoDate(latest);
-  renderSlots(lens1);
-  renderLens1(lens1);
+  renderSlots(data);
+  renderLensRows("lens1-rows", "lens1-sub", data.lens1);
+  if (data.lens3) {
+    renderLensRows("lens3-rows", "lens3-sub", data.lens3);
+    loadChart(data.lens3);
+  }
   document.getElementById("build-stamp").textContent = data.generated_at
     ? "Page generated " + formatIsoInstant(data.generated_at) + " by scripts/build.py"
     : "Development preview — data loaded via fetch fallback from data/.";
@@ -373,17 +539,20 @@ function showError(message) {
   document.getElementById("build-stamp").textContent = "Data failed to load.";
 }
 
+function fetchJson(path) {
+  return fetch(path).then((response) => {
+    if (!response.ok) throw new Error("HTTP " + response.status + " loading " + path);
+    return response.json();
+  });
+}
+
 if (window.__DATA__) {
   render(window.__DATA__);
 } else {
   /* Fetch fallback: template.html works standalone when served from the
      project root (npx serve .), reading data/ directly. */
-  fetch("data/lens1.json")
-    .then((response) => {
-      if (!response.ok) throw new Error("HTTP " + response.status + " loading data/lens1.json");
-      return response.json();
-    })
-    .then((lens1) => render({ lens1: lens1, generated_at: null }))
+  Promise.all([fetchJson("data/lens1.json"), fetchJson("data/lens3.json")])
+    .then(([lens1, lens3]) => render({ lens1: lens1, lens3: lens3, generated_at: null }))
     .catch((error) =>
       showError(
         "Data failed to load (" + error.message + "). Serve the project root — for example " +
