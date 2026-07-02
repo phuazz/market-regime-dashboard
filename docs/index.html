@@ -88,10 +88,12 @@ a:hover { text-decoration: underline; }
 .status-watch .dot, .dot-watch { background: var(--a); }
 .status-elevated .dot, .dot-elevated { background: var(--r); }
 .status-pending .dot, .dot-pending { background: var(--t4); }
+.status-context .dot, .dot-context { background: var(--b); }
 .status-benign { color: var(--g); }
 .status-watch { color: var(--a); }
 .status-elevated { color: var(--r); }
 .status-pending { color: var(--t3); }
+.status-context { color: var(--b); }
 
 /* Legend */
 .legend { display: flex; gap: 18px; padding: 10px 0 2px; font-size: 12px; color: var(--t2); }
@@ -107,6 +109,7 @@ a:hover { text-decoration: underline; }
 .row-desc { font-size: 13px; color: var(--t2); margin-top: 2px; max-width: 640px; }
 .row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
 .chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); margin-left: 6px; vertical-align: 1px; }
+.row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
 .row-value { text-align: right; flex: none; }
@@ -138,7 +141,7 @@ a:hover { text-decoration: underline; }
       <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
     </div>
     <div class="masthead-right">
-      <span class="pill pill-phase">Build phase 1 of 7</span>
+      <span class="pill pill-phase">Build phase 2 of 7</span>
       <span class="pill pill-date" id="asof-pill">Data as of —</span>
     </div>
   </header>
@@ -183,12 +186,14 @@ a:hover { text-decoration: underline; }
         <span><span class="dot dot-benign"></span>Benign</span>
         <span><span class="dot dot-watch"></span>Watch</span>
         <span><span class="dot dot-elevated"></span>Elevated</span>
+        <span><span class="dot dot-context"></span>Context (not a trigger)</span>
       </div>
       <div id="lens1-rows"></div>
       <div class="card-foot">
-        The remaining Lens&nbsp;1 indicators (Sahm Rule, high-yield spreads, manufacturing survey
-        proxy, leading indicators, labour market, valuation context) arrive in phase 2, each
-        verified against two sources before first use.
+        All seven Lens&nbsp;1 rows are live, each verified against two sources before first use
+        (VERIFICATION.md). The PMI and LEI rows use documented free proxies for licensed headline
+        series; valuation is context only and does not feed the lens status. Lens&nbsp;3 arrives in
+        phase 3 and Lens&nbsp;2 in phase 4.
       </div>
     </div>
   </section>
@@ -211,7 +216,7 @@ a:hover { text-decoration: underline; }
 "use strict";
 /* Injected by scripts/build.py; stays null during template development so the
    fetch fallback below loads data/ directly. */
-window.__DATA__ = {"generated_at": "2026-07-02T14:08:18Z", "lens1": {"lens": 1, "title": "Recession risk", "subtitle": "Leading and coincident indicators of an economic downturn.", "updated_at": "2026-07-02T14:04:19Z", "indicators": [{"id": "yield_curve_10y3m", "name": "Yield Curve (10yr - 3mo)", "lens": 1, "value": 0.63, "unit": "pct", "as_of": "2026-07-01", "status": "benign", "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign. Navigo-chosen parameters, pending confirmation.", "source_url": "https://fred.stlouisfed.org/series/T10Y3M", "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates", "notes": "The spread is positive (+0.63) and no sustained inversion ended within the trailing 12 months. Series identity verified against two independent sources on 2026-07-02 (see VERIFICATION.md). History file: data/history/t10y3m.json."}]}, "thresholds": {"_meta": {"description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party.", "last_updated": "2026-07-02"}, "yield_curve_10y3m": {"watch_rule": "Latest spread below zero (curve inverted).", "elevated_rule": "Spread at or above zero within elevated_window_months after the end of a sustained inversion (a run of at least sustained_inversion_min_observations consecutive daily observations below zero).", "benign_rule": "Anything else.", "sustained_inversion_min_observations": 60, "elevated_window_months": 12, "confirmed_by_zh": false}}};
+window.__DATA__ = {"generated_at": "2026-07-02T15:05:18Z", "lens1": {"lens": 1, "title": "Recession risk", "subtitle": "Leading and coincident indicators of an economic downturn.", "updated_at": "2026-07-02T15:01:56Z", "indicators": [{"id": "yield_curve_10y3m", "name": "Yield Curve (10yr - 3mo)", "qualifier": "term spread", "lens": 1, "value": 0.63, "unit": "pct", "signed": true, "decimals": 2, "cadence": "daily", "as_of": "2026-07-01", "status": "benign", "description": "The 10-year minus 3-month Treasury constant-maturity spread. A negative reading (inversion) has historically preceded US recessions; the risk window extends through the re-steepening that follows a sustained inversion.", "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign.", "source_url": "https://fred.stlouisfed.org/series/T10Y3M", "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates", "notes": "The spread is positive (+0.63) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "sahm_rule", "name": "Sahm Rule", "qualifier": "jobs momentum", "lens": 1, "value": 0.07, "unit": "pp", "signed": true, "decimals": 2, "cadence": "monthly", "as_of": "2026-06-01", "status": "benign", "description": "Rise of the three-month average unemployment rate above its low of the previous twelve months. The published 0.50 trigger has fired at the start of every US recession since 1970 (Sahm 2019).", "threshold": "At or above 0.50 = elevated (published Sahm trigger). 0.35-0.50 = watch.", "source_url": "https://fred.stlouisfed.org/series/SAHMREALTIME", "secondary_source_url": "https://www.currentmarketvaluation.com/models/sahm-rule.php", "notes": "The Sahm reading of +0.07 is below the watch band. The real-time variant (SAHMREALTIME) is used so historical values reflect data as originally published; construction recomputed from UNRATE. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "hy_credit_spreads", "name": "High-Yield Credit Spreads", "qualifier": "HY OAS", "lens": 1, "value": 2.74, "unit": "pct", "signed": false, "decimals": 2, "cadence": "daily", "as_of": "2026-07-01", "status": "benign", "description": "Option-adjusted spread of the ICE BofA US High Yield Index over Treasuries. The cleanest market-priced stress gauge: it widens sharply into downturns, and unusually tight spreads signal complacency rather than safety.", "threshold": "At or above 4.00, or widening 100 bp over 63 trading days = watch. At or above 5.50, or widening 200 bp = elevated. At or below 3.00 adds a complacency note without changing status.", "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2", "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread", "notes": "OAS of 2.74 is below the 4.00 watch level with a 63-trading-day change of -31 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are Navigo anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-07-03 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "pmi_manufacturing_proxy", "name": "Manufacturing PMI", "qualifier": "S&P Global, ISM proxy", "lens": 1, "value": 53.9, "unit": "index", "signed": false, "decimals": 1, "cadence": "monthly", "as_of": "2026-06-01", "status": "benign", "description": "Purchasing managers' survey of US manufacturing; readings below 50 indicate contraction. The ISM headline is licensed, so the S&P Global US Manufacturing PMI headline is used as the documented free proxy.", "threshold": "Below 50 = watch. Below 48 and lower than three months earlier = elevated.", "source_url": "https://tradingeconomics.com/united-states/manufacturing-pmi", "secondary_source_url": "https://www.pmi.spglobal.com/Public/Release/PressReleases", "notes": "PMI of 53.9 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "leading_indicators", "name": "Leading Economic Index", "qualifier": "Conference Board headline, 6-month trend", "lens": 1, "value": 99.3, "unit": "index", "signed": false, "decimals": 1, "cadence": "monthly", "as_of": "2026-05-01", "status": "watch", "description": "Composite of ten forward-looking inputs built to turn down before the economy does. Status is driven by the six-month growth rate, not the monthly level.", "threshold": "Six-month change below zero = watch. At or below -2.0% over six months (about -4% annualised, aligned with the Conference Board's published recession-signal research) = elevated.", "source_url": "https://www.conference-board.org/topics/us-leading-indicators", "secondary_source_url": "https://www.prnewswire.com/news/the-conference-board/", "notes": "The six-month change of -0.3% is negative. Monthly change +0.1%. Licence note: only the publicly announced headline figures are displayed; no licensed series is redistributed. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "labour_market", "name": "Labour Market", "qualifier": "unemployment / payrolls / internals", "lens": 1, "value": 4.2, "unit": "pct", "signed": false, "decimals": 1, "cadence": "monthly", "as_of": "2026-06-01", "status": "benign", "description": "Unemployment rate and payroll momentum, checked against internals (long-term unemployed, continued claims). These confirm a downturn once underway; the trend matters more than the headline level.", "threshold": "Unemployment 3-month average at least 0.20 pp above its 12-month low, payroll 3-month average below 75k, or softening internals (long-term unemployed over 15% YoY and continued claims over 5% in 26 weeks) = watch. Rise at or above 0.35 pp or negative payroll 3-month average = elevated.", "source_url": "https://fred.stlouisfed.org/series/UNRATE", "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm", "notes": "Headline and internals are steady: unemployment rise +0.07 pp, payroll 3-month average +111k, long-term unemployed +17% YoY, continued claims -2.5% over 26 weeks. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md)."}, {"id": "shiller_cape", "name": "Valuation", "qualifier": "Shiller CAPE", "lens": 1, "value": 41.66, "unit": "ratio", "signed": false, "decimals": 2, "cadence": "daily", "as_of": "2026-07-01", "status": "context", "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.", "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.", "source_url": "https://www.multpl.com/shiller-pe", "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio", "notes": "Method note: multpl prints a daily CAPE on the latest price with lagged earnings; the Shiller dataset and GuruFocus use monthly average prices, so monthly prints sit slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.39, median 16.10), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer."}]}, "thresholds": {"_meta": {"description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used.", "last_updated": "2026-07-02"}, "yield_curve_10y3m": {"watch_rule": "Latest spread below zero (curve inverted).", "elevated_rule": "Spread at or above zero within elevated_window_months after the end of a sustained inversion (a run of at least sustained_inversion_min_observations consecutive daily observations below zero).", "benign_rule": "Anything else.", "sustained_inversion_min_observations": 60, "elevated_window_months": 12, "confirmed_by_zh": false}, "sahm_rule": {"watch_rule": "Sahm reading at or above watch_level.", "elevated_rule": "Sahm reading at or above elevated_level (the published Sahm 2019 trigger).", "watch_level": 0.35, "elevated_level": 0.5, "confirmed_by_zh": false}, "hy_credit_spreads": {"watch_rule": "OAS at or above watch_level, or a 63-trading-day rise of at least watch_rise_bp basis points.", "elevated_rule": "OAS at or above elevated_level, or a 63-trading-day rise of at least elevated_rise_bp basis points.", "complacency_note_rule": "OAS at or below complacency_level adds a complacency note without changing status.", "basis_note": "Absolute levels are used because the keyless FRED endpoint serves this ICE-licensed series only from mid-2023, so window percentiles would drift. The anchors approximate the published long-run median and 75th percentile of the series (visible on the FRED chart back to 1996).", "watch_level": 4.0, "elevated_level": 5.5, "complacency_level": 3.0, "watch_rise_bp": 100, "elevated_rise_bp": 200, "confirmed_by_zh": false}, "pmi_manufacturing_proxy": {"watch_rule": "PMI below watch_level (the 50 expansion line, a public survey convention).", "elevated_rule": "PMI below elevated_level and lower than its print three months earlier.", "watch_level": 50.0, "elevated_level": 48.0, "confirmed_by_zh": false}, "leading_indicators": {"watch_rule": "Six-month change below zero.", "elevated_rule": "Six-month change at or below elevated_six_month_pct (about -4% annualised, aligned with the Conference Board's published recession-signal research).", "elevated_six_month_pct": -2.0, "confirmed_by_zh": false}, "labour_market": {"watch_rule": "Unemployment 3-month average at least watch_rise pp above its 12-month low, or payroll 3-month average change below watch_payroll_3mo_avg_thousands, or softening internals (long-term unemployed above watch_uemp27ov_yoy_pct YoY and continued claims above watch_ccsa_26wk_pct over 26 weeks).", "elevated_rule": "Unemployment rise at or above elevated_rise pp, or a negative payroll 3-month average change.", "watch_rise": 0.2, "elevated_rise": 0.35, "watch_payroll_3mo_avg_thousands": 75, "watch_uemp27ov_yoy_pct": 15, "watch_ccsa_26wk_pct": 5, "confirmed_by_zh": false}, "shiller_cape": {"status_rule": "Context only; never a timing trigger (SPEC.md section 4). Status is always 'context' and it does not feed the lens roll-up.", "note_rule": "Flag when above flag_level as a long-run return caveat.", "flag_level": 30.0, "confirmed_by_zh": false}}};
 
 /* All date rendering goes through Intl with an explicit UTC time zone.
    JavaScript Date months are 0-indexed, so no month arithmetic is done by
@@ -233,7 +238,19 @@ function formatIsoInstant(iso) {
 }
 
 const STATUS_RANK = { benign: 0, watch: 1, elevated: 2 };
-const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated" };
+const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated", context: "Context" };
+
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  month: "long", year: "numeric", timeZone: "UTC",
+});
+
+/* Monthly and quarterly prints refer to a reference period, so they render
+   as "June 2026" rather than a spurious first-of-month day. */
+function formatAsOf(ind) {
+  const parsed = new Date(ind.as_of + "T00:00:00Z");
+  if (ind.cadence === "monthly" || ind.cadence === "quarterly") return MONTH_FORMAT.format(parsed);
+  return DATE_FORMAT.format(parsed);
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -242,15 +259,20 @@ function el(tag, className, text) {
   return node;
 }
 
-function formatValue(value, unit) {
-  const sign = value >= 0 ? "+" : "";
-  if (unit === "pct") return sign + value.toFixed(2) + "%";
-  return sign + String(value);
+function formatValue(ind) {
+  const decimals = ind.decimals === undefined ? 2 : ind.decimals;
+  const magnitude = ind.value.toFixed(decimals);
+  const sign = ind.signed && ind.value >= 0 ? "+" : "";
+  if (ind.unit === "pct") return sign + magnitude + "%";
+  if (ind.unit === "pp") return sign + magnitude + " pp";
+  return sign + magnitude;
 }
 
+/* Context rows (valuation) deliberately do not feed the lens roll-up. */
 function worstStatus(indicators) {
   return indicators.reduce(
-    (worst, ind) => (STATUS_RANK[ind.status] > STATUS_RANK[worst] ? ind.status : worst),
+    (worst, ind) =>
+      ind.status in STATUS_RANK && STATUS_RANK[ind.status] > STATUS_RANK[worst] ? ind.status : worst,
     "benign"
   );
 }
@@ -260,13 +282,21 @@ function renderSlots(lens1) {
   slots.replaceChildren();
 
   const status = worstStatus(lens1.indicators);
-  const live = lens1.indicators.length;
+  const statusCount = lens1.indicators.filter((i) => i.status in STATUS_RANK).length;
+  const contextCount = lens1.indicators.length - statusCount;
+  const worstRows = lens1.indicators
+    .filter((i) => i.status === status)
+    .map((i) => i.name)
+    .join(", ");
   const defs = [
     {
       label: "Lens 1 · Recession risk",
       status: status,
-      statusText: STATUS_LABEL[status] + " · partial",
-      detail: live + " of 7 indicators live (phase 2 completes the set)",
+      statusText: STATUS_LABEL[status],
+      detail:
+        statusCount + " status indicators" +
+        (contextCount ? " · " + contextCount + " context row" : "") +
+        (status !== "benign" ? " · driven by: " + worstRows : ""),
     },
     { label: "Lens 2 · Market-peak froth", status: "pending", statusText: "Pending", detail: "Arrives in phase 4" },
     { label: "Lens 3 · Price trend", status: "pending", statusText: "Pending", detail: "Arrives in phase 3" },
@@ -293,13 +323,15 @@ function renderLens1(lens1) {
     row.appendChild(el("span", "dot dot-" + ind.status));
 
     const main = el("div", "row-main");
-    const name = el("div", "row-name", ind.name);
+    const name = el("div", "row-name", ind.name + " ");
+    if (ind.qualifier) name.appendChild(el("span", "qualifier", "(" + ind.qualifier + ")"));
     main.appendChild(name);
-    if (ind.notes) main.appendChild(el("div", "row-desc", ind.notes));
+    if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
     const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
     threshold.appendChild(el("span", "chip", "Navigo-chosen · pending confirmation"));
     main.appendChild(threshold);
+    if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
 
     const sources = el("div", "row-sources");
     sources.appendChild(document.createTextNode("Source: "));
@@ -310,12 +342,12 @@ function renderLens1(lens1) {
     const secondary = el("a", null, "secondary");
     secondary.href = ind.secondary_source_url; secondary.target = "_blank"; secondary.rel = "noopener";
     sources.appendChild(secondary);
-    sources.appendChild(document.createTextNode(" · As of " + formatIsoDate(ind.as_of)));
+    sources.appendChild(document.createTextNode(" · As of " + formatAsOf(ind)));
     main.appendChild(sources);
     row.appendChild(main);
 
     const valueBlock = el("div", "row-value");
-    valueBlock.appendChild(el("div", "val status-" + ind.status, formatValue(ind.value, ind.unit)));
+    valueBlock.appendChild(el("div", "val status-" + ind.status, formatValue(ind)));
     valueBlock.appendChild(el("div", "stat status-" + ind.status, STATUS_LABEL[ind.status]));
     row.appendChild(valueBlock);
 

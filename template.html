@@ -88,10 +88,12 @@ a:hover { text-decoration: underline; }
 .status-watch .dot, .dot-watch { background: var(--a); }
 .status-elevated .dot, .dot-elevated { background: var(--r); }
 .status-pending .dot, .dot-pending { background: var(--t4); }
+.status-context .dot, .dot-context { background: var(--b); }
 .status-benign { color: var(--g); }
 .status-watch { color: var(--a); }
 .status-elevated { color: var(--r); }
 .status-pending { color: var(--t3); }
+.status-context { color: var(--b); }
 
 /* Legend */
 .legend { display: flex; gap: 18px; padding: 10px 0 2px; font-size: 12px; color: var(--t2); }
@@ -107,6 +109,7 @@ a:hover { text-decoration: underline; }
 .row-desc { font-size: 13px; color: var(--t2); margin-top: 2px; max-width: 640px; }
 .row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
 .chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); margin-left: 6px; vertical-align: 1px; }
+.row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
 .row-value { text-align: right; flex: none; }
@@ -138,7 +141,7 @@ a:hover { text-decoration: underline; }
       <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
     </div>
     <div class="masthead-right">
-      <span class="pill pill-phase">Build phase 1 of 7</span>
+      <span class="pill pill-phase">Build phase 2 of 7</span>
       <span class="pill pill-date" id="asof-pill">Data as of —</span>
     </div>
   </header>
@@ -183,12 +186,14 @@ a:hover { text-decoration: underline; }
         <span><span class="dot dot-benign"></span>Benign</span>
         <span><span class="dot dot-watch"></span>Watch</span>
         <span><span class="dot dot-elevated"></span>Elevated</span>
+        <span><span class="dot dot-context"></span>Context (not a trigger)</span>
       </div>
       <div id="lens1-rows"></div>
       <div class="card-foot">
-        The remaining Lens&nbsp;1 indicators (Sahm Rule, high-yield spreads, manufacturing survey
-        proxy, leading indicators, labour market, valuation context) arrive in phase 2, each
-        verified against two sources before first use.
+        All seven Lens&nbsp;1 rows are live, each verified against two sources before first use
+        (VERIFICATION.md). The PMI and LEI rows use documented free proxies for licensed headline
+        series; valuation is context only and does not feed the lens status. Lens&nbsp;3 arrives in
+        phase 3 and Lens&nbsp;2 in phase 4.
       </div>
     </div>
   </section>
@@ -233,7 +238,19 @@ function formatIsoInstant(iso) {
 }
 
 const STATUS_RANK = { benign: 0, watch: 1, elevated: 2 };
-const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated" };
+const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated", context: "Context" };
+
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  month: "long", year: "numeric", timeZone: "UTC",
+});
+
+/* Monthly and quarterly prints refer to a reference period, so they render
+   as "June 2026" rather than a spurious first-of-month day. */
+function formatAsOf(ind) {
+  const parsed = new Date(ind.as_of + "T00:00:00Z");
+  if (ind.cadence === "monthly" || ind.cadence === "quarterly") return MONTH_FORMAT.format(parsed);
+  return DATE_FORMAT.format(parsed);
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -242,15 +259,20 @@ function el(tag, className, text) {
   return node;
 }
 
-function formatValue(value, unit) {
-  const sign = value >= 0 ? "+" : "";
-  if (unit === "pct") return sign + value.toFixed(2) + "%";
-  return sign + String(value);
+function formatValue(ind) {
+  const decimals = ind.decimals === undefined ? 2 : ind.decimals;
+  const magnitude = ind.value.toFixed(decimals);
+  const sign = ind.signed && ind.value >= 0 ? "+" : "";
+  if (ind.unit === "pct") return sign + magnitude + "%";
+  if (ind.unit === "pp") return sign + magnitude + " pp";
+  return sign + magnitude;
 }
 
+/* Context rows (valuation) deliberately do not feed the lens roll-up. */
 function worstStatus(indicators) {
   return indicators.reduce(
-    (worst, ind) => (STATUS_RANK[ind.status] > STATUS_RANK[worst] ? ind.status : worst),
+    (worst, ind) =>
+      ind.status in STATUS_RANK && STATUS_RANK[ind.status] > STATUS_RANK[worst] ? ind.status : worst,
     "benign"
   );
 }
@@ -260,13 +282,21 @@ function renderSlots(lens1) {
   slots.replaceChildren();
 
   const status = worstStatus(lens1.indicators);
-  const live = lens1.indicators.length;
+  const statusCount = lens1.indicators.filter((i) => i.status in STATUS_RANK).length;
+  const contextCount = lens1.indicators.length - statusCount;
+  const worstRows = lens1.indicators
+    .filter((i) => i.status === status)
+    .map((i) => i.name)
+    .join(", ");
   const defs = [
     {
       label: "Lens 1 · Recession risk",
       status: status,
-      statusText: STATUS_LABEL[status] + " · partial",
-      detail: live + " of 7 indicators live (phase 2 completes the set)",
+      statusText: STATUS_LABEL[status],
+      detail:
+        statusCount + " status indicators" +
+        (contextCount ? " · " + contextCount + " context row" : "") +
+        (status !== "benign" ? " · driven by: " + worstRows : ""),
     },
     { label: "Lens 2 · Market-peak froth", status: "pending", statusText: "Pending", detail: "Arrives in phase 4" },
     { label: "Lens 3 · Price trend", status: "pending", statusText: "Pending", detail: "Arrives in phase 3" },
@@ -293,13 +323,15 @@ function renderLens1(lens1) {
     row.appendChild(el("span", "dot dot-" + ind.status));
 
     const main = el("div", "row-main");
-    const name = el("div", "row-name", ind.name);
+    const name = el("div", "row-name", ind.name + " ");
+    if (ind.qualifier) name.appendChild(el("span", "qualifier", "(" + ind.qualifier + ")"));
     main.appendChild(name);
-    if (ind.notes) main.appendChild(el("div", "row-desc", ind.notes));
+    if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
     const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
     threshold.appendChild(el("span", "chip", "Navigo-chosen · pending confirmation"));
     main.appendChild(threshold);
+    if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
 
     const sources = el("div", "row-sources");
     sources.appendChild(document.createTextNode("Source: "));
@@ -310,12 +342,12 @@ function renderLens1(lens1) {
     const secondary = el("a", null, "secondary");
     secondary.href = ind.secondary_source_url; secondary.target = "_blank"; secondary.rel = "noopener";
     sources.appendChild(secondary);
-    sources.appendChild(document.createTextNode(" · As of " + formatIsoDate(ind.as_of)));
+    sources.appendChild(document.createTextNode(" · As of " + formatAsOf(ind)));
     main.appendChild(sources);
     row.appendChild(main);
 
     const valueBlock = el("div", "row-value");
-    valueBlock.appendChild(el("div", "val status-" + ind.status, formatValue(ind.value, ind.unit)));
+    valueBlock.appendChild(el("div", "val status-" + ind.status, formatValue(ind)));
     valueBlock.appendChild(el("div", "stat status-" + ind.status, STATUS_LABEL[ind.status]));
     row.appendChild(valueBlock);
 

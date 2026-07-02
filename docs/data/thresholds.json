@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party.",
+    "description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used.",
     "last_updated": "2026-07-02"
   },
   "yield_curve_10y3m": {
@@ -9,6 +9,54 @@
     "benign_rule": "Anything else.",
     "sustained_inversion_min_observations": 60,
     "elevated_window_months": 12,
+    "confirmed_by_zh": false
+  },
+  "sahm_rule": {
+    "watch_rule": "Sahm reading at or above watch_level.",
+    "elevated_rule": "Sahm reading at or above elevated_level (the published Sahm 2019 trigger).",
+    "watch_level": 0.35,
+    "elevated_level": 0.50,
+    "confirmed_by_zh": false
+  },
+  "hy_credit_spreads": {
+    "watch_rule": "OAS at or above watch_level, or a 63-trading-day rise of at least watch_rise_bp basis points.",
+    "elevated_rule": "OAS at or above elevated_level, or a 63-trading-day rise of at least elevated_rise_bp basis points.",
+    "complacency_note_rule": "OAS at or below complacency_level adds a complacency note without changing status.",
+    "basis_note": "Absolute levels are used because the keyless FRED endpoint serves this ICE-licensed series only from mid-2023, so window percentiles would drift. The anchors approximate the published long-run median and 75th percentile of the series (visible on the FRED chart back to 1996).",
+    "watch_level": 4.0,
+    "elevated_level": 5.5,
+    "complacency_level": 3.0,
+    "watch_rise_bp": 100,
+    "elevated_rise_bp": 200,
+    "confirmed_by_zh": false
+  },
+  "pmi_manufacturing_proxy": {
+    "watch_rule": "PMI below watch_level (the 50 expansion line, a public survey convention).",
+    "elevated_rule": "PMI below elevated_level and lower than its print three months earlier.",
+    "watch_level": 50.0,
+    "elevated_level": 48.0,
+    "confirmed_by_zh": false
+  },
+  "leading_indicators": {
+    "watch_rule": "Six-month change below zero.",
+    "elevated_rule": "Six-month change at or below elevated_six_month_pct (about -4% annualised, aligned with the Conference Board's published recession-signal research).",
+    "elevated_six_month_pct": -2.0,
+    "confirmed_by_zh": false
+  },
+  "labour_market": {
+    "watch_rule": "Unemployment 3-month average at least watch_rise pp above its 12-month low, or payroll 3-month average change below watch_payroll_3mo_avg_thousands, or softening internals (long-term unemployed above watch_uemp27ov_yoy_pct YoY and continued claims above watch_ccsa_26wk_pct over 26 weeks).",
+    "elevated_rule": "Unemployment rise at or above elevated_rise pp, or a negative payroll 3-month average change.",
+    "watch_rise": 0.20,
+    "elevated_rise": 0.35,
+    "watch_payroll_3mo_avg_thousands": 75,
+    "watch_uemp27ov_yoy_pct": 15,
+    "watch_ccsa_26wk_pct": 5,
+    "confirmed_by_zh": false
+  },
+  "shiller_cape": {
+    "status_rule": "Context only; never a timing trigger (SPEC.md section 4). Status is always 'context' and it does not feed the lens roll-up.",
+    "note_rule": "Flag when above flag_level as a long-run return caveat.",
+    "flag_level": 30.0,
     "confirmed_by_zh": false
   }
 }
