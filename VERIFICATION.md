@@ -12,6 +12,11 @@ independent publisher; (3) record both URLs and the check date here, and
 carry `source_url` plus `secondary_source_url` in the JSON for every data
 point.
 
+Automatable checks are scripted in `scripts/verify_series.py`
+(`python scripts/verify_series.py`), which re-runs the T10Y3M identity, the
+Sahm recomputation, and the BLS-vs-FRED labour comparison on demand. Run
+output of 2026-07-02: all three checks PASS.
+
 ---
 
 ## T10Y3M — 10-Year Treasury Constant Maturity Minus 3-Month Treasury Constant Maturity
@@ -29,28 +34,164 @@ point.
   | 2026-06-30 | 0.57 | 4.44 | 3.87 | 0.57 | yes |
   | 2026-07-01 | 0.63 | 4.48 | 3.85 | 0.63 | yes |
 
-- **Internal consistency:** FRED component series agree — `DGS10` − `DGS3MO`
-  = 4.44 − 3.87 = 0.57 on 2026-06-30, equal to `T10Y3M` on the same date.
+- **Internal consistency (scripted):** max absolute difference between
+  `T10Y3M` and `DGS10` − `DGS3MO` over the latest 250 common observations:
+  0.0000.
 - **History sanity check:** sustained-inversion episodes detected in the full
   series (1982–2026) match the historical record — 2000-07-19 → 2001-01-19,
   2006-07-19 → 2007-05-29, and 2022-10-25 → 2024-12-12.
 - **Notes:** the FRED HTML series page returned HTTP 403 to automated
-  fetching on 2026-07-02, so the page-title check could not be captured in
-  this log. Identification therefore rests on the numeric match against the
-  originating agency across three consecutive sessions plus internal
-  consistency with the component series `DGS10` and `DGS3MO`, which is the
-  substantive test. `DGS10` and `DGS3MO` are used for verification arithmetic
-  only and do not feed the dashboard.
+  fetching on 2026-07-02, so the page-title check could not be captured.
+  Identification rests on the numeric match against the originating agency
+  plus component-identity consistency, which is the substantive test.
+  `DGS10` and `DGS3MO` are used for verification arithmetic only.
 
 ---
 
-## Pending verification (phase 2 and later — do not use before logging here)
+## SAHMREALTIME — Real-time Sahm Rule Recession Indicator
 
-`SAHMREALTIME` (vs `SAHMCURRENT`), `BAMLH0A0HYM2`, `UNRATE`, `PAYEMS`,
-`UEMP27OV`, `CCSA`, the ISM proxy (S&P Global US Manufacturing PMI headline;
-fallback regional Fed survey candidates `GACDISA066MSFRBNY` and
-`GACDFSA066MSFRBPHI`, both unconfirmed from-memory IDs), the Conference Board
-LEI headline and its public-component proxy inputs, Shiller CAPE
-(multpl.com vs the Shiller Yale dataset), `NFCI` / `ANFCI`, `DRTSCILM`,
-`UMCSENT`, `CPIAUCSL`, `USREC`, AAII survey values, the NAAIM Exposure
-Index, and all price feeds (`^GSPC`, RPV/RPG) with their second feeds.
+- **Verified:** 2026-07-02
+- **Provider:** FRED. **Primary URL:** https://fred.stlouisfed.org/series/SAHMREALTIME
+- **Secondary (construction recomputed):** Sahm reading recomputed from
+  `UNRATE` (three-month average minus its low of the previous twelve
+  months): recomputed **+0.07** for June 2026; `SAHMREALTIME` **+0.07**;
+  `SAHMCURRENT` **+0.07**. Exact agreement on the latest month (scripted).
+- **Tertiary cross-reference:** currentmarketvaluation.com/models/sahm-rule.php
+  states the identical construction; its March 2026 print (0.23) equals the
+  recomputation from today's revised UNRATE for March, while `SAHMREALTIME`
+  shows 0.20 for March — the real-time series uses unemployment data as
+  originally published, so revised-vintage recomputations can differ by a few
+  hundredths in earlier months. This is expected and documented.
+- **Variant decision:** `SAHMREALTIME` (not `SAHMCURRENT`) is displayed so
+  that historical values reflect information actually available at the time
+  (walk-forward integrity for later phases). The two variants agree on the
+  latest month.
+
+---
+
+## BAMLH0A0HYM2 — ICE BofA US High Yield Index Option-Adjusted Spread
+
+- **Verified:** 2026-07-02
+- **Provider:** FRED. **Primary URL:** https://fred.stlouisfed.org/series/BAMLH0A0HYM2
+- **Secondary:** GuruFocus "BofA US High Yield Index Option-Adjusted Spread"
+  — https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread
+  — prints **2.75% (Jun 2026)**, equal to FRED `BAMLH0A0HYM2` on 2026-06-30
+  (**2.75**), an exact month-end match.
+- **Tertiary:** govspending.org/series/BAMLH0A0HYM2/ showed 2.78% around
+  25 June 2026, consistent with FRED's 2.80–2.83 prints that week.
+  A TradingEconomics figure of "2.63% in June" is understood to be a monthly
+  average basis and was not used.
+- **Limitation (material):** the keyless `fredgraph.csv` endpoint serves this
+  ICE-licensed series only from 2023-07-03 (787 observations), including when
+  an earlier `cosd` start date is requested. Full 1996–present history is
+  therefore not redistributable here. Consequence: status thresholds use
+  fixed absolute anchors (watch 4.00, elevated 5.50, complacency 3.00 —
+  approximately the published long-run median and 75th percentile visible on
+  the FRED chart) rather than window percentiles, which would drift with the
+  available window. Flagged in README open issues for ZH confirmation.
+
+---
+
+## UNRATE, PAYEMS, UEMP27OV — labour headline series (BLS)
+
+- **Verified:** 2026-07-02 (scripted, repeatable)
+- **Provider:** FRED. **Primary URLs:** fred.stlouisfed.org/series/UNRATE,
+  /PAYEMS, /UEMP27OV
+- **Secondary (originating agency):** BLS public API v1
+  (api.bls.gov/publicAPI/v1/timeseries/data/) — series LNS14000000,
+  CES0000000001, LNS13008636. **52 month-values compared across the three
+  series over the trailing window: all equal.** Spot check for June 2026:
+  unemployment rate 4.2, total nonfarm payrolls 158,984k, long-term
+  unemployed 1,937k — identical on both providers.
+- **Notes:** the BLS Employment Situation HTML release blocks automated
+  fetching (HTTP 403); the BLS public API is the same agency's data service
+  and serves the purpose better (scripted in verify_series.py).
+
+---
+
+## CCSA — Continued claims (insured unemployment), seasonally adjusted
+
+- **Verified:** 2026-07-02
+- **Provider:** FRED. **Primary URL:** https://fred.stlouisfed.org/series/CCSA
+- **Secondary (originating agency via press coverage):** the DOL weekly
+  claims release for the week ending 20 June 2026 reported seasonally
+  adjusted **initial claims 215,000** (matches FRED `ICSA` context) and
+  **insured unemployment 1,821,000 (advance) for the week ending 13 June**.
+  FRED `CCSA` shows **1,812,000 for 2026-06-13 (revised)** and 1,814,000 for
+  2026-06-20 — the 9k difference is the documented DOL advance-to-revised
+  cycle, in which each week's figure is revised in the following release.
+- **Notes:** dol.gov/ui/data.pdf and the DOL newsroom block automated
+  fetching; the release figures were confirmed via press prints of the DOL
+  release (verifiedinvesting.com claims report, 25 June 2026 cycle). The
+  advance/revision reconciliation is the identity test here.
+
+---
+
+## S&P Global US Manufacturing PMI (documented ISM proxy)
+
+- **Verified:** 2026-07-02
+- **Displayed value:** June 2026 final **53.9** (May final 55.1).
+- **Primary:** S&P Global press release (the official release page carries
+  53.9; it serves HTTP 200 to browser-agent requests) —
+  https://www.pmi.spglobal.com/Public/Home/PressRelease/d52074988b4f4367a787ba833e23b5c6
+- **Secondary:** investinglive.com print "US S&P Global manufacturing PMI
+  final for June 53.9" (1 July 2026) and Advisor Perspectives dshort update
+  "Growth Slips to 3-Month Low Despite Expansion" (1 July 2026), both
+  quoting the same official figures. TradingEconomics carries the identical
+  print and is the runtime scrape fallback.
+- **Substitution note:** the ISM Manufacturing PMI headline is licensed; the
+  S&P Global headline is the documented free proxy (approved decision). It is
+  a different survey and can diverge from ISM — flagged in the indicator
+  notes and the UI.
+- **History:** accumulated one print per month in
+  `data/history/pmi_spglobal_us_mfg.json` (seeded with the May 2026 final,
+  55.1, from the June release coverage). No licensed history is
+  redistributed.
+
+---
+
+## Conference Board US LEI (public headline)
+
+- **Verified:** 2026-07-02
+- **Displayed values:** LEI **99.3** (2016=100) for May 2026; **+0.1%**
+  month change; **−0.3%** six-month change (November 2025 to May 2026),
+  prior six months −1.3%. Released 18 June 2026.
+- **Primary (originating publisher):**
+  https://www.conference-board.org/topics/us-leading-indicators
+- **Secondary:** PR Newswire release "The Conference Board Leading Economic
+  Index (LEI) for the US Rose for the Second Consecutive Month in May" —
+  identical figures verbatim.
+- **Licence note:** only the publicly announced headline figures are
+  displayed; no licensed series is redistributed. History accumulates one
+  headline per month in `data/history/lei_conference_board.json`.
+
+---
+
+## Shiller CAPE (context-only valuation row)
+
+- **Verified:** 2026-07-02
+- **Displayed value:** **41.66** (multpl.com daily print, 1 July 2026;
+  long-run mean 17.39, median 16.10 per the same page).
+- **Primary:** https://www.multpl.com/shiller-pe
+- **Secondary:** GuruFocus "S&P 500 Shiller CAPE Ratio: 40.41 (Jun 2026)" —
+  https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio.
+  The ~3% gap is the documented method difference: multpl prints a daily
+  CAPE on the latest price; the Shiller convention (followed by GuruFocus)
+  uses monthly average prices, which sit below the daily print in a rising
+  market. Within tolerance.
+- **Excluded source:** currentmarketvaluation.com/models/price-earnings.php
+  showed 36.4 "as of March 31, 2026" — a stale quarterly print on a restated
+  basis, inconsistent beyond timing tolerance with both sources above, so it
+  is excluded from CAPE verification (documented here per the
+  conflicting-source rule).
+- **Method reference:** Robert Shiller's `ie_data.xls` (Yale-hosted copy)
+  validates the construction but ends at 2023-09; the maintained dataset
+  moved to shillerdata.com, where the download is not automation-accessible.
+
+---
+
+## Pending verification (later phases — do not use before logging here)
+
+`NFCI` / `ANFCI`, `DRTSCILM` (SLOOS), `UMCSENT`, `CPIAUCSL`, `USREC`, AAII
+survey values, the NAAIM Exposure Index, multpl trailing P/E, IPO-count
+proxy, and all price feeds (`^GSPC`, RPV/RPG) with their second feeds.
