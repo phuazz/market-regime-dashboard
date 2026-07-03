@@ -48,6 +48,9 @@ def main() -> int:
         "lens2": load_json("lens2.json"),
         "lens3": load_json("lens3.json"),
         "thresholds": load_json("thresholds.json"),
+        # Optional: produced on demand by scripts/forward_returns.py.
+        "forward_returns": load_json("forward_returns.json")
+        if (DATA_DIR / "forward_returns.json").exists() else None,
     }
     # "</" is escaped so no JSON string can terminate the surrounding
     # <script> element early; "<\/" is an identical string in JSON.

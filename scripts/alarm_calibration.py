@@ -117,7 +117,13 @@ def max_within(values: list[float]) -> float:
     return max(values) if values else float("nan")
 
 
-def main() -> int:
+def build_composite_grid() -> list[dict]:
+    """Monthly point-in-time Lens 2 composite grid.
+
+    Shared machinery: the filed calibration (main below) and the phase 5
+    forward-return study both consume this. Returns one dict per month-end
+    with iso date, gauge count, composite share, and per-gauge statuses.
+    """
     print("Fetching histories (all in-memory)...")
     aaii_d, aaii_v = fetch_aaii_history()
     naaim_d, naaim_v = fetch_naaim_history()
@@ -218,6 +224,18 @@ def main() -> int:
             "statuses": statuses,
         })
 
+    return grid
+
+
+def load_spx_month_ends() -> tuple[list[str], dict[str, float]]:
+    """Month-end ISO dates and close lookup from the stored S&P history."""
+    gspc = json.loads((ROOT / "data" / "history" / "gspc.json").read_text(encoding="utf-8"))
+    return month_ends_from_daily(gspc["dates"]), dict(zip(gspc["dates"], gspc["values"]))
+
+
+def main() -> int:
+    grid = build_composite_grid()
+    _, spx_close = load_spx_month_ends()
     spx_series = [(g["iso"], spx_close[g["iso"]]) for g in grid]
 
     def forward_return(index: int, months: int):

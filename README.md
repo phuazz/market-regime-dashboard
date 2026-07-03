@@ -23,8 +23,11 @@ indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
 adopted at 62.5% (5 of 8 gauges) on 2026-07-03 from the filed calibration
 study in `reviews/`, and the act rule (Lens 1 elevated or Lens 2 at alarm,
 confirmed by Lens 3) renders prominently on the page. The current read is
-on the live page. Phases 5–6 (conditional forward returns, signal map)
-remain.
+on the live page. Phase 5 is live: conditional forward-return panels per
+lens and for the act rule (point-in-time reconstruction 1970–2026, filed
+in `reviews/2026-07-03_forward-returns.md`; recompute on demand with
+`python scripts/forward_returns.py` — deliberately not in the scheduled
+workflows). Phase 6 (signal map) remains.
 
 All status thresholds are independently chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
