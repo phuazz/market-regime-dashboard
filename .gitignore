@@ -1,3 +1,7 @@
+# Local-only layout reference: third-party dashboard screenshots and an
+# internal memo PDF. Kept out of the public repository deliberately.
+reference/
+
 __pycache__/
 *.pyc
 .pytest_cache/

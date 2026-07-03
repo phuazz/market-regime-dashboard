@@ -80,6 +80,11 @@ be verified per VERIFICATION.md before first use.
 `lens2-froth-composite.png`, `lens2-froth-rows.png`, `lens2-lens3-trend.png`,
 `glossary.png`, `signal-map.png`, and the source video memo PDF.
 
+The folder is **local-only and git-ignored**: it contains third-party
+dashboard screenshots and an internal memo, so it is excluded from the
+public repository and from git history. SPEC.md references to
+`reference/...` therefore resolve only on machines holding a local copy.
+
 ## Open issues
 
 1. **Thresholds pending confirmation** — every parameter in
