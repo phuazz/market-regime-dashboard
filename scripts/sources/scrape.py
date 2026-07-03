@@ -21,6 +21,7 @@ BROWSER_UA = (
 )
 
 MULTPL_CAPE_URL = "https://www.multpl.com/shiller-pe"
+MULTPL_CAPE_TABLE_URL = "https://www.multpl.com/shiller-pe/table/by-month"
 SPGLOBAL_LISTING_URL = "https://www.pmi.spglobal.com/Public/Release/PressReleases?language=en"
 TRADINGECONOMICS_PMI_URL = "https://tradingeconomics.com/united-states/manufacturing-pmi"
 CONFERENCE_BOARD_LEI_URL = "https://www.conference-board.org/topics/us-leading-indicators"
@@ -116,6 +117,34 @@ def fetch_multpl_cape() -> dict:
         "mean": float(mean_match.group(1)) if mean_match else None,
         "median": float(median_match.group(1)) if median_match else None,
     }
+
+
+def fetch_multpl_cape_history() -> tuple[list[str], list[float]]:
+    """Return monthly Shiller CAPE history (oldest first) from multpl.
+
+    The by-month table has the same markup as the trailing-P/E table. The
+    CAPE is Robert Shiller's freely published dataset (Yale), so the monthly
+    history is public and may be charted; only survey-provider series (AAII,
+    NAAIM, S&P Global, Conference Board) carry redistribution limits.
+    """
+    text = fetch_text(MULTPL_CAPE_TABLE_URL)
+    cells = re.findall(
+        r"<td>([A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4})</td>\s*<td[^>]*>(.*?)</td>",
+        text,
+        re.DOTALL,
+    )
+    parsed = []
+    for raw_date, cell_body in cells:
+        value_match = re.search(r"([0-9]{1,3}\.[0-9]{1,2})", cell_body)
+        if not value_match:
+            continue
+        # strptime handles month-name parsing (months are 1-indexed).
+        day = datetime.strptime(raw_date, "%b %d, %Y").date()
+        parsed.append((day.isoformat(), float(value_match.group(1))))
+    if len(parsed) < 200:
+        raise ScrapeError(f"multpl CAPE by-month table parsed only {len(parsed)} rows; layout changed")
+    parsed.sort()
+    return [d for d, _ in parsed], [v for _, v in parsed]
 
 
 def _parse_pmi_from_text(text: str) -> dict:

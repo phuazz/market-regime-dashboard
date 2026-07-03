@@ -1,15 +1,33 @@
 {
-  "series_id": "RENAISSANCE_IPO_PROCEEDS_YTD_BN",
-  "name": "US IPO proceeds, year to date (Renaissance Capital)",
+  "series_id": "RENAISSANCE_IPO_PROCEEDS",
+  "name": "US IPO proceeds by year (Renaissance Capital)",
   "unit": "usd_bn",
   "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
-  "collection": "Year-to-date snapshot accumulated per run date.",
-  "points": [
-    {
-      "as_of": "2026-07-03",
-      "value": 114.7,
-      "recorded_at": "2026-07-03T09:40:25Z"
-    }
+  "updated_at": "2026-07-03T15:24:45Z",
+  "dates": [
+    "2016-12-31",
+    "2017-12-31",
+    "2018-12-31",
+    "2019-12-31",
+    "2020-12-31",
+    "2021-12-31",
+    "2022-12-31",
+    "2023-12-31",
+    "2024-12-31",
+    "2025-12-31",
+    "2026-07-03"
   ],
-  "updated_at": "2026-07-03T14:51:01Z"
+  "values": [
+    18.8,
+    35.5,
+    46.9,
+    46.3,
+    78.2,
+    142.4,
+    7.7,
+    19.5,
+    29.6,
+    44.0,
+    114.7
+  ]
 }

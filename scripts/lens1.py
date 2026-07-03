@@ -530,18 +530,15 @@ def build_cape(thresholds: dict) -> dict:
             f" The reading is far above long-run norms{mean_text}, which historically maps to "
             f"weak decade-ahead returns — a caveat on future returns, not a recession timer."
         )
-    append_scrape_history(
-        "shiller_cape_multpl.json",
-        {
-            "series_id": "MULTPL_SHILLER_CAPE",
-            "name": "Shiller CAPE (multpl daily print)",
-            "unit": "ratio",
-            "source_url": scrape.MULTPL_CAPE_URL,
-            "collection": "Accumulated from multpl.com daily prints (latest-price basis).",
-        },
-        as_of,
-        scraped["value"],
-    )
+    # Full monthly CAPE history (Shiller's public dataset) for the chart.
+    # Best-effort: a by-month table change must not blank the headline value.
+    history_note = ""
+    try:
+        cape_dates, cape_values = scrape.fetch_multpl_cape_history()
+        write_fred_history("SHILLER_CAPE_MULTPL", "Shiller CAPE (monthly)", "ratio",
+                           scrape.MULTPL_CAPE_URL, cape_dates, cape_values)
+    except Exception as error:  # noqa: BLE001 — chart history is non-essential
+        history_note = f" Monthly history not refreshed this run ({str(error)[:80]})."
     return {
         "id": "shiller_cape",
         "name": "Valuation",
@@ -566,10 +563,10 @@ def build_cape(thresholds: dict) -> dict:
         "source_url": scrape.MULTPL_CAPE_URL,
         "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio",
         "notes": (
-            "Method note: multpl prints a daily CAPE on the latest price with lagged earnings; "
-            "the Shiller dataset and GuruFocus use monthly average prices, so monthly prints sit "
-            "slightly below the daily figure in a rising market. Cross-checked within tolerance "
-            f"at first use; see VERIFICATION.md.{flag_note}{as_of_note}"
+            "Method note: the headline is multpl's daily CAPE on the latest price with lagged "
+            "earnings; the chart is the monthly Shiller series (public Yale dataset), so the "
+            "last monthly point sits slightly below the daily figure in a rising market. "
+            f"Cross-checked within tolerance at first use; see VERIFICATION.md.{flag_note}{as_of_note}{history_note}"
         ),
     }
 

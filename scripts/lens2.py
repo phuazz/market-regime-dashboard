@@ -329,21 +329,14 @@ def build_pe(thresholds: dict) -> dict:
         "value": round(percentile(values, params["trigger_percentile"]), 2),
         "label": "current trigger (90th percentile since 1871)",
     }
-    append_scrape_history(
-        "multpl_pe.json",
-        {
-            "series_id": "MULTPL_TRAILING_PE",
-            "name": "S&P 500 trailing P/E (multpl daily print)",
-            "unit": "ratio",
-            "source_url": sentiment.MULTPL_PE_URL,
-            "collection": (
-                "Current print only; the multpl monthly table is used in-memory for the "
-                "percentile calibration and is not redistributed."
-            ),
-        },
-        utc_now_iso()[:10],
-        current,
-    )
+    # Full monthly history for the chart. The trailing P/E is a valuation
+    # ratio derived from long-public S&P price and earnings data (the same
+    # Shiller-lineage series the CAPE draws on), so the monthly series is
+    # public and may be charted — unlike the survey-provider gauges.
+    # series_id lower-cases to the history filename referenced by the UI
+    # (data/history/multpl_pe.json), so keep it aligned with HISTORY_MAP.
+    write_fred_history("MULTPL_PE", "S&P 500 trailing P/E (monthly)", "ratio",
+                       sentiment.MULTPL_PE_URL, dates, values)
     estimate_note = (
         " Recent months in the calibration history are multpl estimates pending final "
         "earnings (marked on their table)." if estimates[-1] else ""
@@ -457,18 +450,19 @@ def build_value_growth(thresholds: dict) -> dict:
     value_return = (rpv_by[last] / rpv_by[past] - 1.0) * 100.0
     spread = round(growth_return - value_return, 1)
     status, detail = classify_value_growth(spread, params)
-    append_scrape_history(
-        "rpg_rpv_spread.json",
-        {
-            "series_id": "RPG_RPV_6M_SPREAD",
-            "name": "Growth minus value, six-month price return spread",
-            "unit": "pp",
-            "source_url": "https://finance.yahoo.com/quote/RPG/",
-            "collection": "Computed from RPG and RPV daily closes (Yahoo chart API).",
-        },
-        last,
-        spread,
-    )
+    # Full rolling-spread history for the chart, computed from RPG/RPV daily
+    # closes (Yahoo prices — chartable). One point per session once the
+    # six-month window is available.
+    spread_dates, spread_values = [], []
+    for i in range(sessions, len(common)):
+        d, base = common[i], common[i - sessions]
+        g = (rpg_by[d] / rpg_by[base] - 1.0) * 100.0
+        v = (rpv_by[d] / rpv_by[base] - 1.0) * 100.0
+        spread_dates.append(d)
+        spread_values.append(round(g - v, 2))
+    # series_id lower-cases to the history filename (data/history/rpg_rpv_spread.json).
+    write_fred_history("RPG_RPV_SPREAD", "Growth minus value, six-month price-return spread", "pp",
+                       "https://finance.yahoo.com/quote/RPG/", spread_dates, spread_values)
     return {
         "id": "value_vs_growth",
         "name": "Value vs Growth",
@@ -551,18 +545,19 @@ def build_ipo(thresholds: dict) -> dict:
     annualised = stats["ytd_proceeds_bn"] * 12.0 / months
     prior = [stats["annual_proceeds_bn"][y] for y in sorted(stats["annual_proceeds_bn"]) if y < current_year]
     status, detail = classify_ipo(annualised, prior, params)
-    append_scrape_history(
-        "renaissance_ipo_proceeds.json",
-        {
-            "series_id": "RENAISSANCE_IPO_PROCEEDS_YTD_BN",
-            "name": "US IPO proceeds, year to date (Renaissance Capital)",
-            "unit": "usd_bn",
-            "source_url": sentiment.RENAISSANCE_STATS_URL,
-            "collection": "Year-to-date snapshot accumulated per run date.",
-        },
-        utc_now_iso()[:10],
-        stats["ytd_proceeds_bn"],
-    )
+    # Annual proceeds history for the chart (Renaissance publishes the annual
+    # series; public). Completed years are dated at year-end; the current
+    # year is its year-to-date point, flagged in the note.
+    ipo_dates, ipo_values = [], []
+    for year in sorted(stats["annual_proceeds_bn"]):
+        if year == current_year:
+            ipo_dates.append(stats["as_of"])
+            ipo_values.append(stats["ytd_proceeds_bn"])
+        else:
+            ipo_dates.append(f"{year}-12-31")
+            ipo_values.append(stats["annual_proceeds_bn"][year])
+    write_fred_history("RENAISSANCE_IPO_PROCEEDS", "US IPO proceeds by year (Renaissance Capital)",
+                       "usd_bn", sentiment.RENAISSANCE_STATS_URL, ipo_dates, ipo_values)
     return {
         "id": "deal_ipo_froth",
         "name": "Deal & IPO Froth",
@@ -589,9 +584,9 @@ def build_ipo(thresholds: dict) -> dict:
         "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
         "notes": (
             f"{detail} Year to date: ${stats['ytd_proceeds_bn']:.1f}bn across {months} months "
-            f"({stats['ytd_count']} IPOs); annualised ${annualised:.0f}bn. History window is "
-            f"short ({len(prior)} prior years) — a coarse gauge, flagged per SPEC. "
-            f"{VERIFIED_NOTE}"
+            f"({stats['ytd_count']} IPOs); annualised ${annualised:.0f}bn. Chart shows full-year "
+            f"proceeds with the current year as a year-to-date point. History window is short "
+            f"({len(prior)} prior years) — a coarse gauge, flagged per SPEC. {VERIFIED_NOTE}"
         ),
     }
 

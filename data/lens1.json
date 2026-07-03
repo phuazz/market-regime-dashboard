@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-03T14:51:01Z",
+  "updated_at": "2026-07-03T15:24:45Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -128,7 +128,7 @@
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
       "source_url": "https://www.multpl.com/shiller-pe",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio",
-      "notes": "Method note: multpl prints a daily CAPE on the latest price with lagged earnings; the Shiller dataset and GuruFocus use monthly average prices, so monthly prints sit slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.39, median 16.10), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer."
+      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.39, median 16.10), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer."
     }
   ]
 }

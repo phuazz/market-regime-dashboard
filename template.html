@@ -137,7 +137,10 @@ a:hover { text-decoration: underline; }
 .row-name .qualifier { color: var(--t3); font-weight: 400; }
 .row-desc { font-size: 13px; color: var(--t2); margin-top: 2px; max-width: 640px; }
 .row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
-.chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); margin-left: 6px; vertical-align: 1px; }
+/* Parameter chip: amber while a threshold awaits ZH confirmation, green
+   once confirmed. Colour follows state, never a class-time default. */
+.chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; margin-left: 6px; vertical-align: 1px; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); }
+.chip.chip-confirmed { background: var(--g-bg); border-color: rgba(26,135,84,0.2); color: var(--g); }
 .row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
@@ -147,6 +150,7 @@ a:hover { text-decoration: underline; }
 .row-chart .plot { width: 100%; height: 260px; }
 .row-chart .chart-note { padding: 0 6px 6px; }
 .row-chart .chart-stats { font-family: var(--mono); font-size: 10.5px; color: var(--t2); padding: 2px 6px 6px; }
+.row-chart .chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; padding: 24px; text-align: center; font-size: 12px; color: var(--t3); line-height: 1.6; }
 .row-value { text-align: right; flex: none; }
 .row-value .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 .row-value .stat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
@@ -545,6 +549,12 @@ const CHART_LAYOUT = {
 
 const AMBER = "#b45309", RED = "#c0392b", BLUE = "#2563eb";
 
+/* Ordinal suffix: 1st, 2nd, 3rd, 21st … 92nd (not "92th"). */
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 /* Indicator id -> history file plus static threshold lines (values read
    from the live thresholds so the chart always matches the active rule).
    Percentile-calibrated gauges get no static line — their trigger moves. */
@@ -606,11 +616,42 @@ function normaliseHistory(payload) {
 
 function drawHistoryChart(container, ind, history, context) {
   const plot = container.querySelector(".plot");
+  const stats = container.querySelector(".chart-stats");
+  const noteEl = container.querySelector(".chart-note");
+  const spec = HISTORY_MAP[ind.id];
+
+  const addSourceLink = (text) => {
+    noteEl.textContent = text ? text + " " : "";
+    const link = el("a", null, "Series page ↗");
+    link.href = ind.source_url; link.target = "_blank"; link.rel = "noopener";
+    noteEl.appendChild(link);
+  };
+
   if (typeof Plotly === "undefined") {
     plot.textContent = "Chart library did not load (CDN unreachable).";
+    stats.textContent = "";
+    addSourceLink("");
     return;
   }
-  const spec = HISTORY_MAP[ind.id];
+
+  /* Accumulating, licence-limited gauges start near-empty and fill in
+     weekly; a two-point line reads as broken, so show a clean status
+     panel until there is enough to plot. */
+  const MIN_PLOT = 8;
+  if (history.accumulating && history.values.length < MIN_PLOT) {
+    const panel = el("div", "chart-empty");
+    panel.textContent =
+      "History accumulates weekly from first collection (July 2026). The source licence " +
+      "(AAII, NAAIM, S&P Global, or the Conference Board) prohibits redistributing back-history, " +
+      "so this chart fills in over the coming weeks — " + history.values.length +
+      " observation(s) so far.";
+    plot.replaceChildren(panel);
+    stats.textContent = "Latest: " + formatValue({ ...ind, value: history.values.at(-1) }) +
+      " (" + formatAsOf({ as_of: history.dates.at(-1), cadence: ind.cadence }) + ").";
+    addSourceLink(spec.note || "");
+    return;
+  }
+
   const thresholds = window.__THRESHOLDS__ || null;
   const lines = thresholds ? spec.lines(thresholds) : [];
   /* Percentile-calibrated gauges carry their current trigger level in the
@@ -682,8 +723,7 @@ function drawHistoryChart(container, ind, history, context) {
   }, { displayModeBar: false, responsive: true });
 
   /* Statistics strip: where the latest reading sits in its own history. */
-  const stats = container.querySelector(".chart-stats");
-  if (history.values.length >= 24) {
+  if (history.values.length >= 2) {
     const values = history.values;
     const rank = Math.round(100 * values.filter((v) => v <= values.at(-1)).length / values.length);
     const ordered = [...values].sort((a, b) => a - b);
@@ -692,26 +732,22 @@ function drawHistoryChart(container, ind, history, context) {
     const maxIndex = values.indexOf(ordered.at(-1));
     const fmt = (v) => formatValue({ ...ind, value: v });
     stats.textContent =
-      "Now " + fmt(values.at(-1)) + " = " + rank + "th percentile of " +
+      "Now " + fmt(values.at(-1)) + " = " + ordinal(rank) + " percentile of " +
       values.length.toLocaleString("en-GB") + " obs since " + history.dates[0].slice(0, 4) +
       " · median " + fmt(median) +
       " · low " + fmt(ordered[0]) + " (" + history.dates[minIndex].slice(0, 4) + ")" +
       " · high " + fmt(ordered.at(-1)) + " (" + history.dates[maxIndex].slice(0, 4) + ")";
   } else {
-    stats.textContent = history.values.length + " observation(s) collected so far.";
+    stats.textContent = "";
   }
 
   const notes = [];
   if (spec.note) notes.push(spec.note);
   if (history.accumulating) {
-    notes.push("History accumulates from first collection (July 2026); licensed source history is not redistributed.");
+    notes.push("History accumulates weekly from July 2026; the licensed source's back-history is not redistributed.");
   }
   notes.push(...bandNotes);
-  const noteEl = container.querySelector(".chart-note");
-  noteEl.textContent = notes.join(" ") + " ";
-  const link = el("a", null, "Series page ↗");
-  link.href = ind.source_url; link.target = "_blank"; link.rel = "noopener";
-  noteEl.appendChild(link);
+  addSourceLink(notes.join(" "));
 }
 
 function toggleHistory(row, ind, toggle) {
@@ -762,7 +798,19 @@ function renderLensRows(rowsId, subId, lensData) {
     if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
     const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
-    threshold.appendChild(el("span", "chip", "Proposed default · pending confirmation"));
+    /* Chip only where there is a confirmable parameter block; context rows
+       with no threshold parameters (e.g. SLOOS) carry none. */
+    const params = (window.__THRESHOLDS__ || {})[ind.id];
+    if (params && "confirmed_by_zh" in params) {
+      const confirmed = params.confirmed_by_zh === true;
+      const chip = el("span", "chip" + (confirmed ? " chip-confirmed" : ""),
+        confirmed ? "Confirmed parameter" : "Proposed default · pending confirmation");
+      const meta = (window.__THRESHOLDS__ || {})._meta;
+      if (confirmed && meta && meta.confirmed_by_zh_on) {
+        chip.title = "Confirmed by ZH on " + meta.confirmed_by_zh_on;
+      }
+      threshold.appendChild(chip);
+    }
     main.appendChild(threshold);
     if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
 

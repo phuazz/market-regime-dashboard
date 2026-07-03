@@ -1,7 +1,8 @@
 {
   "_meta": {
-    "description": "Independently chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used.",
-    "last_updated": "2026-07-02"
+    "description": "Independently chosen status parameters. All confirmed by ZH on 2026-07-03 for the proof-of-concept phase (SPEC.md section 3). Every threshold is an independent construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used. Two carry documented open caveats accepted as-is: the sustained-inversion definition (yield_curve_10y3m; the 60-observation rule excludes the choppy 1989 and 2019 inversions) and the HY OAS absolute anchors (hy_credit_spreads; used because the free FRED endpoint serves the ICE series only from mid-2023). Re-open either if a fuller data source is added.",
+    "last_updated": "2026-07-03",
+    "confirmed_by_zh_on": "2026-07-03"
   },
   "yield_curve_10y3m": {
     "watch_rule": "Latest spread below zero (curve inverted).",
@@ -9,14 +10,14 @@
     "benign_rule": "Anything else.",
     "sustained_inversion_min_observations": 60,
     "elevated_window_months": 12,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "sahm_rule": {
     "watch_rule": "Sahm reading at or above watch_level.",
     "elevated_rule": "Sahm reading at or above elevated_level (the published Sahm 2019 trigger).",
     "watch_level": 0.35,
-    "elevated_level": 0.50,
-    "confirmed_by_zh": false
+    "elevated_level": 0.5,
+    "confirmed_by_zh": true
   },
   "hy_credit_spreads": {
     "watch_rule": "OAS at or above watch_level, or a 63-trading-day rise of at least watch_rise_bp basis points.",
@@ -28,80 +29,84 @@
     "complacency_level": 3.0,
     "watch_rise_bp": 100,
     "elevated_rise_bp": 200,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "pmi_manufacturing_proxy": {
     "watch_rule": "PMI below watch_level (the 50 expansion line, a public survey convention).",
     "elevated_rule": "PMI below elevated_level and lower than its print three months earlier.",
     "watch_level": 50.0,
     "elevated_level": 48.0,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "leading_indicators": {
     "watch_rule": "Six-month change below zero.",
     "elevated_rule": "Six-month change at or below elevated_six_month_pct (about -4% annualised, aligned with the Conference Board's published recession-signal research).",
     "elevated_six_month_pct": -2.0,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "labour_market": {
     "watch_rule": "Unemployment 3-month average at least watch_rise pp above its 12-month low, or payroll 3-month average change below watch_payroll_3mo_avg_thousands, or softening internals (long-term unemployed above watch_uemp27ov_yoy_pct YoY and continued claims above watch_ccsa_26wk_pct over 26 weeks).",
     "elevated_rule": "Unemployment rise at or above elevated_rise pp, or a negative payroll 3-month average change.",
-    "watch_rise": 0.20,
+    "watch_rise": 0.2,
     "elevated_rise": 0.35,
     "watch_payroll_3mo_avg_thousands": 75,
     "watch_uemp27ov_yoy_pct": 15,
     "watch_ccsa_26wk_pct": 5,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "lens2_composite": {
     "description": "Composite = share of in-composite gauges triggered. Alarm adopted at 62.5% (5 of 8) by ZH on 2026-07-03 from the filed calibration study (reviews/2026-07-03_lens2-alarm-calibration.md): an arming line for Lens 3 confirmation, not a standalone signal. Re-run the calibration at any gauge addition or removal.",
     "alarm_share_pct": 62.5,
-    "candidate_shares_pct": [62.5, 75.0, 87.5],
+    "candidate_shares_pct": [
+      62.5,
+      75.0,
+      87.5
+    ],
     "candidate_rationale": "Candidates evaluated 1990-2026 point-in-time: 62.5% captured every 2000-window arm and maps to the 4-of-7 line that marked both 2021 arms once the IPO gauge is counted; 75% never fires on the modern gauge set; 87.5% fired only in melt-ups.",
     "confirmed_by_zh": true
   },
   "consumer_confidence_proxy": {
     "trigger_rule": "Michigan sentiment at or above trigger_percentile of its full monthly history.",
     "trigger_percentile": 75,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "retail_euphoria_aaii": {
     "trigger_rule": "Bull-bear spread at or above the 90th percentile of the full weekly history (computed from the AAII workbook at run time); eased when the spread is below eased_below_pp.",
     "eased_below_pp": 0,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "manager_bullishness_naaim": {
     "trigger_rule": "NAAIM exposure at or above trigger_level (all-in positioning).",
     "trigger_level": 90,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "growth_expectation_pe": {
     "trigger_rule": "Trailing P/E at or above trigger_percentile of monthly history since 1871 (multpl).",
     "trigger_percentile": 90,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "rule_of_20": {
     "trigger_rule": "P/E plus CPI year-on-year change above fair_value_sum and at or above trigger_percentile of the monthly sum history since 1948.",
     "fair_value_sum": 20,
     "trigger_percentile": 80,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "value_vs_growth": {
     "trigger_rule": "Growth (RPG) leading value (RPV) by trigger_pp or more over window_trading_days; eased when value leads (spread below eased_below_pp).",
     "trigger_pp": 10,
     "eased_below_pp": 0,
     "window_trading_days": 126,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "credit_complacency_nfci": {
     "trigger_rule": "NFCI in the loosest trigger_percentile of weekly readings since 1971.",
     "trigger_percentile": 20,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "deal_ipo_froth": {
     "trigger_rule": "Annualised year-to-date IPO proceeds at or above trigger_percentile of the prior years available (Renaissance Capital, from 2016). Coarse by construction — short history, seasonal annualisation.",
     "trigger_percentile": 80,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "sma_trend_sp500": {
     "benign_rule": "50-day SMA at or above the 150-day SMA.",
@@ -110,12 +115,12 @@
     "context_rule": "The 200-day SMA is displayed for context and adds a note when the index closes below it; it does not drive the status.",
     "slope_lookback_trading_days": 20,
     "flat_tolerance_pct": 0.1,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   },
   "shiller_cape": {
     "status_rule": "Context only; never a timing trigger (SPEC.md section 4). Status is always 'context' and it does not feed the lens roll-up.",
     "note_rule": "Flag when above flag_level as a long-run return caveat.",
     "flag_level": 30.0,
-    "confirmed_by_zh": false
+    "confirmed_by_zh": true
   }
 }

@@ -3,7 +3,7 @@
   "name": "Unemployment rate",
   "unit": "pct",
   "source_url": "https://fred.stlouisfed.org/series/UNRATE",
-  "updated_at": "2026-07-03T14:50:46Z",
+  "updated_at": "2026-07-03T15:24:32Z",
   "dates": [
     "1948-01-01",
     "1948-02-01",

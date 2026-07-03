@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-03T14:51:01Z",
+  "updated_at": "2026-07-03T15:24:45Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -109,7 +109,7 @@
       "threshold": "Triggered when the annualised year-to-date proceeds pace reaches the 80th percentile of the prior years available (from 2016).",
       "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
       "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
-      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $114.7bn across 6 months (82 IPOs); annualised $229bn. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $114.7bn across 6 months (82 IPOs); annualised $229bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "rule_of_20",

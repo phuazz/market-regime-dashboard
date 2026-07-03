@@ -4,7 +4,7 @@
   "unit": "index",
   "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
   "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
-  "updated_at": "2026-07-03T14:50:52Z",
+  "updated_at": "2026-07-03T15:24:36Z",
   "dates": [
     "1970-01-02",
     "1970-01-05",

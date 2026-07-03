@@ -82,17 +82,28 @@ Indicator JSON follows the SPEC.md section 9 schema plus display fields
 ## Charts
 
 Every indicator row with a history file expands in place (the "History"
-toggle) to a Plotly time-series chart with the active threshold lines drawn
-from `data/thresholds.json` — styled per the vault design system
-(`C:\dev\design.md`), matching the other phuazz.github.io dashboards.
-Histories are lazy-fetched per chart from `data/history/`. Note on the
-original inline-SVG decision: per ZH's 2026-07-03 steer (breadth-thrust as
-the reference), interactive row charts use Plotly from a pinned CDN; the
-Lens 3 SMA chart and the signal map remain inline SVG. The page degrades
-gracefully when the CDN is unreachable (rows and statuses render; charts
-show a notice). Gauges whose sources forbid redistribution accumulate
-history from first collection (July 2026) and their charts fill in over
-time.
+toggle) to a Plotly time-series chart — styled per the vault design system
+(`C:\dev\design.md`), all charts (rows, Lens 3 SMA, and the signal map)
+migrated to Plotly with unified hover. Each chart carries: the active
+threshold lines (drawn from `data/thresholds.json`, including build-time
+computed levels for the percentile-calibrated gauges); NBER recession
+bands, plus S&P bear-market bands on the Lens 2 froth gauges; a statistics
+strip (latest value as an ordinal percentile of its own history, median,
+dated extremes); and a series-page drill-down link. Histories are
+lazy-fetched per chart from `data/history/`; the page degrades gracefully
+when the CDN is unreachable.
+
+**History depth by source class:**
+- **Full public history** — FRED series (decades), plus Shiller CAPE and
+  trailing P/E (public Shiller-lineage data, monthly since 1871 via the
+  multpl by-month tables), the RPG−RPV value/growth spread (computed from
+  Yahoo closes, daily since 2006), and US IPO proceeds (Renaissance annual,
+  from 2016).
+- **Accumulating** — the four survey-provider gauges whose licences forbid
+  redistributing back-history (AAII, NAAIM, S&P Global PMI, Conference
+  Board LEI). These show a clean status panel until enough points
+  accumulate (from July 2026), then plot; their full histories are used
+  in-memory for calibration but never written to the repo.
 
 ## Working on it
 
