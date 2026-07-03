@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-03T06:37:09Z",
+  "updated_at": "2026-07-03T06:38:21Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
