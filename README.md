@@ -79,6 +79,21 @@ docs/                  GitHub Pages output. Generated, never hand-edited.
 Indicator JSON follows the SPEC.md section 9 schema plus display fields
 (`description`, `qualifier`, `cadence`, `signed`, `decimals`).
 
+## Charts
+
+Every indicator row with a history file expands in place (the "History"
+toggle) to a Plotly time-series chart with the active threshold lines drawn
+from `data/thresholds.json` — styled per the vault design system
+(`C:\dev\design.md`), matching the other phuazz.github.io dashboards.
+Histories are lazy-fetched per chart from `data/history/`. Note on the
+original inline-SVG decision: per ZH's 2026-07-03 steer (breadth-thrust as
+the reference), interactive row charts use Plotly from a pinned CDN; the
+Lens 3 SMA chart and the signal map remain inline SVG. The page degrades
+gracefully when the CDN is unreachable (rows and statuses render; charts
+show a notice). Gauges whose sources forbid redistribution accumulate
+history from first collection (July 2026) and their charts fill in over
+time.
+
 ## Working on it
 
 ```

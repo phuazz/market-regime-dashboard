@@ -6,6 +6,8 @@
 <title>Recession &amp; Market-Peak Dashboard</title>
 <!-- Fonts and :root tokens copied verbatim from C:\dev\design.md (PCC DNA). -->
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Pinned to the version used across the phuazz.github.io dashboards (design.md). -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
 <style>
 :root {
   /* surfaces */
@@ -133,6 +135,11 @@ a:hover { text-decoration: underline; }
 .row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
+.row-toggle { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; background: var(--b-bg); border: 1px solid rgba(37,99,235,0.25); color: var(--b); cursor: pointer; margin-left: 8px; user-select: none; }
+.row-toggle:hover { background: var(--b-bg2); }
+.row-chart { width: 100%; margin: 2px 0 10px 23px; border: 1px solid var(--bd); border-radius: var(--radius); background: var(--bg); padding: 8px 8px 2px; }
+.row-chart .plot { width: 100%; height: 260px; }
+.row-chart .chart-note { padding: 0 6px 6px; }
 .row-value { text-align: right; flex: none; }
 .row-value .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 .row-value .stat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
@@ -509,6 +516,171 @@ function renderSlots(data) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Expandable per-indicator history charts (Plotly, design.md DNA).    */
+
+/* Canonical shared layout from C:\dev\design.md, copied verbatim. The
+   x-axis tickformat/dtick suit short windows and are overridden per chart
+   for multi-decade histories, per the design system's own convention. */
+const CHART_LAYOUT = {
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: '#fafaf8',
+  font: { family: 'DM Sans', size: 10, color: '#5c5c56' },
+  margin: { t: 10, b: 10, l: 10, r: 10 },
+  xaxis: {
+    gridcolor: '#eeeee8', linecolor: '#d5d3ca', linewidth: 1, showgrid: false,
+    tickformat: "%b '%y", dtick: 'M2', tickfont: { size: 9 }
+  },
+  yaxis: {
+    gridcolor: '#f0f0ea', linecolor: '#d5d3ca', linewidth: 1, showgrid: true, gridwidth: 1,
+    side: 'right',
+    tickfont: { size: 9, family: 'JetBrains Mono' }
+  },
+  showlegend: true,
+  legend: { x: 0, y: 1.02, orientation: 'h', font: { size: 9 }, bgcolor: 'transparent' },
+  hovermode: 'x unified',
+  hoverlabel: { bgcolor: '#fff', bordercolor: '#d5d3ca', font: { size: 10, family: 'DM Sans' } }
+};
+
+const AMBER = "#b45309", RED = "#c0392b", BLUE = "#2563eb";
+
+/* Indicator id -> history file plus static threshold lines (values read
+   from the live thresholds so the chart always matches the active rule).
+   Percentile-calibrated gauges get no static line — their trigger moves. */
+const HISTORY_MAP = {
+  yield_curve_10y3m: { file: "t10y3m.json", lines: (th) => [
+    { y: 0, label: "inversion (watch)", color: AMBER }] },
+  sahm_rule: { file: "sahmrealtime.json", lines: (th) => [
+    { y: th.sahm_rule.watch_level, label: "watch", color: AMBER },
+    { y: th.sahm_rule.elevated_level, label: "published trigger", color: RED }] },
+  hy_credit_spreads: { file: "bamlh0a0hym2.json", lines: (th) => [
+    { y: th.hy_credit_spreads.watch_level, label: "watch", color: AMBER },
+    { y: th.hy_credit_spreads.elevated_level, label: "elevated", color: RED },
+    { y: th.hy_credit_spreads.complacency_level, label: "complacency", color: BLUE, dash: "dot" }] },
+  pmi_manufacturing_proxy: { file: "pmi_spglobal_us_mfg.json", lines: (th) => [
+    { y: th.pmi_manufacturing_proxy.watch_level, label: "expansion line", color: AMBER },
+    { y: th.pmi_manufacturing_proxy.elevated_level, label: "elevated", color: RED }] },
+  leading_indicators: { file: "lei_conference_board.json", lines: () => [] },
+  labour_market: { file: "unrate.json", lines: () => [],
+    note: "Headline unemployment rate; payrolls and internals drive the status alongside it." },
+  shiller_cape: { file: "shiller_cape_multpl.json", lines: (th) => [
+    { y: th.shiller_cape.flag_level, label: "context flag", color: BLUE, dash: "dot" }] },
+  consumer_confidence_proxy: { file: "umcsent.json", lines: () => [],
+    note: "Trigger is percentile-based (75th of full history), so no static line is drawn." },
+  retail_euphoria_aaii: { file: "aaii_spread.json", lines: () => [
+    { y: 0, label: "bears lead (eased)", color: BLUE, dash: "dot" }] },
+  manager_bullishness_naaim: { file: "naaim_exposure.json", lines: (th) => [
+    { y: th.manager_bullishness_naaim.trigger_level, label: "all-in", color: RED }] },
+  growth_expectation_pe: { file: "multpl_pe.json", lines: () => [],
+    note: "Trigger is percentile-based (90th since 1871), so no static line is drawn." },
+  value_vs_growth: { file: "rpg_rpv_spread.json", lines: (th) => [
+    { y: th.value_vs_growth.trigger_pp, label: "froth", color: RED },
+    { y: 0, label: "value leads (eased)", color: BLUE, dash: "dot" }] },
+  credit_complacency_nfci: { file: "nfci.json", lines: () => [],
+    note: "Trigger is percentile-based (loosest quintile since 1971), so no static line is drawn." },
+  deal_ipo_froth: { file: "renaissance_ipo_proceeds.json", lines: () => [] },
+  sloos_tightening: { file: "drtscilm.json", lines: () => [
+    { y: 0, label: "net tightening above zero", color: BLUE, dash: "dot" }] },
+};
+
+const historyCache = {};
+
+function normaliseHistory(payload) {
+  if (payload.points) {
+    return {
+      dates: payload.points.map((p) => p.as_of),
+      values: payload.points.map((p) => p.value),
+      accumulating: true,
+      unit: payload.unit,
+    };
+  }
+  return { dates: payload.dates, values: payload.values, accumulating: false, unit: payload.unit };
+}
+
+function drawHistoryChart(container, ind, history) {
+  const plot = container.querySelector(".plot");
+  if (typeof Plotly === "undefined") {
+    plot.textContent = "Chart library did not load (CDN unreachable).";
+    return;
+  }
+  const spec = HISTORY_MAP[ind.id];
+  const thresholds = window.__THRESHOLDS__ || null;
+  const lines = thresholds ? spec.lines(thresholds) : [];
+  const sparse = history.dates.length < 24;
+  const spanYears = history.dates.length > 1
+    ? (new Date(history.dates.at(-1)) - new Date(history.dates[0])) / 3.15576e10 : 0;
+
+  const shapes = lines.map((l) => ({
+    type: "line", xref: "paper", x0: 0, x1: 1, y0: l.y, y1: l.y,
+    line: { color: l.color, width: 1, dash: l.dash || "dash" },
+  }));
+  const annotations = lines.map((l) => ({
+    xref: "paper", x: 0, y: l.y, xanchor: "left", yanchor: "bottom",
+    text: l.label, showarrow: false, font: { size: 9, color: l.color },
+  }));
+  const last = history.values.at(-1);
+  annotations.push({
+    xref: "paper", x: 1, y: last, xanchor: "left", xshift: 4, yanchor: "middle",
+    text: formatValue({ ...ind, value: last }), showarrow: false,
+    font: { size: 9, family: "JetBrains Mono", color: "#ffffff" },
+    bgcolor: "#1a1a18", borderpad: 2,
+  });
+
+  Plotly.newPlot(plot, [{
+    x: history.dates, y: history.values, type: "scatter",
+    mode: sparse ? "lines+markers" : "lines",
+    name: ind.name, line: { color: BLUE, width: 1.5 }, marker: { size: 5 },
+  }], {
+    ...CHART_LAYOUT,
+    showlegend: false,
+    margin: { t: 12, b: 26, l: 10, r: 64 },
+    xaxis: {
+      ...CHART_LAYOUT.xaxis,
+      tickformat: spanYears > 3 ? "%Y" : "%b '%y",
+      dtick: undefined,
+    },
+    shapes: shapes,
+    annotations: annotations,
+  }, { displayModeBar: false, responsive: true });
+
+  const notes = [];
+  if (spec.note) notes.push(spec.note);
+  if (history.accumulating) {
+    notes.push("History accumulates from first collection (July 2026); licensed source history is not redistributed.");
+  }
+  container.querySelector(".chart-note").textContent = notes.join(" ");
+}
+
+function toggleHistory(row, ind, toggle) {
+  const existing = row.nextElementSibling;
+  if (existing && existing.classList.contains("row-chart")) {
+    if (typeof Plotly !== "undefined") Plotly.purge(existing.querySelector(".plot"));
+    existing.remove();
+    toggle.textContent = "History ▸";
+    return;
+  }
+  const container = el("div", "row-chart");
+  container.appendChild(el("div", "plot"));
+  container.appendChild(el("div", "chart-note", "Loading history…"));
+  row.after(container);
+  toggle.textContent = "History ▾";
+
+  const file = HISTORY_MAP[ind.id].file;
+  const cached = historyCache[file];
+  const load = cached
+    ? Promise.resolve(cached)
+    : fetchJson("data/history/" + file).then((payload) => {
+        historyCache[file] = payload;
+        return payload;
+      });
+  load
+    .then((payload) => drawHistoryChart(container, ind, normaliseHistory(payload)))
+    .catch((error) => {
+      container.querySelector(".chart-note").textContent =
+        "History failed to load (" + error.message + ").";
+    });
+}
+
 function renderLensRows(rowsId, subId, lensData) {
   document.getElementById(subId).textContent = lensData.subtitle || "";
   const rows = document.getElementById(rowsId);
@@ -539,6 +711,11 @@ function renderLensRows(rowsId, subId, lensData) {
     secondary.href = ind.secondary_source_url; secondary.target = "_blank"; secondary.rel = "noopener";
     sources.appendChild(secondary);
     sources.appendChild(document.createTextNode(" · As of " + formatAsOf(ind)));
+    if (HISTORY_MAP[ind.id]) {
+      const toggle = el("span", "row-toggle", "History ▸");
+      toggle.addEventListener("click", () => toggleHistory(row, ind, toggle));
+      sources.appendChild(toggle);
+    }
     main.appendChild(sources);
     row.appendChild(main);
 
@@ -838,6 +1015,8 @@ function loadChart(lens3) {
 }
 
 function render(data) {
+  /* Threshold values feed the chart threshold lines. */
+  window.__THRESHOLDS__ = data.thresholds || null;
   const indicators = data.lens1.indicators
     .concat(data.lens2 ? data.lens2.indicators : [])
     .concat(data.lens3 ? data.lens3.indicators : []);
@@ -883,10 +1062,11 @@ if (window.__DATA__) {
     fetchJson("data/lens3.json"),
     fetchJson("data/forward_returns.json").catch(() => null),  /* optional panel */
     fetchJson("data/signal_map.json").catch(() => null),       /* optional map */
+    fetchJson("data/thresholds.json").catch(() => null),       /* chart threshold lines */
   ])
-    .then(([lens1, lens2, lens3, forward, map]) =>
+    .then(([lens1, lens2, lens3, forward, map, thresholds]) =>
       render({ lens1: lens1, lens2: lens2, lens3: lens3, forward_returns: forward,
-               signal_map: map, generated_at: null }))
+               signal_map: map, thresholds: thresholds, generated_at: null }))
     .catch((error) =>
       showError(
         "Data failed to load (" + error.message + "). Serve the project root — for example " +
