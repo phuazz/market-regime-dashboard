@@ -1003,9 +1003,12 @@ function renderMap(map) {
   const closes = map.months.closes;
   const n = dates.length;
   if (!n) return;
+  /* Reveal the card BEFORE plotting: Plotly measures the container at
+     newPlot time, and a display:none parent yields its 700px default —
+     leaving the chart short of the full card width. */
+  document.getElementById("map-card").style.display = "block";
   if (typeof Plotly === "undefined") {
     plot.textContent = "Chart library did not load (CDN unreachable).";
-    document.getElementById("map-card").style.display = "block";
     return;
   }
   const monthIndex = {};
@@ -1078,7 +1081,7 @@ function renderMap(map) {
     map.note + " Alarm level " + fmtShare(map.alarm_share_pct) +
     "%. Recomputed on demand via scripts/signal_map.py; last computed " +
     formatIsoInstant(map.computed_as_of) + ".";
-  document.getElementById("map-card").style.display = "block";
+  /* Card already revealed before plotting (see top of renderMap). */
 }
 
 /* ------------------------------------------------------------------ */
