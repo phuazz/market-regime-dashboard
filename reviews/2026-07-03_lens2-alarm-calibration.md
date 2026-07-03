@@ -1,6 +1,9 @@
 # Lens 2 alarm-level calibration — running memo
 
 Date: 2026-07-03 · Project: market-regime-dashboard · Status: REVIEWED
+**Decision: adopted at 62.5% (5 of 8) by ZH, 2026-07-03.** Wired into
+`data/thresholds.json` (`lens2_composite`) the same day; the combined read
+is live from this change.
 Script: `scripts/alarm_calibration.py` (rerunnable; all histories fetched
 in-memory, nothing licensed is redistributed). Builds on the WS0/WS1
 threshold-robustness lesson (breadth-thrust-etf, 2026-07-02): prefer

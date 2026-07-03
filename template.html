@@ -103,6 +103,13 @@ a:hover { text-decoration: underline; }
 .status-quiet { color: var(--t3); }
 .status-eased { color: var(--g); }
 
+/* Combined read banner (SPEC section 2: prominent at the top) */
+.combined-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: var(--radius-lg); border: 1px solid; font-size: 14px; font-weight: 600; margin-top: 12px; }
+.combined-banner .dot { margin-top: 6px; background: currentColor; }
+.combined-none { background: var(--g-bg); border-color: rgba(26,135,84,0.25); color: var(--g); }
+.combined-armed { background: var(--a-bg); border-color: rgba(180,83,9,0.25); color: var(--a); }
+.combined-act { background: var(--r-bg2); border-color: rgba(192,57,43,0.35); color: var(--r); }
+
 /* Lens 2 composite hero */
 .composite { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 14px 18px; border: 1px solid var(--bd); border-radius: var(--radius-lg); background: var(--bg3); margin-top: 12px; }
 .composite-share { font-family: var(--mono); font-size: 34px; font-weight: 700; letter-spacing: -1px; }
@@ -187,14 +194,17 @@ a:hover { text-decoration: underline; }
   <section class="card">
     <div class="card-head">
       <div class="card-title">Overall read</div>
-      <div class="card-sub">The combined read activates once all three lenses are live.</div>
+      <div class="card-sub">Act rule: Lens 1 elevated or Lens 2 at alarm, confirmed by Lens 3 — reduce risk, not liquidate.</div>
     </div>
     <div class="card-body">
+      <div class="combined-banner" id="combined-banner" style="display:none">
+        <span class="dot"></span><span id="combined-text"></span>
+      </div>
       <div class="slots" id="slots"></div>
-      <p class="combined-note">
-        All three lenses are live. The Lens&nbsp;2 alarm level is deliberately unset pending
-        confirmation, so the combined read treats Lens&nbsp;2 as not firing; no combined signal
-        is computed until the alarm level is set.
+      <p class="combined-note" id="combined-note">
+        A single lens firing is not an act signal; unconfirmed arms cost nothing by design.
+        The Lens&nbsp;2 alarm level was adopted from a filed point-in-time calibration
+        (1990–2026); every threshold remains an independently chosen parameter.
       </p>
     </div>
   </section>
@@ -374,6 +384,11 @@ function lensSlotDef(label, lensData, pendingText) {
   };
 }
 
+/* Shares can be fractional (62.5% = 5 of 8); show one decimal only when needed. */
+function fmtShare(x) {
+  return Number.isInteger(x) ? x.toFixed(0) : x.toFixed(1);
+}
+
 /* Lens 2 rolls up by composite share, not worst status. With the alarm
    level unset the slot stays neutral and the combined read treats the lens
    as not firing. */
@@ -386,13 +401,50 @@ function lens2SlotDef(lens2) {
   return {
     label: "Lens 2 · Market-peak froth",
     status: firing ? "elevated" : (c.alarm_share_pct === null ? "pending" : "benign"),
-    statusText: c.share_pct.toFixed(0) + "% triggered",
+    statusText: fmtShare(c.share_pct) + "% triggered",
     detail:
       c.triggered_count + " of " + c.gauge_count + " gauges · " +
       (c.alarm_share_pct === null
         ? "alarm level pending confirmation — treated as not firing"
-        : "alarm at " + c.alarm_share_pct.toFixed(0) + "% — " + (firing ? "FIRING" : "not firing")),
+        : "alarm at " + fmtShare(c.alarm_share_pct) + "% — " + (firing ? "FIRING" : "not firing")),
   };
+}
+
+function renderCombined(data) {
+  const banner = document.getElementById("combined-banner");
+  const complete =
+    data.lens1 && data.lens2 && data.lens3 &&
+    data.lens2.composite && data.lens2.composite.alarm_share_pct !== null;
+  if (!complete) {
+    banner.style.display = "none";
+    return;
+  }
+  const c = data.lens2.composite;
+  const lens1Fires = worstStatus(data.lens1.indicators) === "elevated";
+  const lens2Fires = c.alarm_state === "at_or_above";
+  const lens3Confirms = worstStatus(data.lens3.indicators) === "elevated";
+  const armed = [];
+  if (lens1Fires) armed.push("recession risk is elevated");
+  if (lens2Fires) armed.push("the froth composite is at alarm");
+
+  banner.classList.remove("combined-none", "combined-armed", "combined-act");
+  let cls, message;
+  if (armed.length && lens3Confirms) {
+    cls = "combined-act";
+    message = "ACT — reduce risk, not liquidate: " + armed.join(" and ") +
+      ", confirmed by the price-trend bear trigger.";
+  } else if (armed.length) {
+    cls = "combined-armed";
+    message = "ARMED — " + armed.join(" and ") +
+      "; no action until Lens 3 confirms with the trend bear trigger.";
+  } else {
+    cls = "combined-none";
+    message = "No combined signal — recession risk is not elevated and the froth composite (" +
+      fmtShare(c.share_pct) + "%) is below the " + fmtShare(c.alarm_share_pct) + "% alarm.";
+  }
+  banner.classList.add(cls);
+  banner.style.display = "flex";
+  document.getElementById("combined-text").textContent = message;
 }
 
 function renderSlots(data) {
@@ -461,7 +513,7 @@ function renderLens2(lens2) {
   renderLensRows("lens2-rows", "lens2-sub", lens2);
   const c = lens2.composite;
   if (!c) return;
-  document.getElementById("composite-share").textContent = c.share_pct.toFixed(0) + "%";
+  document.getElementById("composite-share").textContent = fmtShare(c.share_pct) + "%";
   const easedText = c.eased_count
     ? " " + c.eased_count + (c.eased_count === 1 ? " gauge has" : " gauges have") + " eased."
     : "";
@@ -471,7 +523,7 @@ function renderLens2(lens2) {
   document.getElementById("composite-alarm").textContent =
     c.alarm_share_pct === null
       ? "Alarm level: pending confirmation"
-      : "Alarm level: " + c.alarm_share_pct.toFixed(0) + "% (" +
+      : "Alarm level: " + fmtShare(c.alarm_share_pct) + "% (" +
         (c.alarm_state === "at_or_above" ? "firing" : "not firing") + ")";
 }
 
@@ -606,6 +658,7 @@ function render(data) {
     .concat(data.lens3 ? data.lens3.indicators : []);
   const latest = indicators.map((i) => i.as_of).sort().at(-1);
   document.getElementById("asof-pill").textContent = "Data as of " + formatIsoDate(latest);
+  renderCombined(data);
   renderSlots(data);
   renderLensRows("lens1-rows", "lens1-sub", data.lens1);
   if (data.lens2) renderLens2(data.lens2);

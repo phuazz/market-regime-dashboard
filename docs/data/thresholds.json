@@ -54,11 +54,11 @@
     "confirmed_by_zh": false
   },
   "lens2_composite": {
-    "description": "Composite = share of in-composite gauges triggered. The alarm level is deliberately unset (SPEC.md section 5 — ZH to set; do not default to 80%). Until set, the combined read treats Lens 2 as not firing.",
-    "alarm_share_pct": null,
+    "description": "Composite = share of in-composite gauges triggered. Alarm adopted at 62.5% (5 of 8) by ZH on 2026-07-03 from the filed calibration study (reviews/2026-07-03_lens2-alarm-calibration.md): an arming line for Lens 3 confirmation, not a standalone signal. Re-run the calibration at any gauge addition or removal.",
+    "alarm_share_pct": 62.5,
     "candidate_shares_pct": [62.5, 75.0, 87.5],
-    "candidate_rationale": "With eight gauges: 5 of 8 (simple majority of froth evidence), 6 of 8 (super-majority), 7 of 8 (near-unanimous). A historical calibration against reconstructable gauges accompanies the phase 6 signal map.",
-    "confirmed_by_zh": false
+    "candidate_rationale": "Candidates evaluated 1990-2026 point-in-time: 62.5% captured every 2000-window arm and maps to the 4-of-7 line that marked both 2021 arms once the IPO gauge is counted; 75% never fires on the modern gauge set; 87.5% fired only in melt-ups.",
+    "confirmed_by_zh": true
   },
   "consumer_confidence_proxy": {
     "trigger_rule": "Michigan sentiment at or above trigger_percentile of its full monthly history.",

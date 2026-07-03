@@ -19,9 +19,12 @@ Actions refreshes. All three lenses are live: Lens 1 (seven recession-risk
 indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
 = share triggered, alarm level pending confirmation), and Lens 3 (50-day vs
 150-day SMA with an inline-SVG chart; Yahoo feed cross-checked against FRED
-`SP500` on every run). The current read is on the live page. Phases 5–6
-(conditional forward returns, signal map) remain; the combined read stays
-inactive until the Lens 2 alarm level is set.
+`SP500` on every run). The combined read is live: the Lens 2 alarm was
+adopted at 62.5% (5 of 8 gauges) on 2026-07-03 from the filed calibration
+study in `reviews/`, and the act rule (Lens 1 elevated or Lens 2 at alarm,
+confirmed by Lens 3) renders prominently on the page. The current read is
+on the live page. Phases 5–6 (conditional forward returns, signal map)
+remain.
 
 All status thresholds are independently chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
@@ -139,16 +142,15 @@ public repository and from git history. SPEC.md references to
    so automation surfaces it. The official S&P Global release blocks some
    fetchers; the TradingEconomics fallback supplied the June print
    (source_url records which supplier actually served each value).
-5. **Lens 2 alarm level** — deliberately unset; the combined read treats
-   Lens 2 as not firing until ZH picks a level. Candidates in
-   `data/thresholds.json` (`lens2_composite`): 62.5% (5 of 8, simple
-   majority), 75% (6 of 8, super-majority), 87.5% (7 of 8, near-unanimous).
-   A historical calibration against the reconstructable gauges accompanies
-   the phase 6 signal map. Two further Lens 2 items for the same review:
-   the IPO gauge is coarse by construction (Renaissance history from 2016,
-   seasonal annualisation), and the P/E gauge is within-methodology
-   consistent on multpl's as-reported basis (provider levels differ; see
-   VERIFICATION.md).
+5. **Lens 2 alarm level — decided.** Adopted at 62.5% (5 of 8) by ZH on
+   2026-07-03 from the filed calibration
+   (`reviews/2026-07-03_lens2-alarm-calibration.md`): an arming line for
+   Lens 3 confirmation, not a standalone signal. Re-run the calibration at
+   any gauge addition or removal. Two Lens 2 items remain for future
+   review: the IPO gauge is coarse by construction (Renaissance history
+   from 2016, seasonal annualisation), and the P/E gauge is
+   within-methodology consistent on multpl's as-reported basis (provider
+   levels differ; see VERIFICATION.md).
 6. **Stooq blocked** — the Stooq CSV endpoint named in SPEC.md now requires a
    JavaScript proof-of-work and is not automatable; FRED `SP500` serves as
    the S&P second feed instead (exact agreement with Yahoo; see

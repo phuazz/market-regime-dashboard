@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-03T09:40:26Z",
+  "updated_at": "2026-07-03T12:06:56Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -181,7 +181,7 @@
     "triggered_count": 4,
     "eased_count": 1,
     "share_pct": 50.0,
-    "alarm_share_pct": null,
-    "alarm_state": "pending"
+    "alarm_share_pct": 62.5,
+    "alarm_state": "below"
   }
 }
