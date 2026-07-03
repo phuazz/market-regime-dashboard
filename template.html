@@ -118,7 +118,11 @@ a:hover { text-decoration: underline; }
 .composite { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 14px 18px; border: 1px solid var(--bd); border-radius: var(--radius-lg); background: var(--bg3); margin-top: 12px; }
 .composite-share { font-family: var(--mono); font-size: 34px; font-weight: 700; letter-spacing: -1px; }
 .composite-note { font-size: 12px; color: var(--t2); max-width: 560px; flex: 1 1 260px; }
-.composite-alarm { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); white-space: nowrap; }
+/* Alarm chip colours are state-dependent: neutral when set and not firing,
+   red when firing, amber only while the level awaits confirmation. */
+.composite-alarm { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--bg3); border: 1px solid var(--bd2); color: var(--t2); white-space: nowrap; }
+.composite-alarm.alarm-pending { background: var(--a-bg); border-color: rgba(180,83,9,0.2); color: var(--a); }
+.composite-alarm.alarm-firing { background: var(--r-bg2); border-color: rgba(192,57,43,0.35); color: var(--r); }
 
 /* Legend */
 .legend { display: flex; gap: 18px; padding: 10px 0 2px; font-size: 12px; color: var(--t2); }
@@ -192,7 +196,7 @@ a:hover { text-decoration: underline; }
       <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
     </div>
     <div class="masthead-right">
-      <span class="pill pill-phase">Build phase 4 of 7</span>
+      <span class="pill pill-phase">Proof of concept</span>
       <span class="pill pill-date" id="asof-pill">Data as of —</span>
     </div>
   </header>
@@ -800,11 +804,19 @@ function renderLens2(lens2) {
   document.getElementById("composite-note").textContent =
     c.triggered_count + " of " + c.gauge_count + " froth gauges are triggered." + easedText +
     " The SLOOS row is context and sits outside the composite.";
-  document.getElementById("composite-alarm").textContent =
+  const alarmChip = document.getElementById("composite-alarm");
+  alarmChip.textContent =
     c.alarm_share_pct === null
       ? "Alarm level: pending confirmation"
       : "Alarm level: " + fmtShare(c.alarm_share_pct) + "% (" +
         (c.alarm_state === "at_or_above" ? "firing" : "not firing") + ")";
+  alarmChip.className = "composite-alarm" + (
+    c.alarm_share_pct === null ? " alarm-pending"
+    : c.alarm_state === "at_or_above" ? " alarm-firing" : ""
+  );
+  alarmChip.title =
+    "Adopted at 62.5% (5 of 8) on 2026-07-03 from the filed calibration study; " +
+    "an arming line confirmed by Lens 3, not a standalone signal.";
 }
 
 function renderForward(fwd) {
