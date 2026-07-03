@@ -5,7 +5,7 @@ schema (plus display fields: description, qualifier, cadence, signed,
 decimals) and writes its own history file. Classifiers are pure functions
 over (data, params) so tests/test_status.py can exercise thresholds without
 network access. All parameters live in data/thresholds.json and are
-Navigo-chosen defaults pending confirmation.
+independently chosen defaults pending confirmation.
 
 Date handling: Python datetime months are 1-indexed. Month arithmetic uses
 dateutil.relativedelta only.
@@ -253,7 +253,7 @@ def build_hy_oas(thresholds: dict) -> dict:
         "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
         "notes": (
-            f"{detail} Absolute levels are Navigo anchors near the published long-run median and "
+            f"{detail} Absolute levels are fixed anchors near the published long-run median and "
             f"75th percentile; the keyless FRED endpoint serves this ICE-licensed series from "
             f"{clean_dates[0]} only, so window percentiles would drift. {VERIFIED_NOTE}"
         ),

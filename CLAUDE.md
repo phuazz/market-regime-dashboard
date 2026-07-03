@@ -1,10 +1,10 @@
-# CLAUDE.md — Navigo Recession & Market-Peak Dashboard
+# CLAUDE.md — Recession & Market-Peak Dashboard
 
 Operating constraints for this repository. Read this in full before writing any code.
 
 ## Purpose
 A three-lens macro dashboard (recession risk, market-peak froth, price-trend confirmation)
-built entirely from sourced public data. Internal Navigo IC grade now; structured so it can be
+built entirely from sourced public data. Internal IC grade now; structured so it can be
 promoted to client-facing later without a rebuild. See SPEC.md for the design.
 
 ## Non-negotiable architecture

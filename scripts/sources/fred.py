@@ -25,7 +25,7 @@ import time
 import urllib.request
 
 FREDGRAPH_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
-BOT_UA = "navigo-market-regime-dashboard/1.0 (internal data pipeline)"
+BOT_UA = "market-regime-dashboard/1.0 (data pipeline)"
 RETRY_DELAYS_SECONDS = (0, 5, 15)
 
 

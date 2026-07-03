@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recession &amp; Market-Peak Dashboard — Navigo</title>
+<title>Recession &amp; Market-Peak Dashboard</title>
 <!-- Fonts and :root tokens copied verbatim from C:\dev\design.md (PCC DNA). -->
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -164,7 +164,7 @@ a:hover { text-decoration: underline; }
   </p>
   <p class="intro-meta">
     Every value is from sourced public data with a primary and secondary source per data point.
-    Every threshold is a Navigo-chosen parameter, pending confirmation. Nothing on this page is a
+    Every threshold is an independently chosen proposed default, pending confirmation. Nothing on this page is a
     third-party proprietary figure.
   </p>
 
@@ -229,7 +229,7 @@ a:hover { text-decoration: underline; }
 
   <footer class="footer">
     <div>
-      Navigo Investment Management Pte. Ltd. — internal investment-committee dashboard.
+      Internal research dashboard — proof of concept.
       All displayed values carry a primary source, a secondary source, and an as-of date.
     </div>
     <div class="disclaimer-placeholder">
@@ -366,7 +366,7 @@ function renderLensRows(rowsId, subId, lensData) {
     if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
     const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
-    threshold.appendChild(el("span", "chip", "Navigo-chosen · pending confirmation"));
+    threshold.appendChild(el("span", "chip", "Proposed default · pending confirmation"));
     main.appendChild(threshold);
     if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
 

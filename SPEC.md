@@ -1,4 +1,4 @@
-# SPEC.md — Navigo Recession & Market-Peak Dashboard
+# SPEC.md — Recession & Market-Peak Dashboard
 
 ## 1. Purpose and audience
 A single-page dashboard giving three lenses on bear-market risk:
@@ -7,8 +7,8 @@ A single-page dashboard giving three lenses on bear-market risk:
 2. **Market-peak froth** — is the market priced and positioned like a top?
 3. **Price trend** — is the market actually rolling over?
 
-Audience: internal Navigo IC and personal use now. Design and copy must be factual and fully sourced
-so the page can be promoted to client-facing later. Do not assert a Navigo house view. Leave a
+Audience: internal IC and personal use now. Design and copy must be factual and fully sourced
+so the page can be promoted to client-facing later. Do not assert a house view. Leave a
 clearly marked disclaimer placeholder in the footer of `template.html` for later completion; do not
 draft compliance or marketing language now.
 
@@ -25,8 +25,8 @@ data.** Do not reproduce his proprietary numbers.
 
 ## 3. Thresholds
 All thresholds below are **proposed defaults, to be confirmed by ZH** before go-live. They are
-documented and auditable, not inherited from any third party. Mark each threshold in the UI as a
-Navigo-chosen parameter.
+documented and auditable, not inherited from any third party. Mark each threshold in the UI as an
+independently chosen parameter.
 
 ## 4. Lens 1 — Recession risk
 Leading and coincident indicators of an economic downturn. Status: benign / watch / elevated.

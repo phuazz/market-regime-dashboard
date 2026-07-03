@@ -15,7 +15,7 @@ import socket
 import time
 import urllib.request
 
-BOT_UA = "navigo-market-regime-dashboard/1.0 (internal data pipeline)"
+BOT_UA = "market-regime-dashboard/1.0 (data pipeline)"
 BROWSER_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"

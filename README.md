@@ -1,8 +1,8 @@
-# Navigo Recession & Market-Peak Dashboard
+# Recession & Market-Peak Dashboard
 
 A three-lens macro dashboard — recession risk, market-peak froth, and
 price-trend confirmation — built entirely from sourced public data. Internal
-Navigo IC grade now; structured for later promotion to client-facing without
+IC grade now; structured for later promotion to client-facing without
 a rebuild. The design brief is [SPEC.md](SPEC.md); operating constraints are
 [CLAUDE.md](CLAUDE.md); series verification is logged in
 [VERIFICATION.md](VERIFICATION.md).
@@ -22,7 +22,7 @@ on the live page. Phases 4–6 (Lens 2 froth composite, conditional forward
 returns, signal map) are planned and not yet built; phase 7 ran early at
 ZH's request so the dashboard publishes while the remaining lenses land.
 
-All status thresholds are Navigo-chosen proposed defaults, held in
+All status thresholds are independently chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
 before go-live**.
 

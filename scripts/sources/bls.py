@@ -10,7 +10,7 @@ import json
 import urllib.request
 
 BLS_API_URL = "https://api.bls.gov/publicAPI/v1/timeseries/data/"
-USER_AGENT = "navigo-market-regime-dashboard/1.0 (internal verification)"
+USER_AGENT = "market-regime-dashboard/1.0 (verification)"
 
 # BLS series IDs for the FRED labour series used in Lens 1.
 BLS_EQUIVALENTS = {

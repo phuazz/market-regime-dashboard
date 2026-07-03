@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-03T06:38:21Z",
+  "updated_at": "2026-07-03T07:31:59Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -56,7 +56,7 @@
       "threshold": "At or above 4.00, or widening 100 bp over 63 trading days = watch. At or above 5.50, or widening 200 bp = elevated. At or below 3.00 adds a complacency note without changing status.",
       "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
-      "notes": "OAS of 2.74 is below the 4.00 watch level with a 63-trading-day change of -31 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are Navigo anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-07-03 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "OAS of 2.74 is below the 4.00 watch level with a 63-trading-day change of -31 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-07-03 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "pmi_manufacturing_proxy",
@@ -117,12 +117,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 41.66,
+      "value": 41.6,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-01",
+      "as_of": "2026-07-02",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "Navigo-chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent Navigo construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used.",
+    "description": "Independently chosen status parameters. Proposed defaults pending confirmation by ZH before go-live (SPEC.md section 3). Every threshold is an independent construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used.",
     "last_updated": "2026-07-02"
   },
   "yield_curve_10y3m": {
