@@ -142,6 +142,7 @@ a:hover { text-decoration: underline; }
 .row-chart { width: 100%; margin: 2px 0 10px 23px; border: 1px solid var(--bd); border-radius: var(--radius); background: var(--bg); padding: 8px 8px 2px; }
 .row-chart .plot { width: 100%; height: 260px; }
 .row-chart .chart-note { padding: 0 6px 6px; }
+.row-chart .chart-stats { font-family: var(--mono); font-size: 10.5px; color: var(--t2); padding: 2px 6px 6px; }
 .row-value { text-align: right; flex: none; }
 .row-value .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 .row-value .stat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
@@ -561,25 +562,31 @@ const HISTORY_MAP = {
     note: "Headline unemployment rate; payrolls and internals drive the status alongside it." },
   shiller_cape: { file: "shiller_cape_multpl.json", lines: (th) => [
     { y: th.shiller_cape.flag_level, label: "context flag", color: BLUE, dash: "dot" }] },
-  consumer_confidence_proxy: { file: "umcsent.json", lines: () => [],
-    note: "Trigger is percentile-based (75th of full history), so no static line is drawn." },
+  consumer_confidence_proxy: { file: "umcsent.json", lines: () => [] },
   retail_euphoria_aaii: { file: "aaii_spread.json", lines: () => [
     { y: 0, label: "bears lead (eased)", color: BLUE, dash: "dot" }] },
   manager_bullishness_naaim: { file: "naaim_exposure.json", lines: (th) => [
     { y: th.manager_bullishness_naaim.trigger_level, label: "all-in", color: RED }] },
-  growth_expectation_pe: { file: "multpl_pe.json", lines: () => [],
-    note: "Trigger is percentile-based (90th since 1871), so no static line is drawn." },
+  growth_expectation_pe: { file: "multpl_pe.json", lines: () => [] },
   value_vs_growth: { file: "rpg_rpv_spread.json", lines: (th) => [
     { y: th.value_vs_growth.trigger_pp, label: "froth", color: RED },
     { y: 0, label: "value leads (eased)", color: BLUE, dash: "dot" }] },
-  credit_complacency_nfci: { file: "nfci.json", lines: () => [],
-    note: "Trigger is percentile-based (loosest quintile since 1971), so no static line is drawn." },
+  credit_complacency_nfci: { file: "nfci.json", lines: () => [] },
   deal_ipo_froth: { file: "renaissance_ipo_proceeds.json", lines: () => [] },
   sloos_tightening: { file: "drtscilm.json", lines: () => [
     { y: 0, label: "net tightening above zero", color: BLUE, dash: "dot" }] },
 };
 
 const historyCache = {};
+let chartContextCache;
+
+/* Shared context bands (NBER recessions; S&P bears) for the history charts. */
+function loadChartContext() {
+  if (chartContextCache !== undefined) return Promise.resolve(chartContextCache);
+  return fetchJson("data/chart_context.json")
+    .then((context) => { chartContextCache = context; return context; })
+    .catch(() => { chartContextCache = null; return null; });
+}
 
 function normaliseHistory(payload) {
   if (payload.points) {
@@ -593,7 +600,7 @@ function normaliseHistory(payload) {
   return { dates: payload.dates, values: payload.values, accumulating: false, unit: payload.unit };
 }
 
-function drawHistoryChart(container, ind, history) {
+function drawHistoryChart(container, ind, history, context) {
   const plot = container.querySelector(".plot");
   if (typeof Plotly === "undefined") {
     plot.textContent = "Chart library did not load (CDN unreachable).";
@@ -602,6 +609,11 @@ function drawHistoryChart(container, ind, history) {
   const spec = HISTORY_MAP[ind.id];
   const thresholds = window.__THRESHOLDS__ || null;
   const lines = thresholds ? spec.lines(thresholds) : [];
+  /* Percentile-calibrated gauges carry their current trigger level in the
+     indicator payload, computed at build time from the same history. */
+  if (ind.chart_line) {
+    lines.push({ y: ind.chart_line.value, label: ind.chart_line.label, color: AMBER });
+  }
   const sparse = history.dates.length < 24;
   const spanYears = history.dates.length > 1
     ? (new Date(history.dates.at(-1)) - new Date(history.dates[0])) / 3.15576e10 : 0;
@@ -614,6 +626,32 @@ function drawHistoryChart(container, ind, history) {
     xref: "paper", x: 0, y: l.y, xanchor: "left", yanchor: "bottom",
     text: l.label, showarrow: false, font: { size: 9, color: l.color },
   }));
+
+  /* Context bands: recessions on every chart (grey); S&P bear periods on
+     the market-froth gauges (red tint). Only spans overlapping the data
+     range are drawn. */
+  const bandNotes = [];
+  if (context && history.dates.length > 1) {
+    const first = history.dates[0];
+    const last = history.dates.at(-1);
+    const overlapping = (span) => span.end >= first && span.start <= last;
+    for (const span of context.recessions.filter(overlapping)) {
+      shapes.push({
+        type: "rect", xref: "x", yref: "paper", x0: span.start, x1: span.end,
+        y0: 0, y1: 1, fillcolor: "rgba(26,26,24,0.07)", line: { width: 0 }, layer: "below",
+      });
+    }
+    bandNotes.push("Grey bands: NBER recessions.");
+    if (ind.lens === 2) {
+      for (const span of context.bears.filter(overlapping)) {
+        shapes.push({
+          type: "rect", xref: "x", yref: "paper", x0: span.start, x1: span.end,
+          y0: 0, y1: 1, fillcolor: "rgba(192,57,43,0.07)", line: { width: 0 }, layer: "below",
+        });
+      }
+      bandNotes.push("Red tint: S&P bear markets (declines of 20% or more).");
+    }
+  }
   const last = history.values.at(-1);
   annotations.push({
     xref: "paper", x: 1, y: last, xanchor: "left", xshift: 4, yanchor: "middle",
@@ -639,12 +677,37 @@ function drawHistoryChart(container, ind, history) {
     annotations: annotations,
   }, { displayModeBar: false, responsive: true });
 
+  /* Statistics strip: where the latest reading sits in its own history. */
+  const stats = container.querySelector(".chart-stats");
+  if (history.values.length >= 24) {
+    const values = history.values;
+    const rank = Math.round(100 * values.filter((v) => v <= values.at(-1)).length / values.length);
+    const ordered = [...values].sort((a, b) => a - b);
+    const median = ordered[Math.floor(ordered.length / 2)];
+    const minIndex = values.indexOf(ordered[0]);
+    const maxIndex = values.indexOf(ordered.at(-1));
+    const fmt = (v) => formatValue({ ...ind, value: v });
+    stats.textContent =
+      "Now " + fmt(values.at(-1)) + " = " + rank + "th percentile of " +
+      values.length.toLocaleString("en-GB") + " obs since " + history.dates[0].slice(0, 4) +
+      " · median " + fmt(median) +
+      " · low " + fmt(ordered[0]) + " (" + history.dates[minIndex].slice(0, 4) + ")" +
+      " · high " + fmt(ordered.at(-1)) + " (" + history.dates[maxIndex].slice(0, 4) + ")";
+  } else {
+    stats.textContent = history.values.length + " observation(s) collected so far.";
+  }
+
   const notes = [];
   if (spec.note) notes.push(spec.note);
   if (history.accumulating) {
     notes.push("History accumulates from first collection (July 2026); licensed source history is not redistributed.");
   }
-  container.querySelector(".chart-note").textContent = notes.join(" ");
+  notes.push(...bandNotes);
+  const noteEl = container.querySelector(".chart-note");
+  noteEl.textContent = notes.join(" ") + " ";
+  const link = el("a", null, "Series page ↗");
+  link.href = ind.source_url; link.target = "_blank"; link.rel = "noopener";
+  noteEl.appendChild(link);
 }
 
 function toggleHistory(row, ind, toggle) {
@@ -656,6 +719,7 @@ function toggleHistory(row, ind, toggle) {
     return;
   }
   const container = el("div", "row-chart");
+  container.appendChild(el("div", "chart-stats"));
   container.appendChild(el("div", "plot"));
   container.appendChild(el("div", "chart-note", "Loading history…"));
   row.after(container);
@@ -669,8 +733,9 @@ function toggleHistory(row, ind, toggle) {
         historyCache[file] = payload;
         return payload;
       });
-  load
-    .then((payload) => drawHistoryChart(container, ind, normaliseHistory(payload)))
+  Promise.all([load, loadChartContext()])
+    .then(([payload, context]) =>
+      drawHistoryChart(container, ind, normaliseHistory(payload), context))
     .catch((error) => {
       container.querySelector(".chart-note").textContent =
         "History failed to load (" + error.message + ").";

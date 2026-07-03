@@ -27,6 +27,7 @@ from sources.fred import fetch_series
 from sources.sentiment import percentile_rank
 from util import (
     append_scrape_history,
+    percentile,
     clean_series,
     latest_observation,
     utc_now_iso,
@@ -179,10 +180,14 @@ def build_consumer_confidence(thresholds: dict) -> dict:
     dates, values = clean_series(*fetch_series("UMCSENT"))
     write_fred_history("UMCSENT", "University of Michigan consumer sentiment", "index",
                        "https://fred.stlouisfed.org/series/UMCSENT", dates, values)
-    percentile = percentile_rank(values, values[-1])
-    status, detail = classify_confidence(percentile, params)
+    pct_rank = percentile_rank(values, values[-1])
+    status, detail = classify_confidence(pct_rank, params)
     return {
         "id": "consumer_confidence_proxy",
+        "chart_line": {
+            "value": round(percentile(values, params["trigger_percentile"]), 1),
+            "label": "current trigger (75th percentile of history)",
+        },
         "name": "Consumer Confidence",
         "qualifier": "Michigan sentiment, proxy",
         "lens": 2,
@@ -232,6 +237,10 @@ def build_aaii(thresholds: dict) -> dict:
     )
     return {
         "id": "retail_euphoria_aaii",
+        "chart_line": {
+            "value": survey["spread_p90_pp"],
+            "label": "top-decile line (full weekly history)",
+        },
         "name": "Retail Euphoria",
         "qualifier": "AAII bull-bear survey",
         "lens": 2,
@@ -314,8 +323,12 @@ def build_pe(thresholds: dict) -> dict:
     params = thresholds["growth_expectation_pe"]
     current = sentiment.fetch_multpl_pe()["value"]
     dates, values, estimates = sentiment.fetch_multpl_pe_history()
-    percentile = percentile_rank(values, current)
-    status, detail = classify_pe(percentile, params)
+    pct_rank = percentile_rank(values, current)
+    status, detail = classify_pe(pct_rank, params)
+    chart_line = {
+        "value": round(percentile(values, params["trigger_percentile"]), 2),
+        "label": "current trigger (90th percentile since 1871)",
+    }
     append_scrape_history(
         "multpl_pe.json",
         {
@@ -337,6 +350,7 @@ def build_pe(thresholds: dict) -> dict:
     )
     return {
         "id": "growth_expectation_pe",
+        "chart_line": chart_line,
         "name": "Growth-Expectation Froth",
         "qualifier": "trailing P/E percentile, proxy",
         "lens": 2,
@@ -496,6 +510,10 @@ def build_nfci(thresholds: dict) -> dict:
     status, detail = classify_nfci(values[-1], loose_percentile, params)
     return {
         "id": "credit_complacency_nfci",
+        "chart_line": {
+            "value": round(percentile(values, params["trigger_percentile"]), 3),
+            "label": "complacent tail (loosest quintile since 1971)",
+        },
         "name": "Credit Complacency",
         "qualifier": "Chicago Fed NFCI",
         "lens": 2,

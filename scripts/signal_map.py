@@ -60,9 +60,49 @@ def usrec_spans(start_iso: str) -> list[dict]:
     return [s for s in spans if s["end"] >= start_iso]
 
 
+def bear_spans(grid: list[dict], threshold_pct: float = -20.0) -> list[dict]:
+    """S&P bear periods (peak month to trough month) from monthly closes.
+
+    A bear episode opens when the drawdown from the running peak breaches
+    the threshold; it spans from the peak month to the lowest close before
+    the prior peak is regained.
+    """
+    spans: list[dict] = []
+    peak_iso, peak = grid[0]["iso"], grid[0]["close"]
+    trough_iso, trough = peak_iso, peak
+    in_bear = False
+    for g in grid:
+        if g["close"] >= peak:
+            if in_bear:
+                spans.append({"start": peak_iso, "end": trough_iso})
+                in_bear = False
+            peak_iso, peak = g["iso"], g["close"]
+            trough_iso, trough = g["iso"], g["close"]
+            continue
+        if g["close"] < trough:
+            trough_iso, trough = g["iso"], g["close"]
+        if (g["close"] / peak - 1.0) * 100.0 <= threshold_pct:
+            in_bear = True
+    if in_bear:
+        spans.append({"start": peak_iso, "end": trough_iso})
+    return spans
+
+
 def main() -> int:
     grid, meta = build_signal_grid()
     window = [g for g in grid if g["iso"] >= START]
+
+    # Shared context bands for the per-indicator history charts: full-depth
+    # NBER recessions and S&P bear periods over the stored price history.
+    dump_json(DATA_DIR / "chart_context.json", {
+        "computed_as_of": utc_now_iso(),
+        "recessions": usrec_spans("1900-01-01"),
+        "bears": bear_spans(grid),
+        "note": (
+            "Recessions per NBER (FRED USREC, verified); bears are S&P 500 declines of "
+            "20% or more from a monthly-close peak, spanning peak month to trough month."
+        ),
+    })
 
     crossings = []
     previous = False

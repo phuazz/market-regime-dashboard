@@ -2,10 +2,14 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-03T12:06:56Z",
+  "updated_at": "2026-07-03T14:51:01Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
+      "chart_line": {
+        "value": 94.7,
+        "label": "current trigger (75th percentile of history)"
+      },
       "name": "Consumer Confidence",
       "qualifier": "Michigan sentiment, proxy",
       "lens": 2,
@@ -25,6 +29,10 @@
     },
     {
       "id": "retail_euphoria_aaii",
+      "chart_line": {
+        "value": 28.3,
+        "label": "top-decile line (full weekly history)"
+      },
       "name": "Retail Euphoria",
       "qualifier": "AAII bull-bear survey",
       "lens": 2,
@@ -63,6 +71,10 @@
     },
     {
       "id": "growth_expectation_pe",
+      "chart_line": {
+        "value": 23.65,
+        "label": "current trigger (90th percentile since 1871)"
+      },
       "name": "Growth-Expectation Froth",
       "qualifier": "trailing P/E percentile, proxy",
       "lens": 2,
@@ -139,6 +151,10 @@
     },
     {
       "id": "credit_complacency_nfci",
+      "chart_line": {
+        "value": -0.633,
+        "label": "complacent tail (loosest quintile since 1971)"
+      },
       "name": "Credit Complacency",
       "qualifier": "Chicago Fed NFCI",
       "lens": 2,

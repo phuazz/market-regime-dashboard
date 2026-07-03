@@ -1,5 +1,5 @@
 {
-  "computed_as_of": "2026-07-03T13:45:15Z",
+  "computed_as_of": "2026-07-03T14:51:08Z",
   "start": "1990-01-01",
   "alarm_share_pct": 62.5,
   "note": "Point-in-time reconstructions (phases 4-5, filed in reviews/): Lens 1 core omits HY/PMI/LEI (no free history); the Lens 2 reconstruction omits the IPO gauge, so historical shares understate live ones in deal-froth eras (2022 does not cross on the reconstruction). Recessions per NBER via FRED USREC.",
