@@ -13,7 +13,7 @@ from public data. No proprietary third-party values are reproduced.
 
 ## Status
 
-Phases 1–4 and 7 complete (2026-07-03). **Live at
+**All seven build phases are complete** (2026-07-03). **Live at
 https://phuazz.github.io/market-regime-dashboard/** with scheduled GitHub
 Actions refreshes. All three lenses are live: Lens 1 (seven recession-risk
 indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
@@ -27,7 +27,12 @@ on the live page. Phase 5 is live: conditional forward-return panels per
 lens and for the act rule (point-in-time reconstruction 1970–2026, filed
 in `reviews/2026-07-03_forward-returns.md`; recompute on demand with
 `python scripts/forward_returns.py` — deliberately not in the scheduled
-workflows). Phase 6 (signal map) remains.
+workflows). Phase 6 is live: the signal map (log-scale S&P 500 from 1990
+with NBER recession shading via verified `USREC`, Lens 1 elevated bands,
+Lens 2 alarm crossings, and act-rule strips; regenerate with
+`python scripts/signal_map.py`). The map starts 1990 rather than SPEC
+section 8's 2006 so the dot-com episode — the strongest act-rule case —
+stays visible.
 
 All status thresholds are independently chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
@@ -106,6 +111,7 @@ npx serve docs                                # test the built output
 | Value vs growth (Lens 2) | `RPG` − `RPV` six-month spread (Yahoo) | Verified Yahoo endpoint; tickers confirmed | Daily |
 | Credit complacency (Lens 2) | FRED `NFCI` percentile | Chicago Fed CSV (vintage-tolerant) | Weekly |
 | Tightening credit (Lens 2, context) | FRED `DRTSCILM` | Fed SLOOS release | Quarterly |
+| Recession shading (signal map) | FRED `USREC` | NBER business-cycle chronology | On demand |
 
 Planned sources for the remaining phases are listed in SPEC.md sections 7–8
 and must be verified per VERIFICATION.md before first use.

@@ -51,7 +51,13 @@ def median(values: list[float]) -> float:
     return ordered[len(ordered) // 2]
 
 
-def main() -> int:
+def build_signal_grid() -> tuple[list[dict], dict]:
+    """Monthly point-in-time signal grid shared by phases 5 and 6.
+
+    Returns (grid, meta): one dict per month-end with iso, close, and the
+    four signal booleans; meta carries the alarm level and the first month
+    the Lens 2 reconstruction is defined.
+    """
     thresholds = load_json(DATA_DIR / "thresholds.json")
     alarm = thresholds["lens2_composite"]["alarm_share_pct"]
     yc_params = thresholds["yield_curve_10y3m"]
@@ -139,13 +145,20 @@ def main() -> int:
         l2 = lens2_grid[iso]["share"] >= alarm if iso in lens2_grid else False
         grid.append({
             "iso": iso,
+            "close": close_by[iso],
             "lens1_core": l1,
             "lens2_alarm": l2,
             "lens3_bear": l3,
             "combined_act": (l1 or l2) and l3,
         })
+    return grid, {"alarm_share_pct": alarm, "lens2_start": lens2_start}
 
-    closes = [close_by[g["iso"]] for g in grid]
+
+def main() -> int:
+    grid, meta = build_signal_grid()
+    alarm = meta["alarm_share_pct"]
+    lens2_start = meta["lens2_start"]
+    closes = [g["close"] for g in grid]
 
     def forward(i: int, months: int):
         if i + months < len(closes):

@@ -279,6 +279,19 @@ output of 2026-07-02: all three checks PASS.
 
 ---
 
+## USREC — NBER recession indicator (verified 2026-07-03)
+
+- FRED `USREC` (monthly, 1854-12 to 2026-06; latest reads 0 — no current
+  recession). Every span since 1980 matches the NBER business-cycle
+  chronology (nber.org/research/data/us-business-cycle-expansions-and-contractions)
+  under FRED's documented convention of 1 from the month after the peak
+  through the trough month: 1980-02..07 (peak Jan 1980, trough Jul 1980),
+  1981-08..1982-11, 1990-08..1991-03, 2001-04..11, 2008-01..2009-06 (peak
+  Dec 2007), 2020-03..04 (peak Feb 2020). Used for signal-map recession
+  shading only.
+
+---
+
 ## Endpoint access notes (probed 2026-07-03, local machine and GitHub runner)
 
 Recorded so future fetch failures are diagnosed from evidence rather than
@@ -305,7 +318,7 @@ environment.
 
 ---
 
-## Pending verification (later phases — do not use before logging here)
+## Pending verification (do not use before logging here)
 
-`USREC` (NBER recession indicator, needed for the phase 6 signal map) and
-any vendor forward-P/E series should one ever be licensed.
+Any vendor forward-P/E series, should one ever be licensed. All series
+currently displayed or used in the filed studies are verified above.
