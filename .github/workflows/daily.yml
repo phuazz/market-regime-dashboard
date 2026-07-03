@@ -1,0 +1,63 @@
+# Refreshes the daily cadence group (yield curve, HY OAS, labour internals,
+# S&P 500 trend) and redeploys docs/. A failing builder keeps its previous
+# value (stale-but-sourced); successes are committed and the run is marked
+# failed so the breakage is visible.
+name: Daily data refresh
+
+on:
+  schedule:
+    # 23:30 UTC on weekdays, after the US close (07:30 Singapore next morning).
+    - cron: "30 23 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run offline tests
+        run: python -m unittest discover -s tests
+
+      - name: Update daily-group data
+        id: update
+        run: |
+          set +e
+          python scripts/update_data.py --group daily
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Build docs
+        run: python scripts/build.py
+
+      - name: Commit and push refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data docs
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Automated daily data refresh"
+            git pull --rebase origin main
+            git push origin main
+          fi
+
+      - name: Surface builder failures
+        if: steps.update.outputs.exit_code != '0'
+        run: |
+          echo "One or more builders failed; previous values were retained for those rows."
+          exit 1
