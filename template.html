@@ -6,8 +6,10 @@
 <title>Recession &amp; Market-Peak Dashboard</title>
 <!-- Fonts and :root tokens copied verbatim from C:\dev\design.md (PCC DNA). -->
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Pinned to the version used across the phuazz.github.io dashboards (design.md). -->
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+<!-- Pinned to the version used across the phuazz.github.io dashboards
+     (design.md). Loaded without defer: renderMap runs synchronously from
+     the inline script and needs Plotly present. -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
 :root {
   /* surfaces */
@@ -151,7 +153,7 @@ a:hover { text-decoration: underline; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .chart-legend i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; }
 .chart-note { font-size: 11px; color: var(--t3); margin-top: 6px; }
-#lens3-chart { width: 100%; height: auto; display: block; }
+.plot-block { width: 100%; }
 
 /* Conditional forward-return panels */
 .fwd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px; }
@@ -284,14 +286,8 @@ a:hover { text-decoration: underline; }
     <div class="card-body">
       <div id="lens3-rows"></div>
       <div class="chart-wrap">
-        <div class="chart-legend">
-          <span><i style="border-color:#1a1a18"></i>S&amp;P 500 close</span>
-          <span><i style="border-color:#2563eb"></i>50-day SMA</span>
-          <span><i style="border-color:#b45309"></i>150-day SMA</span>
-          <span><i style="border-color:#8a8a82;border-top-style:dashed"></i>200-day SMA (context)</span>
-        </div>
-        <svg id="lens3-chart" viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" role="img"
-             aria-label="S&amp;P 500 with 50, 150, and 200-day simple moving averages, three-year window"></svg>
+        <div id="lens3-chart" class="plot-block" style="height:320px" role="img"
+             aria-label="S&amp;P 500 with 50, 150, and 200-day simple moving averages, three-year window"></div>
         <div class="chart-note" id="lens3-chart-note">Loading chart data…</div>
       </div>
     </div>
@@ -321,8 +317,8 @@ a:hover { text-decoration: underline; }
         <span><i style="border-color:#b45309;border-top-width:6px"></i>● Lens 2 alarm crossing</span>
         <span><i style="border-color:#c0392b;border-top-width:4px"></i>Act rule active</span>
       </div>
-      <svg id="map-chart" viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></svg>
+      <div id="map-chart" class="plot-block" style="height:340px" role="img"
+           aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></div>
       <div class="chart-note" id="map-note"></div>
     </div>
   </section>
@@ -795,92 +791,81 @@ function renderForward(fwd) {
 }
 
 function renderMap(map) {
-  const svg = document.getElementById("map-chart");
-  svg.replaceChildren();
+  const plot = document.getElementById("map-chart");
   const dates = map.months.dates;
   const closes = map.months.closes;
   const n = dates.length;
   if (!n) return;
-  const M = { width: 960, height: 340, top: 16, right: 68, bottom: 26, left: 10 };
-  const plotW = M.width - M.left - M.right;
-  const plotH = M.height - M.top - M.bottom;
+  if (typeof Plotly === "undefined") {
+    plot.textContent = "Chart library did not load (CDN unreachable).";
+    document.getElementById("map-card").style.display = "block";
+    return;
+  }
   const monthIndex = {};
   dates.forEach((d, i) => { monthIndex[d.slice(0, 7)] = i; });
-  const x = (i) => M.left + (i / (n - 1)) * plotW;
-  const logs = closes.map(Math.log);
-  const lo = Math.min(...logs);
-  const hi = Math.max(...logs);
-  const pad = (hi - lo) * 0.05;
-  const y = (v) => M.top + (1 - (Math.log(v) - lo + pad) / (hi - lo + 2 * pad)) * plotH;
-  const spanRect = (span, fill, yTop, height) => {
+  /* Widen each span to the next grid month so single-month spans stay
+     visible — index arithmetic on the data, no calendar maths. */
+  const spanEdges = (span) => {
     const i0 = monthIndex[span.start.slice(0, 7)];
     const i1 = monthIndex[span.end.slice(0, 7)];
     if (i0 === undefined || i1 === undefined) return null;
-    return svgEl("rect", {
-      x: x(i0), y: yTop, width: Math.max(x(Math.min(i1 + 1, n - 1)) - x(i0), 2),
-      height: height, fill: fill,
-    });
+    return [dates[i0], dates[Math.min(i1 + 1, n - 1)]];
   };
-
+  const bandShape = (span, fill, y0, y1) => {
+    const edges = spanEdges(span);
+    if (!edges) return null;
+    return {
+      type: "rect", xref: "x", yref: "paper", x0: edges[0], x1: edges[1],
+      y0: y0, y1: y1, fillcolor: fill, line: { width: 0 }, layer: "below",
+    };
+  };
+  const shapes = [];
   for (const span of map.recessions) {
-    const rect = spanRect(span, "rgba(26,26,24,0.07)", M.top, plotH);
-    if (rect) svg.appendChild(rect);
+    const shape = bandShape(span, "rgba(26,26,24,0.07)", 0, 1);
+    if (shape) shapes.push(shape);
   }
   for (const span of map.lens1_spans) {
-    const rect = spanRect(span, "rgba(192,57,43,0.10)", M.top, plotH);
-    if (rect) svg.appendChild(rect);
+    const shape = bandShape(span, "rgba(192,57,43,0.10)", 0, 1);
+    if (shape) shapes.push(shape);
   }
-
-  /* Log-scale gridlines and right-side labels at doubling price levels. */
-  for (let level = 250; level < Math.exp(hi); level *= 2) {
-    if (Math.log(level) < lo) continue;
-    const gy = y(level);
-    svg.appendChild(svgEl("line", {
-      x1: M.left, x2: M.left + plotW, y1: gy, y2: gy,
-      stroke: "#e2e0d8", "stroke-width": 1,
-    }));
-    const label = svgEl("text", {
-      x: M.left + plotW + 6, y: gy + 3, "font-size": 10,
-      "font-family": "JetBrains Mono, monospace", fill: "#8a8a82",
-    });
-    label.textContent = level.toLocaleString("en-GB");
-    svg.appendChild(label);
-  }
-  /* Year labels every six years (label lookup by month, no manual month maths). */
-  for (let year = 1990; year <= 2030; year += 6) {
-    const i = monthIndex[year + "-01"];
-    if (i === undefined) continue;
-    const label = svgEl("text", {
-      x: x(i), y: M.top + plotH + 16, "font-size": 10, "text-anchor": "middle",
-      "font-family": "JetBrains Mono, monospace", fill: "#8a8a82",
-    });
-    label.textContent = String(year);
-    svg.appendChild(label);
-  }
-
-  svg.appendChild(svgEl("path", {
-    d: linePath(closes.map((_, i) => x(i)), closes.map((v) => y(v))),
-    fill: "none", stroke: "#1a1a18", "stroke-width": 1.6,
-  }));
-
   for (const span of map.act_spans) {
-    const rect = spanRect(span, "#c0392b", M.top + plotH - 6, 6);
-    if (rect) svg.appendChild(rect);
+    const shape = bandShape(span, "#c0392b", 0, 0.03);
+    if (shape) { shape.layer = "above"; shapes.push(shape); }
   }
-  for (const crossing of map.lens2_crossings) {
-    const i = monthIndex[crossing.iso.slice(0, 7)];
-    if (i === undefined) continue;
-    svg.appendChild(svgEl("circle", {
-      cx: x(i), cy: y(crossing.close), r: 4,
-      fill: "#b45309", stroke: "#ffffff", "stroke-width": 1.2,
-    }));
-  }
-  const nowLabel = svgEl("text", {
-    x: x(n - 1) - 4, y: y(closes[n - 1]) - 8, "font-size": 9, "text-anchor": "end",
-    "font-family": "JetBrains Mono, monospace", "font-weight": 700, fill: "#1a1a18",
-  });
-  nowLabel.textContent = "NOW " + Math.round(closes[n - 1]).toLocaleString("en-GB");
-  svg.appendChild(nowLabel);
+
+  const traces = [
+    {
+      x: dates, y: closes, type: "scatter", mode: "lines", name: "S&P 500",
+      line: { color: "#1a1a18", width: 1.6 }, hovertemplate: "%{y:,.0f}<extra>S&P 500</extra>",
+    },
+    {
+      x: map.lens2_crossings.map((c) => c.iso),
+      y: map.lens2_crossings.map((c) => c.close),
+      type: "scatter", mode: "markers", name: "Lens 2 alarm crossing",
+      marker: { color: "#b45309", size: 8, line: { color: "#ffffff", width: 1.2 } },
+      hovertemplate: "Lens 2 crossed the alarm<br>%{x|%b %Y} · S&P %{y:,.0f}<extra></extra>",
+    },
+  ];
+  Plotly.newPlot(plot, traces, {
+    ...CHART_LAYOUT,
+    /* Band meanings live in the HTML chips above the chart; a Plotly
+       legend would duplicate only the traces. */
+    showlegend: false,
+    margin: { t: 12, b: 26, l: 10, r: 64 },
+    xaxis: { ...CHART_LAYOUT.xaxis, tickformat: "%Y", dtick: "M72" },
+    yaxis: {
+      ...CHART_LAYOUT.yaxis, type: "log",
+      tickvals: [500, 1000, 2000, 4000], ticktext: ["500", "1,000", "2,000", "4,000"],
+    },
+    shapes: shapes,
+    annotations: [{
+      /* Plotly log-axis annotations take log10 of the data value. */
+      xref: "paper", x: 1, y: Math.log10(closes.at(-1)), xanchor: "left", xshift: 4,
+      yanchor: "middle", text: "NOW " + Math.round(closes.at(-1)).toLocaleString("en-GB"),
+      showarrow: false, font: { size: 9, family: "JetBrains Mono", color: "#ffffff" },
+      bgcolor: "#1a1a18", borderpad: 2,
+    }],
+  }, { displayModeBar: false, responsive: true });
 
   document.getElementById("map-note").textContent =
     map.note + " Alarm level " + fmtShare(map.alarm_share_pct) +
@@ -890,108 +875,36 @@ function renderMap(map) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Lens 3 chart: inline SVG, no charting dependency. Conventions per   */
-/* design.md — y-axis on the right, monospaced ticks, no vertical      */
-/* gridlines, month-year x labels.                                     */
-
-const SVG_NS = "http://www.w3.org/2000/svg";
-const CHART = { width: 960, height: 320, top: 14, right: 68, bottom: 26, left: 10 };
-const CHART_SHORT_MONTH = new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" });
-
-function svgEl(tag, attrs) {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const key in attrs) node.setAttribute(key, attrs[key]);
-  return node;
-}
-
-function linePath(xs, ys) {
-  const parts = [];
-  for (let i = 0; i < xs.length; i++) {
-    if (ys[i] === null) continue;
-    parts.push((parts.length ? "L" : "M") + xs[i].toFixed(1) + " " + ys[i].toFixed(1));
-  }
-  return parts.join(" ");
-}
+/* Lens 3 chart: Plotly with unified hover, per the design.md chart DNA.  */
 
 function renderChart(chart, statusColour) {
-  const svg = document.getElementById("lens3-chart");
-  svg.replaceChildren();
-  const n = chart.dates.length;
-  const plotW = CHART.width - CHART.left - CHART.right;
-  const plotH = CHART.height - CHART.top - CHART.bottom;
-
-  const series = [chart.close, chart.sma50, chart.sma150, chart.sma200];
-  let lo = Infinity, hi = -Infinity;
-  for (const s of series) {
-    for (const v of s) {
-      if (v === null) continue;
-      if (v < lo) lo = v;
-      if (v > hi) hi = v;
-    }
+  const plot = document.getElementById("lens3-chart");
+  if (typeof Plotly === "undefined") {
+    plot.textContent = "Chart library did not load (CDN unreachable).";
+    return;
   }
-  const pad = (hi - lo) * 0.04;
-  lo -= pad; hi += pad;
-
-  const x = (i) => CHART.left + (i / (n - 1)) * plotW;
-  const y = (v) => CHART.top + (1 - (v - lo) / (hi - lo)) * plotH;
-  const xs = chart.dates.map((_, i) => x(i));
-
-  for (let t = 0; t <= 4; t++) {
-    const value = lo + ((hi - lo) * t) / 4;
-    const yy = y(value);
-    svg.appendChild(svgEl("line", {
-      x1: CHART.left, x2: CHART.left + plotW, y1: yy, y2: yy,
-      stroke: "#f0f0ea", "stroke-width": 1,
-    }));
-    const label = svgEl("text", {
-      x: CHART.left + plotW + 6, y: yy + 3, "font-size": 9,
-      "font-family": "JetBrains Mono, monospace", fill: "#8a8a82",
-    });
-    label.textContent = Math.round(value).toLocaleString("en-GB");
-    svg.appendChild(label);
-  }
-
-  /* One x label at each January and July (month parsing via Date + Intl,
-     UTC; JavaScript months are 0-indexed so no manual month names). */
-  let previousMonth = null;
-  for (let i = 0; i < n; i++) {
-    const parsed = new Date(chart.dates[i] + "T00:00:00Z");
-    const month = parsed.getUTCMonth();
-    if (previousMonth !== null && month !== previousMonth && (month === 0 || month === 6)) {
-      const label = svgEl("text", {
-        x: x(i), y: CHART.height - 8, "font-size": 9, "text-anchor": "middle",
-        "font-family": "DM Sans, sans-serif", fill: "#8a8a82",
-      });
-      label.textContent = CHART_SHORT_MONTH.format(parsed) + " '" + chart.dates[i].slice(2, 4);
-      svg.appendChild(label);
-    }
-    previousMonth = month;
-  }
-
-  const styles = [
-    { key: "sma200", colour: "#8a8a82", width: 1.2, dash: "4 3" },
-    { key: "sma150", colour: "#b45309", width: 1.2, dash: null },
-    { key: "sma50", colour: "#2563eb", width: 1.2, dash: null },
-    { key: "close", colour: "#1a1a18", width: 1.6, dash: null },
-  ];
-  for (const s of styles) {
-    const attrs = {
-      d: linePath(xs, chart[s.key].map((v) => (v === null ? null : y(v)))),
-      fill: "none", stroke: s.colour, "stroke-width": s.width,
-    };
-    if (s.dash) attrs["stroke-dasharray"] = s.dash;
-    svg.appendChild(svgEl("path", attrs));
-  }
-
-  /* NOW marker at the latest close (design.md convention). */
-  const lastClose = chart.close[n - 1];
-  svg.appendChild(svgEl("circle", { cx: x(n - 1), cy: y(lastClose), r: 3, fill: statusColour }));
-  const now = svgEl("text", {
-    x: CHART.left + plotW + 6, y: y(lastClose) - 6, "font-size": 9, "font-weight": 700,
-    "font-family": "JetBrains Mono, monospace", fill: statusColour,
-  });
-  now.textContent = Math.round(lastClose).toLocaleString("en-GB");
-  svg.appendChild(now);
+  const traces = [
+    { y: chart.sma200, name: "200-day SMA (context)", line: { color: "#8a8a82", width: 1.2, dash: "dot" } },
+    { y: chart.sma150, name: "150-day SMA", line: { color: "#b45309", width: 1.2 } },
+    { y: chart.sma50, name: "50-day SMA", line: { color: "#2563eb", width: 1.2 } },
+    { y: chart.close, name: "S&P 500", line: { color: "#1a1a18", width: 1.6 } },
+  ].map((t) => ({
+    ...t, x: chart.dates, type: "scatter", mode: "lines",
+    hovertemplate: "%{y:,.0f}",
+  }));
+  const lastClose = chart.close.at(-1);
+  Plotly.newPlot(plot, traces, {
+    ...CHART_LAYOUT,
+    margin: { t: 24, b: 26, l: 10, r: 64 },
+    xaxis: { ...CHART_LAYOUT.xaxis, dtick: undefined },
+    annotations: [{
+      /* NOW marker at the latest close (design.md convention). */
+      xref: "paper", x: 1, y: lastClose, xanchor: "left", xshift: 4, yanchor: "middle",
+      text: Math.round(lastClose).toLocaleString("en-GB"), showarrow: false,
+      font: { size: 9, family: "JetBrains Mono", color: "#ffffff" },
+      bgcolor: statusColour, borderpad: 2,
+    }],
+  }, { displayModeBar: false, responsive: true });
 }
 
 function loadChart(lens3) {
