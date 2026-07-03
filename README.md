@@ -13,14 +13,15 @@ from public data. No proprietary third-party values are reproduced.
 
 ## Status
 
-Phases 1–3 and 7 complete (2026-07-03). **Live at
+Phases 1–4 and 7 complete (2026-07-03). **Live at
 https://phuazz.github.io/market-regime-dashboard/** with scheduled GitHub
-Actions refreshes. Lens 1 is fully live (seven indicators) and Lens 3 is
-live (50-day vs 150-day SMA on the S&P 500 with an inline-SVG chart; Yahoo
-feed cross-checked against FRED `SP500` on every run). The current read is
-on the live page. Phases 4–6 (Lens 2 froth composite, conditional forward
-returns, signal map) are planned and not yet built; phase 7 ran early at
-ZH's request so the dashboard publishes while the remaining lenses land.
+Actions refreshes. All three lenses are live: Lens 1 (seven recession-risk
+indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
+= share triggered, alarm level pending confirmation), and Lens 3 (50-day vs
+150-day SMA with an inline-SVG chart; Yahoo feed cross-checked against FRED
+`SP500` on every run). The current read is on the live page. Phases 5–6
+(conditional forward returns, signal map) remain; the combined read stays
+inactive until the Lens 2 alarm level is set.
 
 All status thresholds are independently chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
@@ -90,9 +91,18 @@ npx serve docs                                # test the built output
 | Labour market | FRED `UNRATE`, `PAYEMS`, `UEMP27OV`, `CCSA` | BLS public API; DOL release coverage | Monthly / weekly |
 | Valuation (Shiller CAPE) | multpl.com daily print | GuruFocus monthly print | Daily (context only) |
 | S&P 500 trend (Lens 3) | Yahoo chart API `^GSPC` (daily, from 1970) | FRED `SP500`, checked on every run | Daily |
+| Consumer confidence (Lens 2) | FRED `UMCSENT` (CB proxy) | Michigan release press prints | Monthly |
+| Retail euphoria (Lens 2) | AAII workbook, current week + in-memory decile calibration | AAII weekly article | Weekly |
+| Manager bullishness (Lens 2) | NAAIM public headline | Aggregator mirrors (lagged) | Weekly |
+| Growth-expectation froth (Lens 2) | multpl trailing P/E vs its own 1871 table | Provider dispersion documented | Daily |
+| Rule of 20 (Lens 2) | multpl P/E + FRED `CPIAUCSL` | BLS API for CPI | Monthly |
+| Deal & IPO froth (Lens 2) | Renaissance Capital stats page | Matches the published annual record | Monthly |
+| Value vs growth (Lens 2) | `RPG` − `RPV` six-month spread (Yahoo) | Verified Yahoo endpoint; tickers confirmed | Daily |
+| Credit complacency (Lens 2) | FRED `NFCI` percentile | Chicago Fed CSV (vintage-tolerant) | Weekly |
+| Tightening credit (Lens 2, context) | FRED `DRTSCILM` | Fed SLOOS release | Quarterly |
 
-Planned sources for later phases are listed in SPEC.md sections 5–6 and must
-be verified per VERIFICATION.md before first use.
+Planned sources for the remaining phases are listed in SPEC.md sections 7–8
+and must be verified per VERIFICATION.md before first use.
 
 ## Reference material
 
@@ -129,8 +139,16 @@ public repository and from git history. SPEC.md references to
    so automation surfaces it. The official S&P Global release blocks some
    fetchers; the TradingEconomics fallback supplied the June print
    (source_url records which supplier actually served each value).
-5. **Lens 2 alarm level** — deliberately unset; ZH to choose in phase 4 from
-   percentile-derived candidates.
+5. **Lens 2 alarm level** — deliberately unset; the combined read treats
+   Lens 2 as not firing until ZH picks a level. Candidates in
+   `data/thresholds.json` (`lens2_composite`): 62.5% (5 of 8, simple
+   majority), 75% (6 of 8, super-majority), 87.5% (7 of 8, near-unanimous).
+   A historical calibration against the reconstructable gauges accompanies
+   the phase 6 signal map. Two further Lens 2 items for the same review:
+   the IPO gauge is coarse by construction (Renaissance history from 2016,
+   seasonal annualisation), and the P/E gauge is within-methodology
+   consistent on multpl's as-reported basis (provider levels differ; see
+   VERIFICATION.md).
 6. **Stooq blocked** — the Stooq CSV endpoint named in SPEC.md now requires a
    JavaScript proof-of-work and is not automatable; FRED `SP500` serves as
    the S&P second feed instead (exact agreement with Yahoo; see

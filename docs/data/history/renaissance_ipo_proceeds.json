@@ -1,0 +1,15 @@
+{
+  "series_id": "RENAISSANCE_IPO_PROCEEDS_YTD_BN",
+  "name": "US IPO proceeds, year to date (Renaissance Capital)",
+  "unit": "usd_bn",
+  "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
+  "collection": "Year-to-date snapshot accumulated per run date.",
+  "points": [
+    {
+      "as_of": "2026-07-03",
+      "value": 114.7,
+      "recorded_at": "2026-07-03T09:40:25Z"
+    }
+  ],
+  "updated_at": "2026-07-03T09:40:25Z"
+}

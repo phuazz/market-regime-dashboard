@@ -1,0 +1,15 @@
+{
+  "series_id": "NAAIM_EXPOSURE",
+  "name": "NAAIM Exposure Index (weekly)",
+  "unit": "index",
+  "source_url": "https://naaim.org/programs/naaim-exposure-index/",
+  "collection": "Accumulated from the weekly public headline; no licensed history is redistributed.",
+  "points": [
+    {
+      "as_of": "2026-07-03",
+      "value": 84.69,
+      "recorded_at": "2026-07-03T09:40:07Z"
+    }
+  ],
+  "updated_at": "2026-07-03T09:40:07Z"
+}

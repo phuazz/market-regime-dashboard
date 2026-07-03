@@ -94,6 +94,20 @@ a:hover { text-decoration: underline; }
 .status-elevated { color: var(--r); }
 .status-pending { color: var(--t3); }
 .status-context { color: var(--b); }
+/* Lens 2 gauge semantics: triggered = froth on (red), quiet = not yet
+   (grey), eased = froth leadership switched off (green) */
+.status-triggered .dot, .dot-triggered { background: var(--r); }
+.status-quiet .dot, .dot-quiet { background: var(--t4); }
+.status-eased .dot, .dot-eased { background: var(--g); }
+.status-triggered { color: var(--r); }
+.status-quiet { color: var(--t3); }
+.status-eased { color: var(--g); }
+
+/* Lens 2 composite hero */
+.composite { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 14px 18px; border: 1px solid var(--bd); border-radius: var(--radius-lg); background: var(--bg3); margin-top: 12px; }
+.composite-share { font-family: var(--mono); font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+.composite-note { font-size: 12px; color: var(--t2); max-width: 560px; flex: 1 1 260px; }
+.composite-alarm { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); white-space: nowrap; }
 
 /* Legend */
 .legend { display: flex; gap: 18px; padding: 10px 0 2px; font-size: 12px; color: var(--t2); }
@@ -149,7 +163,7 @@ a:hover { text-decoration: underline; }
       <h1>Recession &amp; Market-Peak Dashboard <em>— three lenses on bear-market risk</em></h1>
     </div>
     <div class="masthead-right">
-      <span class="pill pill-phase">Build phase 3 of 7</span>
+      <span class="pill pill-phase">Build phase 4 of 7</span>
       <span class="pill pill-date" id="asof-pill">Data as of —</span>
     </div>
   </header>
@@ -178,8 +192,9 @@ a:hover { text-decoration: underline; }
     <div class="card-body">
       <div class="slots" id="slots"></div>
       <p class="combined-note">
-        Lens&nbsp;2 arrives in phase 4; until then this panel reports lens-level status only and
-        no combined signal is computed.
+        All three lenses are live. The Lens&nbsp;2 alarm level is deliberately unset pending
+        confirmation, so the combined read treats Lens&nbsp;2 as not firing; no combined signal
+        is computed until the alarm level is set.
       </p>
     </div>
   </section>
@@ -200,8 +215,34 @@ a:hover { text-decoration: underline; }
       <div class="card-foot">
         All seven Lens&nbsp;1 rows are live, each verified against two sources before first use
         (VERIFICATION.md). The PMI and LEI rows use documented free proxies for licensed headline
-        series; valuation is context only and does not feed the lens status. Lens&nbsp;2 arrives
-        in phase 4.
+        series; valuation is context only and does not feed the lens status.
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-title">Lens 2 · Market-peak froth</div>
+      <div class="card-sub" id="lens2-sub"></div>
+    </div>
+    <div class="card-body">
+      <div class="composite">
+        <div class="composite-share" id="composite-share">—</div>
+        <div class="composite-note" id="composite-note">Loading…</div>
+        <span class="composite-alarm" id="composite-alarm">Alarm: pending</span>
+      </div>
+      <div class="legend">
+        <span><span class="dot dot-triggered"></span>Triggered</span>
+        <span><span class="dot dot-quiet"></span>Quiet</span>
+        <span><span class="dot dot-eased"></span>Eased</span>
+        <span><span class="dot dot-context"></span>Context (outside the composite)</span>
+      </div>
+      <div id="lens2-rows"></div>
+      <div class="card-foot">
+        Triggers are calibrated on each gauge's own full history where a free history exists
+        (AAII deciles, P/E and Rule-of-20 percentiles, NFCI percentiles); the confidence and
+        P/E rows use documented free proxies for licensed or vendor series. The inverted yield
+        curve is deliberately absent — it lives in Lens&nbsp;1 and is not double-counted.
       </div>
     </div>
   </section>
@@ -267,7 +308,10 @@ function formatIsoInstant(iso) {
 }
 
 const STATUS_RANK = { benign: 0, watch: 1, elevated: 2 };
-const STATUS_LABEL = { benign: "Benign", watch: "Watch", elevated: "Elevated", context: "Context" };
+const STATUS_LABEL = {
+  benign: "Benign", watch: "Watch", elevated: "Elevated", context: "Context",
+  triggered: "Triggered", quiet: "Quiet", eased: "Eased",
+};
 
 const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", {
   month: "long", year: "numeric", timeZone: "UTC",
@@ -330,12 +374,33 @@ function lensSlotDef(label, lensData, pendingText) {
   };
 }
 
+/* Lens 2 rolls up by composite share, not worst status. With the alarm
+   level unset the slot stays neutral and the combined read treats the lens
+   as not firing. */
+function lens2SlotDef(lens2) {
+  if (!lens2 || !lens2.composite) {
+    return { label: "Lens 2 · Market-peak froth", status: "pending", statusText: "Pending", detail: "Pending" };
+  }
+  const c = lens2.composite;
+  const firing = c.alarm_state === "at_or_above";
+  return {
+    label: "Lens 2 · Market-peak froth",
+    status: firing ? "elevated" : (c.alarm_share_pct === null ? "pending" : "benign"),
+    statusText: c.share_pct.toFixed(0) + "% triggered",
+    detail:
+      c.triggered_count + " of " + c.gauge_count + " gauges · " +
+      (c.alarm_share_pct === null
+        ? "alarm level pending confirmation — treated as not firing"
+        : "alarm at " + c.alarm_share_pct.toFixed(0) + "% — " + (firing ? "FIRING" : "not firing")),
+  };
+}
+
 function renderSlots(data) {
   const slots = document.getElementById("slots");
   slots.replaceChildren();
   const defs = [
     lensSlotDef("Lens 1 · Recession risk", data.lens1, "Pending"),
-    lensSlotDef("Lens 2 · Market-peak froth", data.lens2, "Arrives in phase 4"),
+    lens2SlotDef(data.lens2),
     lensSlotDef("Lens 3 · Price trend", data.lens3, "Pending"),
   ];
   for (const def of defs) {
@@ -390,6 +455,24 @@ function renderLensRows(rowsId, subId, lensData) {
 
     rows.appendChild(row);
   }
+}
+
+function renderLens2(lens2) {
+  renderLensRows("lens2-rows", "lens2-sub", lens2);
+  const c = lens2.composite;
+  if (!c) return;
+  document.getElementById("composite-share").textContent = c.share_pct.toFixed(0) + "%";
+  const easedText = c.eased_count
+    ? " " + c.eased_count + (c.eased_count === 1 ? " gauge has" : " gauges have") + " eased."
+    : "";
+  document.getElementById("composite-note").textContent =
+    c.triggered_count + " of " + c.gauge_count + " froth gauges are triggered." + easedText +
+    " The SLOOS row is context and sits outside the composite.";
+  document.getElementById("composite-alarm").textContent =
+    c.alarm_share_pct === null
+      ? "Alarm level: pending confirmation"
+      : "Alarm level: " + c.alarm_share_pct.toFixed(0) + "% (" +
+        (c.alarm_state === "at_or_above" ? "firing" : "not firing") + ")";
 }
 
 /* ------------------------------------------------------------------ */
@@ -518,11 +601,14 @@ function loadChart(lens3) {
 }
 
 function render(data) {
-  const indicators = data.lens1.indicators.concat(data.lens3 ? data.lens3.indicators : []);
+  const indicators = data.lens1.indicators
+    .concat(data.lens2 ? data.lens2.indicators : [])
+    .concat(data.lens3 ? data.lens3.indicators : []);
   const latest = indicators.map((i) => i.as_of).sort().at(-1);
   document.getElementById("asof-pill").textContent = "Data as of " + formatIsoDate(latest);
   renderSlots(data);
   renderLensRows("lens1-rows", "lens1-sub", data.lens1);
+  if (data.lens2) renderLens2(data.lens2);
   if (data.lens3) {
     renderLensRows("lens3-rows", "lens3-sub", data.lens3);
     loadChart(data.lens3);
@@ -551,8 +637,8 @@ if (window.__DATA__) {
 } else {
   /* Fetch fallback: template.html works standalone when served from the
      project root (npx serve .), reading data/ directly. */
-  Promise.all([fetchJson("data/lens1.json"), fetchJson("data/lens3.json")])
-    .then(([lens1, lens3]) => render({ lens1: lens1, lens3: lens3, generated_at: null }))
+  Promise.all([fetchJson("data/lens1.json"), fetchJson("data/lens2.json"), fetchJson("data/lens3.json")])
+    .then(([lens1, lens2, lens3]) => render({ lens1: lens1, lens2: lens2, lens3: lens3, generated_at: null }))
     .catch((error) =>
       showError(
         "Data failed to load (" + error.message + "). Serve the project root — for example " +

@@ -1,0 +1,15 @@
+{
+  "series_id": "RPG_RPV_6M_SPREAD",
+  "name": "Growth minus value, six-month price return spread",
+  "unit": "pp",
+  "source_url": "https://finance.yahoo.com/quote/RPG/",
+  "collection": "Computed from RPG and RPV daily closes (Yahoo chart API).",
+  "points": [
+    {
+      "as_of": "2026-07-02",
+      "value": 15.4,
+      "recorded_at": "2026-07-03T09:40:08Z"
+    }
+  ],
+  "updated_at": "2026-07-03T09:40:08Z"
+}

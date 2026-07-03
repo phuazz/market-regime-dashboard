@@ -1,0 +1,15 @@
+{
+  "series_id": "AAII_BULL_BEAR_SPREAD",
+  "name": "AAII bull-bear spread (weekly)",
+  "unit": "pp",
+  "source_url": "https://www.aaii.com/files/surveys/sentiment.xls",
+  "collection": "Current week only; the full AAII workbook is used in-memory to calibrate the decile line and is not redistributed (AAII terms of service).",
+  "points": [
+    {
+      "as_of": "2026-07-02",
+      "value": -10.9,
+      "recorded_at": "2026-07-03T09:40:06Z"
+    }
+  ],
+  "updated_at": "2026-07-03T09:40:06Z"
+}

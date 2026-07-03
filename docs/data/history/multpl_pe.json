@@ -1,0 +1,15 @@
+{
+  "series_id": "MULTPL_TRAILING_PE",
+  "name": "S&P 500 trailing P/E (multpl daily print)",
+  "unit": "ratio",
+  "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
+  "collection": "Current print only; the multpl monthly table is used in-memory for the percentile calibration and is not redistributed.",
+  "points": [
+    {
+      "as_of": "2026-07-03",
+      "value": 32.15,
+      "recorded_at": "2026-07-03T09:40:21Z"
+    }
+  ],
+  "updated_at": "2026-07-03T09:40:21Z"
+}
