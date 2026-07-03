@@ -1,7 +1,8 @@
 # Refreshes the monthly cadence group (Sahm rule, PMI proxy, LEI headline,
-# Shiller CAPE). Monthly prints land on scattered days, so this polls weekly;
-# the scrape-history files append at most one point per reference month.
-name: Monthly-group data refresh
+# Shiller CAPE, consumer sentiment, P/E percentile, Rule of 20, IPO proxy)
+# and the quarterly group (SLOOS). Monthly prints land on scattered days, so
+# this polls weekly; history files append at most one point per period.
+name: Monthly and quarterly data refresh
 
 on:
   schedule:
@@ -32,12 +33,15 @@ jobs:
       - name: Run offline tests
         run: python -m unittest discover -s tests
 
-      - name: Update monthly-group data
+      - name: Update monthly-group and quarterly-group data
         id: update
         run: |
           set +e
           python scripts/update_data.py --group monthly
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          monthly_exit=$?
+          python scripts/update_data.py --group quarterly
+          quarterly_exit=$?
+          echo "exit_code=$((monthly_exit + quarterly_exit))" >> "$GITHUB_OUTPUT"
 
       - name: Build docs
         run: python scripts/build.py

@@ -53,6 +53,56 @@
     "watch_ccsa_26wk_pct": 5,
     "confirmed_by_zh": false
   },
+  "lens2_composite": {
+    "description": "Composite = share of in-composite gauges triggered. The alarm level is deliberately unset (SPEC.md section 5 — ZH to set; do not default to 80%). Until set, the combined read treats Lens 2 as not firing.",
+    "alarm_share_pct": null,
+    "candidate_shares_pct": [62.5, 75.0, 87.5],
+    "candidate_rationale": "With eight gauges: 5 of 8 (simple majority of froth evidence), 6 of 8 (super-majority), 7 of 8 (near-unanimous). A historical calibration against reconstructable gauges accompanies the phase 6 signal map.",
+    "confirmed_by_zh": false
+  },
+  "consumer_confidence_proxy": {
+    "trigger_rule": "Michigan sentiment at or above trigger_percentile of its full monthly history.",
+    "trigger_percentile": 75,
+    "confirmed_by_zh": false
+  },
+  "retail_euphoria_aaii": {
+    "trigger_rule": "Bull-bear spread at or above the 90th percentile of the full weekly history (computed from the AAII workbook at run time); eased when the spread is below eased_below_pp.",
+    "eased_below_pp": 0,
+    "confirmed_by_zh": false
+  },
+  "manager_bullishness_naaim": {
+    "trigger_rule": "NAAIM exposure at or above trigger_level (all-in positioning).",
+    "trigger_level": 90,
+    "confirmed_by_zh": false
+  },
+  "growth_expectation_pe": {
+    "trigger_rule": "Trailing P/E at or above trigger_percentile of monthly history since 1871 (multpl).",
+    "trigger_percentile": 90,
+    "confirmed_by_zh": false
+  },
+  "rule_of_20": {
+    "trigger_rule": "P/E plus CPI year-on-year change above fair_value_sum and at or above trigger_percentile of the monthly sum history since 1948.",
+    "fair_value_sum": 20,
+    "trigger_percentile": 80,
+    "confirmed_by_zh": false
+  },
+  "value_vs_growth": {
+    "trigger_rule": "Growth (RPG) leading value (RPV) by trigger_pp or more over window_trading_days; eased when value leads (spread below eased_below_pp).",
+    "trigger_pp": 10,
+    "eased_below_pp": 0,
+    "window_trading_days": 126,
+    "confirmed_by_zh": false
+  },
+  "credit_complacency_nfci": {
+    "trigger_rule": "NFCI in the loosest trigger_percentile of weekly readings since 1971.",
+    "trigger_percentile": 20,
+    "confirmed_by_zh": false
+  },
+  "deal_ipo_froth": {
+    "trigger_rule": "Annualised year-to-date IPO proceeds at or above trigger_percentile of the prior years available (Renaissance Capital, from 2016). Coarse by construction — short history, seasonal annualisation.",
+    "trigger_percentile": 80,
+    "confirmed_by_zh": false
+  },
   "sma_trend_sp500": {
     "benign_rule": "50-day SMA at or above the 150-day SMA.",
     "watch_rule": "50-day SMA below the 150-day SMA without slope confirmation.",

@@ -26,7 +26,17 @@ CANONICAL_ORDER = {
         "labour_market",
         "shiller_cape",
     ],
-    2: [],
+    2: [
+        "consumer_confidence_proxy",
+        "retail_euphoria_aaii",
+        "manager_bullishness_naaim",
+        "growth_expectation_pe",
+        "deal_ipo_froth",
+        "rule_of_20",
+        "value_vs_growth",
+        "credit_complacency_nfci",
+        "sloos_tightening",
+    ],
     3: ["sma_trend_sp500"],
 }
 

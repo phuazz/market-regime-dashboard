@@ -18,17 +18,18 @@ from __future__ import annotations
 import argparse
 
 import lens1
+import lens2
 import lens3
 from util import CANONICAL_ORDER, DATA_DIR, LENS_TITLES, ROOT, dump_json, load_json, utc_now_iso
 
 # One registry across all lens modules, keyed by cadence group.
 GROUPS: dict[str, list] = {
-    group: lens1.GROUPS[group] + lens3.GROUPS[group]
+    group: lens1.GROUPS[group] + lens2.GROUPS[group] + lens3.GROUPS[group]
     for group in ("daily", "monthly", "quarterly")
 }
 
 
-def update_lens_file(lens: int, built: list[dict]) -> str:
+def update_lens_file(lens: int, built: list[dict], thresholds: dict) -> str:
     """Merge freshly built indicators into data/lens<N>.json by id."""
     path = DATA_DIR / f"lens{lens}.json"
     existing = load_json(path) or {}
@@ -40,13 +41,17 @@ def update_lens_file(lens: int, built: list[dict]) -> str:
     indicators += [ind for key, ind in by_id.items() if key not in order]
 
     title, subtitle = LENS_TITLES[lens]
-    dump_json(path, {
+    payload = {
         "lens": lens,
         "title": title,
         "subtitle": subtitle,
         "updated_at": utc_now_iso(),
         "indicators": indicators,
-    })
+    }
+    if lens == 2:
+        alarm = thresholds.get("lens2_composite", {}).get("alarm_share_pct")
+        payload["composite"] = lens2.summarise(indicators, alarm)
+    dump_json(path, payload)
     return str(path.relative_to(ROOT))
 
 
@@ -80,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
                   f"({indicator['value']} as of {indicator['as_of']})")
 
     for lens, built in sorted(built_by_lens.items()):
-        path = update_lens_file(lens, built)
+        path = update_lens_file(lens, built, thresholds)
         print(f"wrote {path} ({len(built)} indicator(s) refreshed)")
 
     if failures:
