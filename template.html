@@ -176,6 +176,22 @@ a:hover { text-decoration: underline; }
 .fwd-table .base { color: var(--t3); }
 .fwd-note { font-size: 10.5px; color: var(--t3); margin-top: 8px; border-top: 1px dashed var(--bd); padding-top: 6px; }
 
+/* Combined act rule — the framework's output, given visual primacy. */
+.fwd-hero { border: 1px solid var(--bd2); border-left: 4px solid var(--r); border-radius: var(--radius); background: linear-gradient(180deg, var(--r-bg) 0%, var(--bg2) 60%); padding: 16px 18px; margin-bottom: 8px; }
+.fwd-hero-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.fwd-hero-title { font-size: 15px; font-weight: 700; color: var(--t1); }
+.fwd-hero-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--r-bg2); border: 1px solid rgba(192,57,43,0.35); color: var(--r); white-space: nowrap; }
+.fwd-hero-meta { font-size: 11px; color: var(--t3); margin-top: 2px; }
+.fwd-hero-body { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-top: 12px; align-items: start; }
+.fwd-hero-prose { font-size: 12.5px; color: var(--t2); line-height: 1.55; }
+.fwd-hero-prose strong { color: var(--t1); }
+.fwd-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.fwd-tile { border: 1px solid var(--bd); border-radius: var(--radius); background: var(--bg2); padding: 9px 11px; }
+.fwd-tile-big { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--t1); }
+.fwd-tile-lab { font-size: 10px; color: var(--t3); margin-top: 2px; line-height: 1.35; }
+.fwd-subhead { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--t3); margin: 16px 0 2px; }
+@media (max-width: 620px) { .fwd-hero-body { grid-template-columns: 1fr; } .fwd-tiles { grid-template-columns: 1fr; } }
+
 /* Error strip */
 .error-strip { display: none; margin-top: 24px; padding: 12px 16px; border: 1px solid rgba(192,57,43,0.25); background: var(--r-bg); color: var(--r); border-radius: var(--radius); font-size: 13px; }
 
@@ -308,6 +324,8 @@ a:hover { text-decoration: underline; }
       <div class="card-sub">S&amp;P 500 forward returns when each signal is active, against the base rate over the same window — studied from signal onset (entry-point discipline).</div>
     </div>
     <div class="card-body">
+      <div id="fwd-hero"></div>
+      <div class="fwd-subhead">Input signals feeding the rule</div>
       <div class="fwd-grid" id="fwd-grid"></div>
       <div class="card-foot" id="fwd-foot"></div>
     </div>
@@ -867,37 +885,101 @@ function renderLens2(lens2) {
     "an arming line confirmed by Lens 3, not a standalone signal.";
 }
 
+/* Horizon table shared by the hero and the lens cards. */
+function forwardTable(signal) {
+  const table = el("table", "fwd-table");
+  const head = el("tr");
+  for (const label of ["Horizon", "Median (signal vs base)", "Hit rate"]) {
+    head.appendChild(el("th", null, label));
+  }
+  table.appendChild(head);
+  for (const h of ["3m", "6m", "12m"]) {
+    const stats = signal.horizons[h];
+    if (!stats) continue;
+    const row = el("tr");
+    row.appendChild(el("td", null, h));
+    const medianCell = el("td", null, (stats.cond_median_pct === null ? "n/a" : stats.cond_median_pct.toFixed(1) + "%") + " ");
+    medianCell.appendChild(el("span", "base", "vs " + stats.uncond_median_pct.toFixed(1) + "%"));
+    row.appendChild(medianCell);
+    const hitCell = el("td", null, (stats.cond_hit_pct === null ? "n/a" : stats.cond_hit_pct.toFixed(0) + "%") + " ");
+    hitCell.appendChild(el("span", "base", "vs " + stats.uncond_hit_pct.toFixed(0) + "%"));
+    row.appendChild(hitCell);
+    table.appendChild(row);
+  }
+  return table;
+}
+
+function monthYear(iso) {
+  return MONTH_FORMAT.format(new Date(iso + "T00:00:00Z"));
+}
+
+function tile(big, label) {
+  const t = el("div", "fwd-tile");
+  t.appendChild(el("div", "fwd-tile-big", big));
+  t.appendChild(el("div", "fwd-tile-lab", label));
+  return t;
+}
+
+function renderForwardHero(signal) {
+  const hero = document.getElementById("fwd-hero");
+  hero.className = "fwd-hero";
+  hero.replaceChildren();
+  const t = signal.tail || {};
+
+  const head = el("div", "fwd-hero-head");
+  head.appendChild(el("div", "fwd-hero-title", "Combined act rule — the framework's output"));
+  head.appendChild(el("div", "fwd-hero-tag", "when confirmed: reduce risk, not liquidate"));
+  hero.appendChild(head);
+  hero.appendChild(el("div", "fwd-hero-meta",
+    signal.active_months + " active months · " + signal.episode_count + " onset episodes · sample " +
+    signal.sample_start.slice(0, 4) + " to " + signal.sample_end.slice(0, 4)));
+
+  const body = el("div", "fwd-hero-body");
+  const prose = el("div", "fwd-hero-prose");
+  const p = document.createElement("p");
+  p.innerHTML =
+    "<strong>What it is:</strong> Lens&nbsp;1 elevated <em>or</em> Lens&nbsp;2 at its alarm, then " +
+    "confirmed by the Lens&nbsp;3 trend break. <strong>How to read it:</strong> a risk-reduction " +
+    "trigger, not a return signal — so the pooled median sitting near the base rate is expected, " +
+    "not a weakness. Its value is in the left tail: across " + (t.scored_onsets || "—") +
+    " onset episodes it fired ahead of every major bear in the sample, " + (t.deep_drawdown_onsets || "—") +
+    " of them preceding a fall worse than 20% within a year. The cost is whipsaws near capitulation " +
+    "bottoms — the price of waiting for confirmation.";
+  prose.appendChild(p);
+  body.appendChild(prose);
+  body.appendChild(forwardTable(signal));
+  hero.appendChild(body);
+
+  const tiles = el("div", "fwd-tiles");
+  tiles.appendChild(tile(
+    (t.deep_drawdown_onsets || 0) + " of " + (t.scored_onsets || 0),
+    "onsets preceded a >20% drawdown within 12 months — every major bear caught"));
+  if (t.worst_fwd_12m_pct != null) {
+    tiles.appendChild(tile(t.worst_fwd_12m_pct.toFixed(1) + "%",
+      "worst 12-month outcome from onset · " + monthYear(t.worst_fwd_12m_start) + " (bear caught)"));
+  }
+  if (t.best_fwd_12m_pct != null) {
+    tiles.appendChild(tile("+" + t.best_fwd_12m_pct.toFixed(1) + "%",
+      "best 12-month outcome from onset · " + monthYear(t.best_fwd_12m_start) + " (whipsaw at a bottom)"));
+  }
+  hero.appendChild(tiles);
+}
+
 function renderForward(fwd) {
   if (!fwd || !fwd.signals) return;
+  const combined = fwd.signals.find((s) => s.id === "combined_act");
+  if (combined) renderForwardHero(combined);
+
   const grid = document.getElementById("fwd-grid");
   grid.replaceChildren();
   for (const signal of fwd.signals) {
+    if (signal.id === "combined_act") continue;
     const block = el("div", "fwd-block");
     block.appendChild(el("div", "fwd-name", signal.name));
     block.appendChild(el("div", "fwd-meta",
       signal.active_months + " active months · " + signal.episode_count + " episodes · sample " +
       signal.sample_start.slice(0, 7) + " to " + signal.sample_end.slice(0, 7)));
-
-    const table = el("table", "fwd-table");
-    const head = el("tr");
-    for (const label of ["Horizon", "Median (signal vs base)", "Hit rate"]) {
-      head.appendChild(el("th", null, label));
-    }
-    table.appendChild(head);
-    for (const h of ["3m", "6m", "12m"]) {
-      const stats = signal.horizons[h];
-      if (!stats) continue;
-      const row = el("tr");
-      row.appendChild(el("td", null, h));
-      const medianCell = el("td", null, (stats.cond_median_pct === null ? "n/a" : stats.cond_median_pct.toFixed(1) + "%") + " ");
-      medianCell.appendChild(el("span", "base", "vs " + stats.uncond_median_pct.toFixed(1) + "%"));
-      row.appendChild(medianCell);
-      const hitCell = el("td", null, (stats.cond_hit_pct === null ? "n/a" : stats.cond_hit_pct.toFixed(0) + "%") + " ");
-      hitCell.appendChild(el("span", "base", "vs " + stats.uncond_hit_pct.toFixed(0) + "%"));
-      row.appendChild(hitCell);
-      table.appendChild(row);
-    }
-    block.appendChild(table);
+    block.appendChild(forwardTable(signal));
 
     const outcomes = signal.episodes.map((e) => e.fwd_12m_pct).filter((v) => v !== null);
     let noteText = signal.availability_note;

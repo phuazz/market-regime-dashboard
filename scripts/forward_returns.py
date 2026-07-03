@@ -229,6 +229,25 @@ def main() -> int:
                 "worst_12m_pct": round(w12, 1) if w12 is not None else None,
             })
 
+        # Left-tail decomposition: a confirmation-based risk trigger earns its
+        # keep by catching deep drawdowns, not by lifting the pooled median.
+        # Count onsets that preceded a fall worse than 20% within 12 months,
+        # and record the worst and best onset outcomes with their dates.
+        scored = [e for e in episode_rows if e["fwd_12m_pct"] is not None]
+        drawdown_onsets = [e for e in episode_rows
+                           if e["worst_12m_pct"] is not None and e["worst_12m_pct"] <= -20.0]
+        worst_ep = min(scored, key=lambda e: e["fwd_12m_pct"]) if scored else None
+        best_ep = max(scored, key=lambda e: e["fwd_12m_pct"]) if scored else None
+        tail = {
+            "scored_onsets": len(scored),
+            "deep_drawdown_onsets": len(drawdown_onsets),
+            "deep_drawdown_starts": [e["start"] for e in drawdown_onsets],
+            "worst_fwd_12m_pct": worst_ep["fwd_12m_pct"] if worst_ep else None,
+            "worst_fwd_12m_start": worst_ep["start"] if worst_ep else None,
+            "best_fwd_12m_pct": best_ep["fwd_12m_pct"] if best_ep else None,
+            "best_fwd_12m_start": best_ep["start"] if best_ep else None,
+        }
+
         signals_out.append({
             "id": key,
             "name": name,
@@ -239,6 +258,7 @@ def main() -> int:
             "episode_count": len(episodes),
             "horizons": horizons,
             "episodes": episode_rows,
+            "tail": tail,
         })
         print(f"{name}: {len(active)} active months, {len(episodes)} episodes")
 

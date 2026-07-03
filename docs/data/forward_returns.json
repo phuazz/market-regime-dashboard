@@ -1,5 +1,5 @@
 {
-  "computed_as_of": "2026-07-03T12:20:32Z",
+  "computed_as_of": "2026-07-03T15:48:27Z",
   "method": "Point-in-time monthly grid; expanding-window or absolute triggers only; conditional S&P 500 forward returns from month-end onset versus the unconditional base rate over each signal's own sample window. Episode counts are small and clustered — per-episode outcomes matter more than pooled statistics. Entry-point discipline: signals are studied from onset, not conditioned on prior strong runs.",
   "signals": [
     {
@@ -139,7 +139,19 @@
           "fwd_12m_pct": null,
           "worst_12m_pct": -5.1
         }
-      ]
+      ],
+      "tail": {
+        "scored_onsets": 13,
+        "deep_drawdown_onsets": 2,
+        "deep_drawdown_starts": [
+          "1974-03-29",
+          "2001-01-31"
+        ],
+        "worst_fwd_12m_pct": -17.3,
+        "worst_fwd_12m_start": "2001-01-31",
+        "best_fwd_12m_pct": 53.7,
+        "best_fwd_12m_start": "2020-03-31"
+      }
     },
     {
       "id": "lens2_alarm",
@@ -285,7 +297,19 @@
           "fwd_12m_pct": -6.2,
           "worst_12m_pct": -6.2
         }
-      ]
+      ],
+      "tail": {
+        "scored_onsets": 16,
+        "deep_drawdown_onsets": 2,
+        "deep_drawdown_starts": [
+          "2000-04-28",
+          "2000-08-31"
+        ],
+        "worst_fwd_12m_pct": -25.3,
+        "worst_fwd_12m_start": "2000-08-31",
+        "best_fwd_12m_pct": 29.7,
+        "best_fwd_12m_start": "1996-10-31"
+      }
     },
     {
       "id": "lens3_bear",
@@ -578,7 +602,25 @@
           "fwd_12m_pct": 29.4,
           "worst_12m_pct": 6.2
         }
-      ]
+      ],
+      "tail": {
+        "scored_onsets": 37,
+        "deep_drawdown_onsets": 8,
+        "deep_drawdown_starts": [
+          "1973-12-31",
+          "1974-04-30",
+          "2000-10-31",
+          "2001-07-31",
+          "2002-05-31",
+          "2007-12-31",
+          "2008-06-30",
+          "2022-03-31"
+        ],
+        "worst_fwd_12m_pct": -38.5,
+        "worst_fwd_12m_start": "2007-12-31",
+        "best_fwd_12m_pct": 53.7,
+        "best_fwd_12m_start": "2020-03-31"
+      }
     },
     {
       "id": "combined_act",
@@ -731,7 +773,24 @@
           "fwd_12m_pct": 53.7,
           "worst_12m_pct": 12.7
         }
-      ]
+      ],
+      "tail": {
+        "scored_onsets": 17,
+        "deep_drawdown_onsets": 7,
+        "deep_drawdown_starts": [
+          "1974-04-30",
+          "2000-10-31",
+          "2001-01-31",
+          "2001-07-31",
+          "2002-05-31",
+          "2007-12-31",
+          "2008-06-30"
+        ],
+        "worst_fwd_12m_pct": -38.5,
+        "worst_fwd_12m_start": "2007-12-31",
+        "best_fwd_12m_pct": 53.7,
+        "best_fwd_12m_start": "2020-03-31"
+      }
     }
   ]
 }
