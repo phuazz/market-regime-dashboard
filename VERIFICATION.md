@@ -210,6 +210,75 @@ output of 2026-07-02: all three checks PASS.
 
 ---
 
+## Lens 2 series (verified 2026-07-03)
+
+### UMCSENT — University of Michigan consumer sentiment (confidence proxy)
+- FRED May 2026 = 44.8. Corroborated by the May final press coverage (CNBC,
+  InvestingLive: "44.8 vs 48.2 expected", Advisor Perspectives) — a record
+  low since 1952. Primary: fred.stlouisfed.org/series/UMCSENT; secondary:
+  sca.isr.umich.edu and press prints. Note: FRED carries the licensed
+  series with roughly a one-month lag; the as-of month is displayed.
+
+### CPIAUCSL — CPI, all urban consumers, SA (Rule-of-20 input)
+- FRED vs the BLS public API (CUSR0000SA0): 12 recent months compared,
+  maximum absolute difference 0.000 (May 2026: 333.979 on both).
+
+### NFCI — Chicago Fed National Financial Conditions Index
+- FRED vs the Chicago Fed CSV (originating agency,
+  chicagofed.org/-/media/publications/nfci/nfci-data-series-csv.csv):
+  2,886 common weeks; maximum absolute difference over the last 260 weeks
+  0.027 (spot 2026-04-24: FRED -0.491 vs snapshot -0.518). The index is
+  re-estimated every release, so vintage differences of this size are
+  inherent to the methodology; series identity confirmed.
+
+### DRTSCILM — SLOOS net tightening, C&I loans to large and mid-sized firms
+- FRED 2026-04-01 = +8.1. Corroborated by the Fed's April 2026 SLOOS
+  release ("modest net shares of banks reported having tightened standards
+  on C&I loans to firms of all sizes"):
+  federalreserve.gov/data/sloos/sloos-202604.htm.
+
+### AAII weekly sentiment survey (retail euphoria)
+- Workbook (aaii.com/files/surveys/sentiment.xls), week ending 2026-07-02:
+  bulls 31.4%, bears 42.3%, spread -10.9 pp. Internal consistency: the
+  spread column equals bulls minus bears. Corroborated by AAII's own weekly
+  article ("decreased 13.6 percentage points to 31.4%"). Licence
+  discipline: the workbook is used in-memory to calibrate the decile line
+  (2,030 weeks since 1987); the raw history is not redistributed.
+
+### NAAIM Exposure Index (manager bullishness)
+- naaim.org headline (originating source) = 84.69 this week. Aggregator
+  mirrors (YCharts, MacroMicro) carry the same series with up to a week of
+  lag; late-June mirrored prints in the high 90s are consistent with this
+  week's decline alongside the AAII drop. The page publishes no
+  machine-readable as-of date; collection time is stamped and noted.
+
+### multpl trailing P/E (growth-expectation proxy and Rule-of-20 input)
+- Current print 32.15 matches multpl's own monthly table (1,867 months,
+  1871–2026) exactly — the percentile compares like with like. Provider
+  dispersion documented: as-reported trailing P/E prints differ across
+  providers by methodology (GuruFocus 25.4, FactSet-style trailing 27.8,
+  multpl 32.2 as-reported with lagged quarterly earnings); the gauge is
+  within-methodology consistent and the proxy substitution (trailing, not
+  forward) is flagged in the UI. Recent table months are multpl estimates
+  (dagger-marked) pending final earnings — flagged in notes.
+
+### RPG / RPV — S&P 500 pure growth vs pure value (Yahoo chart API)
+- Fetched from the same Yahoo endpoint already two-source verified for
+  ^GSPC (see the price-feed entry). Latest closes 2026-07-02: RPG 59.79,
+  RPV 115.76, six-month spread +15.4 pp. Ticker identity confirmed against
+  the funds' public descriptions; stockanalysis.com (listed secondary)
+  blocks automated fetching, so close-by-close cross-checks are manual.
+
+### Renaissance Capital US IPO statistics (deal and IPO froth proxy)
+- Annual chart parsed from the official stats page: 2021 = 397 IPOs,
+  2022 = 71, 2023 = 109, 2024 = 150 — matching the widely published
+  record, which confirms series identity. 2026 year-to-date: $114.7bn
+  proceeds across 82 IPOs in six months (page's own stamp "as of
+  07/03/2026"). Short history (from 2016) and seasonal annualisation are
+  flagged as coarse in the UI.
+
+---
+
 ## Endpoint access notes (probed 2026-07-03, local machine and GitHub runner)
 
 Recorded so future fetch failures are diagnosed from evidence rather than
@@ -238,6 +307,5 @@ environment.
 
 ## Pending verification (later phases — do not use before logging here)
 
-`NFCI` / `ANFCI`, `DRTSCILM` (SLOOS), `UMCSENT`, `CPIAUCSL`, `USREC`, AAII
-survey values, the NAAIM Exposure Index, multpl trailing P/E, IPO-count
-proxy, and the Value-vs-Growth price pair (RPV/RPG) with second feeds.
+`USREC` (NBER recession indicator, needed for the phase 6 signal map) and
+any vendor forward-P/E series should one ever be licensed.

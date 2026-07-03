@@ -37,6 +37,26 @@ class ScrapeError(RuntimeError):
 RETRY_DELAYS_SECONDS = (0, 5, 15)
 
 
+def fetch_bytes(url: str, timeout: int = 90) -> bytes:
+    """Fetch a binary artefact (spreadsheets) with the same retry policy."""
+    last_error: Exception | None = None
+    for delay in RETRY_DELAYS_SECONDS:
+        if delay:
+            time.sleep(delay)
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": BROWSER_UA, "Accept": "*/*"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return response.read()
+        except Exception as error:  # noqa: BLE001 — retried, then funnelled below
+            last_error = error
+    raise ScrapeError(
+        f"Fetch failed for {url} after {len(RETRY_DELAYS_SECONDS)} attempts: {last_error}"
+    ) from last_error
+
+
 def fetch_text(url: str, timeout: int = 90) -> str:
     last_error: Exception | None = None
     for delay in RETRY_DELAYS_SECONDS:
