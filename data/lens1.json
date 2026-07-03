@@ -2,25 +2,25 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-02T15:18:44Z",
+  "updated_at": "2026-07-03T06:37:09Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
       "name": "Yield Curve (10yr - 3mo)",
       "qualifier": "term spread",
       "lens": 1,
-      "value": 0.63,
+      "value": 0.67,
       "unit": "pct",
       "signed": true,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-01",
+      "as_of": "2026-07-02",
       "status": "benign",
       "description": "The 10-year minus 3-month Treasury constant-maturity spread. A negative reading (inversion) has historically preceded US recessions; the risk window extends through the re-steepening that follows a sustained inversion.",
       "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign.",
       "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
       "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-      "notes": "The spread is positive (+0.63) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The spread is positive (+0.67) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "sahm_rule",

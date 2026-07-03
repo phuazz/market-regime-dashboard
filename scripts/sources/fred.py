@@ -6,15 +6,21 @@ holidays and unposted dates) arrive as empty strings or ".". No API key is
 required. Every series ID used in this project is verified against two
 independent sources before first use — see VERIFICATION.md.
 
-User-agent note (verified by direct A/B test on 2026-07-03): the honest
-bot agent below is served in under a second, while a spoofed browser agent
-is tarpitted to a read timeout — the CDN checks that the claimed browser
-matches the TLS fingerprint. Do not "upgrade" this to a browser string.
+Transport note (probed on 2026-07-03, local machine and GitHub runner —
+see scripts/net_probe.py and VERIFICATION.md): the CDN in front of FRED
+matches the client fingerprint against the claimed identity per network
+path. python-urllib is tarpitted from datacentre IPs with any user agent,
+and a spoofed browser agent is tarpitted from residential IPs, while curl
+under its own default agent passes on every path tested. The transport is
+therefore curl-first (honest identity), alternating with urllib across
+retries. Do not "simplify" this back to a single transport or spoof agents.
 """
 from __future__ import annotations
 
 import csv
 import io
+import shutil
+import subprocess
 import time
 import urllib.request
 
@@ -27,28 +33,49 @@ class FredFetchError(RuntimeError):
     """Raised when a FRED series cannot be fetched or parsed."""
 
 
-def fetch_series(series_id: str, timeout: int = 90) -> tuple[list[str], list[float | None]]:
+def _curl_fetch(url: str, timeout: int) -> str:
+    curl = shutil.which("curl")
+    if curl is None:
+        raise FredFetchError("curl is not available on this machine")
+    result = subprocess.run(
+        [curl, "-s", "--fail", "--max-time", str(timeout), url],
+        capture_output=True,
+        encoding="utf-8",
+    )
+    if result.returncode != 0 or not result.stdout:
+        raise FredFetchError(f"curl exited {result.returncode} for {url}")
+    return result.stdout.lstrip("\ufeff")
+
+
+def _urllib_fetch(url: str, timeout: int) -> str:
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": BOT_UA, "Accept": "text/csv,text/plain,*/*"},
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return response.read().decode("utf-8-sig")
+
+
+def fetch_series(series_id: str, timeout: int = 60) -> tuple[list[str], list[float | None]]:
     """Return ``(dates, values)`` for one FRED series, oldest observation first.
 
     Dates are ISO ``YYYY-MM-DD`` strings exactly as FRED publishes them.
     Values are floats, or None where the observation is missing.
     """
     url = FREDGRAPH_URL.format(series_id=series_id)
+    transports = ([_curl_fetch] if shutil.which("curl") else []) + [_urllib_fetch]
     last_error: Exception | None = None
-    for delay in RETRY_DELAYS_SECONDS:
+    text: str | None = None
+    for attempt, delay in enumerate(RETRY_DELAYS_SECONDS):
         if delay:
             time.sleep(delay)
+        transport = transports[attempt % len(transports)]
         try:
-            request = urllib.request.Request(
-                url,
-                headers={"User-Agent": BOT_UA, "Accept": "text/csv,text/plain,*/*"},
-            )
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                text = response.read().decode("utf-8-sig")
+            text = transport(url, timeout)
             break
         except Exception as error:  # noqa: BLE001 — retried, then funnelled below
             last_error = error
-    else:
+    if text is None:
         raise FredFetchError(
             f"Fetch failed for {series_id} after {len(RETRY_DELAYS_SECONDS)} attempts: {last_error}"
         )
