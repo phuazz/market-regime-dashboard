@@ -210,6 +210,32 @@ output of 2026-07-02: all three checks PASS.
 
 ---
 
+## Endpoint access notes (probed 2026-07-03, local machine and GitHub runner)
+
+Recorded so future fetch failures are diagnosed from evidence rather than
+guessed at. Reproduce with `python scripts/net_probe.py` from the affected
+environment.
+
+- **fredgraph.csv (Akamai-fronted):** admits clients per network path,
+  client fingerprint, and user agent. Residential IP: urllib with the
+  honest bot agent returns in 0.3 s; urllib with a spoofed browser agent is
+  tarpitted to a read timeout. GitHub-hosted runner: curl with its default
+  agent returns HTTP 200 in 0.8 s; curl with the bot agent is reset
+  instantly (HTTP 000); urllib times out with any agent. Pipeline transport
+  is therefore curl-first, alternating with urllib across retries
+  (`scripts/sources/fred.py`). Spoofed agents are never used.
+- **Yahoo v8 chart API:** clean via urllib with a browser agent from both
+  network paths (query1 and query2 hosts). The Lens 3 builder additionally
+  carries a FRED `SP500` fallback for future path changes.
+- **multpl.com:** clean via urllib with a browser agent from both paths.
+- **Stooq:** JavaScript proof-of-work challenge; not automatable (logged in
+  the price-feed entry above).
+- **BLS/DOL/S&P Global/GuruFocus HTML pages:** block generic fetchers; the
+  BLS public API, press prints, and browser-agent urllib serve as
+  replacements, as logged per series.
+
+---
+
 ## Pending verification (later phases — do not use before logging here)
 
 `NFCI` / `ANFCI`, `DRTSCILM` (SLOOS), `UMCSENT`, `CPIAUCSL`, `USREC`, AAII

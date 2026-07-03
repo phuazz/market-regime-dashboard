@@ -13,17 +13,38 @@ from public data. No proprietary third-party values are reproduced.
 
 ## Status
 
-Phase 3 of 7 complete (2026-07-02): Lens 1 fully live (seven indicators) and
-Lens 3 live (50-day vs 150-day SMA on the S&P 500 with an inline-SVG chart;
-Yahoo feed cross-checked against FRED `SP500` on every run). Current read:
-Lens 1 watch (driven by the LEI six-month change), Lens 3 benign (uptrend
-intact, 50-day 7,386 above 150-day 7,014). Phases 4–7 (Lens 2 froth
-composite, conditional forward returns, signal map, GitHub Actions
-automation) are planned and not yet built.
+Phases 1–3 and 7 complete (2026-07-03). **Live at
+https://phuazz.github.io/market-regime-dashboard/** with scheduled GitHub
+Actions refreshes. Lens 1 is fully live (seven indicators) and Lens 3 is
+live (50-day vs 150-day SMA on the S&P 500 with an inline-SVG chart; Yahoo
+feed cross-checked against FRED `SP500` on every run). The current read is
+on the live page. Phases 4–6 (Lens 2 froth composite, conditional forward
+returns, signal map) are planned and not yet built; phase 7 ran early at
+ZH's request so the dashboard publishes while the remaining lenses land.
 
 All status thresholds are Navigo-chosen proposed defaults, held in
 `data/thresholds.json` and marked in the UI, **pending confirmation by ZH
 before go-live**.
+
+## Automation and publication
+
+GitHub Pages serves `docs/` from `main` at
+https://phuazz.github.io/market-regime-dashboard/. Two workflows keep it
+fresh (`.github/workflows/`):
+
+- **daily.yml** — weekdays 23:30 UTC (07:30 Singapore next morning), after
+  the US close: yield curve, HY OAS, labour internals, S&P 500 trend.
+- **monthly.yml** — Mondays 12:00 UTC: Sahm rule, PMI proxy, LEI headline,
+  Shiller CAPE. Monthly prints land on scattered days, so a weekly poll
+  catches each within seven days; the history files append at most one
+  point per reference month.
+
+Both run the offline tests first, commit only when data changed, and mark
+the run failed if any builder failed — in that case the affected rows keep
+their previous values (stale-but-sourced, with the run visible in the
+Actions tab). The `reference/` folder and this machine's local files are
+not needed by automation. Local sessions should start with
+`git pull --rebase origin main` to pick up bot commits.
 
 ## Architecture
 
@@ -97,7 +118,7 @@ public repository and from git history. SPEC.md references to
    ICE-licensed spread series only from mid-2023, so status uses fixed
    absolute anchors (watch 4.00 / elevated 5.50 / complacency 3.00) rather
    than window percentiles. Alternative: a FRED API key (Actions secret)
-   may serve full history; decision for ZH in phase 7.
+   may serve full history; standing decision for ZH.
 3. **Sustained-inversion definition** — the strict rule (60 consecutive
    daily observations below zero) captures 2000, 2006–07, and 2022–24 but
    excludes the choppy 1989 and 2019 inversions. A days-in-window
@@ -115,5 +136,13 @@ public repository and from git history. SPEC.md references to
    the S&P second feed instead (exact agreement with Yahoo; see
    VERIFICATION.md). Price history starts 1970 (Yahoo daily), which covers
    the phase 5–6 studies.
+7. **FRED endpoint fingerprint rules** — the CDN in front of
+   `fredgraph.csv` admits clients per (network path, client fingerprint,
+   user agent): python-urllib is tarpitted from datacentre IPs with any
+   agent, and a spoofed browser agent is tarpitted from residential IPs,
+   while curl under its own identity passes everywhere tested. The fetcher
+   is therefore curl-first with a urllib fallback (`scripts/sources/fred.py`);
+   probe with `python scripts/net_probe.py` before changing any transport.
+   Evidence logged in VERIFICATION.md (2026-07-03).
 
-*Last updated: 2026-07-02.*
+*Last updated: 2026-07-03.*
