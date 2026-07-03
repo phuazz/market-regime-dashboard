@@ -11,6 +11,7 @@ one. Every scraped print is cross-checked at first use per VERIFICATION.md.
 from __future__ import annotations
 
 import re
+import time
 import urllib.request
 from datetime import date, datetime
 
@@ -33,13 +34,30 @@ class ScrapeError(RuntimeError):
     """Raised when a page cannot be fetched or its expected pattern is absent."""
 
 
-def fetch_text(url: str, timeout: int = 60) -> str:
-    request = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            return response.read().decode("utf-8", errors="replace")
-    except Exception as error:  # noqa: BLE001 — single funnel into ScrapeError
-        raise ScrapeError(f"Fetch failed for {url}: {error}") from error
+RETRY_DELAYS_SECONDS = (0, 5, 15)
+
+
+def fetch_text(url: str, timeout: int = 90) -> str:
+    last_error: Exception | None = None
+    for delay in RETRY_DELAYS_SECONDS:
+        if delay:
+            time.sleep(delay)
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": BROWSER_UA,
+                "Accept": "text/html,application/xhtml+xml,*/*",
+                "Accept-Language": "en-GB,en;q=0.9",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return response.read().decode("utf-8", errors="replace")
+        except Exception as error:  # noqa: BLE001 — retried, then funnelled below
+            last_error = error
+    raise ScrapeError(
+        f"Fetch failed for {url} after {len(RETRY_DELAYS_SECONDS)} attempts: {last_error}"
+    ) from last_error
 
 
 def _month_name_to_first_of_month(name: str, year: int) -> str:

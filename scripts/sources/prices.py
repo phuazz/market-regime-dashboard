@@ -10,14 +10,19 @@ and is not automatable — documented in VERIFICATION.md.
 from __future__ import annotations
 
 import json
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+# Two equivalent hosts; retries alternate between them because datacentre
+# IP ranges (GitHub Actions runners) are throttled per host.
 YAHOO_CHART_URL = (
-    "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+    "https://{host}/v8/finance/chart/{symbol}"
     "?period1={period1}&period2=9999999999&interval=1d"
 )
+YAHOO_HOSTS = ("query1.finance.yahoo.com", "query2.finance.yahoo.com")
+RETRY_DELAYS_SECONDS = (0, 5, 15, 30)
 BROWSER_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
@@ -37,13 +42,35 @@ def fetch_yahoo_daily(symbol: str, period1: int = 0, timeout: int = 90) -> tuple
     US time is already the next UTC day), the bar keeps. Documented in
     VERIFICATION.md.
     """
-    url = YAHOO_CHART_URL.format(symbol=urllib.parse.quote(symbol), period1=period1)
-    request = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            payload = json.load(response)
-    except Exception as error:  # noqa: BLE001 — single funnel into PriceFetchError
-        raise PriceFetchError(f"Yahoo chart fetch failed for {symbol}: {error}") from error
+    last_error: Exception | None = None
+    payload = None
+    for attempt, delay in enumerate(RETRY_DELAYS_SECONDS):
+        if delay:
+            time.sleep(delay)
+        url = YAHOO_CHART_URL.format(
+            host=YAHOO_HOSTS[attempt % len(YAHOO_HOSTS)],
+            symbol=urllib.parse.quote(symbol),
+            period1=period1,
+        )
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": BROWSER_UA,
+                "Accept": "application/json,text/plain,*/*",
+                "Accept-Language": "en-GB,en;q=0.9",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                payload = json.load(response)
+            break
+        except Exception as error:  # noqa: BLE001 — retried, then funnelled below
+            last_error = error
+    if payload is None:
+        raise PriceFetchError(
+            f"Yahoo chart fetch failed for {symbol} after "
+            f"{len(RETRY_DELAYS_SECONDS)} attempts: {last_error}"
+        ) from last_error
 
     try:
         result = payload["chart"]["result"][0]

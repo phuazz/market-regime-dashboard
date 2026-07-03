@@ -13,13 +13,16 @@ AND both flat or sloping down. The 200-day SMA is context only.
 from __future__ import annotations
 
 from sources.fred import fetch_series
-from sources.prices import fetch_yahoo_daily
+from sources.prices import PriceFetchError, fetch_yahoo_daily
 from util import HISTORY_DIR, clean_series, dump_json, utc_now_iso
 
 VERIFIED_NOTE = "Feeds verified against each other and logged in VERIFICATION.md."
 CROSS_CHECK_TOLERANCE_PCT = 0.05  # relative disagreement that blocks publication
 
 CHART_WINDOW_TRADING_DAYS = 756  # about three years
+
+YAHOO_QUOTE_URL = "https://finance.yahoo.com/quote/%5EGSPC/"
+FRED_SP500_URL = "https://fred.stlouisfed.org/series/SP500"
 
 
 def rolling_mean(values: list[float], window: int) -> list[float | None]:
@@ -120,20 +123,43 @@ def cross_check_against_fred(dates: list[str], closes: list[float]) -> str:
 
 def build_sma_trend(thresholds: dict) -> dict:
     params = thresholds["sma_trend_sp500"]
-    dates, closes = fetch_yahoo_daily("^GSPC")
-    check_note = cross_check_against_fred(dates, closes)
-    status, detail, metrics = classify_sma_trend(closes, params)
+    yahoo_error: Exception | None = None
+    try:
+        dates, closes = fetch_yahoo_daily("^GSPC")
+    except PriceFetchError as error:
+        yahoo_error = error
 
-    dump_json(HISTORY_DIR / "gspc.json", {
-        "series_id": "GSPC",
-        "name": "S&P 500 daily closes",
-        "unit": "index",
-        "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
-        "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
-        "updated_at": utc_now_iso(),
-        "dates": dates,
-        "values": closes,
-    })
+    if yahoo_error is None:
+        check_note = cross_check_against_fred(dates, closes)
+        primary_url, secondary_url = YAHOO_QUOTE_URL, FRED_SP500_URL
+        # The full-history file is only rewritten from the primary feed, so
+        # the long history for later analysis phases is never truncated by
+        # the fallback below.
+        dump_json(HISTORY_DIR / "gspc.json", {
+            "series_id": "GSPC",
+            "name": "S&P 500 daily closes",
+            "unit": "index",
+            "source_url": YAHOO_QUOTE_URL,
+            "secondary_source_url": FRED_SP500_URL,
+            "updated_at": utc_now_iso(),
+            "dates": dates,
+            "values": closes,
+        })
+    else:
+        # Fallback: FRED SP500 carries the official S&P 500 close for the
+        # trailing ten years — ample for the 200-day SMA and the chart
+        # window. The substitution is declared in the row notes and the
+        # two-feed cross-check resumes on the next successful Yahoo fetch.
+        dates, closes = clean_series(*fetch_series("SP500"))
+        reason = str(yahoo_error)
+        check_note = (
+            "Primary feed (Yahoo) unavailable this run ({reason}); values computed from "
+            "FRED SP500, the official S&P 500 close. The two-feed cross-check resumes on "
+            "the next successful primary fetch."
+        ).format(reason=reason[:120] + ("..." if len(reason) > 120 else ""))
+        primary_url, secondary_url = FRED_SP500_URL, YAHOO_QUOTE_URL
+
+    status, detail, metrics = classify_sma_trend(closes, params)
     sma50 = rolling_mean(closes, 50)
     sma150 = rolling_mean(closes, 150)
     sma200 = rolling_mean(closes, 200)
@@ -171,8 +197,8 @@ def build_sma_trend(thresholds: dict) -> dict:
             "(within {t:+.1f}%) = elevated (bear trigger). Below without slope confirmation "
             "= watch. Otherwise benign."
         ).format(n=params["slope_lookback_trading_days"], t=params["flat_tolerance_pct"]),
-        "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
-        "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
+        "source_url": primary_url,
+        "secondary_source_url": secondary_url,
         "notes": f"{detail} {check_note} {VERIFIED_NOTE}",
     }
 

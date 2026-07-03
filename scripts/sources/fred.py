@@ -5,31 +5,53 @@ the header ``observation_date,<SERIES_ID>``. Missing observations (market
 holidays and unposted dates) arrive as empty strings or ".". No API key is
 required. Every series ID used in this project is verified against two
 independent sources before first use — see VERIFICATION.md.
+
+User-agent note (verified by direct A/B test on 2026-07-03): the honest
+bot agent below is served in under a second, while a spoofed browser agent
+is tarpitted to a read timeout — the CDN checks that the claimed browser
+matches the TLS fingerprint. Do not "upgrade" this to a browser string.
 """
 from __future__ import annotations
 
 import csv
 import io
+import time
 import urllib.request
 
 FREDGRAPH_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
-USER_AGENT = "navigo-market-regime-dashboard/1.0 (internal data pipeline)"
+BOT_UA = "navigo-market-regime-dashboard/1.0 (internal data pipeline)"
+RETRY_DELAYS_SECONDS = (0, 5, 15)
 
 
 class FredFetchError(RuntimeError):
     """Raised when a FRED series cannot be fetched or parsed."""
 
 
-def fetch_series(series_id: str, timeout: int = 60) -> tuple[list[str], list[float | None]]:
+def fetch_series(series_id: str, timeout: int = 90) -> tuple[list[str], list[float | None]]:
     """Return ``(dates, values)`` for one FRED series, oldest observation first.
 
     Dates are ISO ``YYYY-MM-DD`` strings exactly as FRED publishes them.
     Values are floats, or None where the observation is missing.
     """
     url = FREDGRAPH_URL.format(series_id=series_id)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        text = response.read().decode("utf-8-sig")
+    last_error: Exception | None = None
+    for delay in RETRY_DELAYS_SECONDS:
+        if delay:
+            time.sleep(delay)
+        try:
+            request = urllib.request.Request(
+                url,
+                headers={"User-Agent": BOT_UA, "Accept": "text/csv,text/plain,*/*"},
+            )
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                text = response.read().decode("utf-8-sig")
+            break
+        except Exception as error:  # noqa: BLE001 — retried, then funnelled below
+            last_error = error
+    else:
+        raise FredFetchError(
+            f"Fetch failed for {series_id} after {len(RETRY_DELAYS_SECONDS)} attempts: {last_error}"
+        )
 
     reader = csv.reader(io.StringIO(text))
     header = next(reader, None)
