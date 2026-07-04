@@ -31,7 +31,7 @@ from forward_returns import build_signal_grid
 from lens1 import find_sustained_inversions, three_month_average_rise
 from signal_map import usrec_spans
 from sources.fred import fetch_series
-from util import DATA_DIR, clean_series, load_json
+from util import DATA_DIR, ROOT, clean_series, dump_json, load_json, utc_now_iso
 
 HORIZON = 12
 
@@ -130,6 +130,7 @@ def main() -> int:
           f"{len(rec_starts)} NBER recessions. Base 12m median {base_med:+.1f}%, hit {base_hit:.0f}%.\n")
     print("Reconstructable core = yield curve, Sahm, labour (3 of the 6 live status indicators).\n")
 
+    rule_rows = []
     for k in (1, 2, 3):
         fires = [counts[iso] >= k for iso in isos]
         active = sum(fires)
@@ -177,6 +178,42 @@ def main() -> int:
         print(f"   combined act rule with this bar: {sum(combined)} months, {len(c_eps)} episodes, "
               f"{deep} caught >20% drawdowns\n")
 
+        rule_rows.append({
+            "k": k,
+            "label": ("≥ 1 of 3 (current)" if k == 1 else f"≥ {k} of 3"),
+            "active_months": active,
+            "active_pct": round(100 * active / len(isos)),
+            "episodes": len(eps),
+            "recessions_caught": caught,
+            "false_alarm_episodes": false_alarms,
+            "cond_median_pct": round(cond_med, 1) if cond_med is not None else None,
+            "combined_episodes": len(c_eps),
+            "combined_deep_drawdowns": deep,
+        })
+
+    payload = {
+        "computed_as_of": utc_now_iso(),
+        "sample_start": isos[0], "sample_end": isos[-1],
+        "sample_months": len(isos), "recession_count": len(rec_starts),
+        "base_median_pct": round(base_med, 1), "base_hit_pct": round(base_hit),
+        "current_k": 1,
+        "core_note": (
+            "Point-in-time 1970–2026, reconstructed on the three status indicators with clean "
+            "free history (yield curve, Sahm, labour); HY spreads, PMI, and LEI have no free "
+            "history to reconstruct. Recession capture = fired within 12 months before an NBER "
+            "onset. The live lens ORs all six, so it fires somewhat more than this core."),
+        "finding": (
+            "Raising the bar is counterproductive: recession capture and combined-rule drawdown "
+            "protection both fall, because the core indicators lead by different amounts and "
+            "rarely align before onset. Specificity comes from the Lens 3 confirmation gate, not "
+            "a higher Lens 1 bar. The 1-of (worst-of) bar is kept; the slots show the depth."),
+        "memo_url": ("https://github.com/phuazz/market-regime-dashboard/blob/main/reviews/"
+                     "2026-07-04_lens1-firing-bar-calibration.md"),
+        "rules": rule_rows,
+    }
+    out = DATA_DIR / "lens1_calibration.json"
+    dump_json(out, payload)
+    print(f"wrote {out.relative_to(ROOT)} ({out.stat().st_size:,} bytes)")
     return 0
 
 

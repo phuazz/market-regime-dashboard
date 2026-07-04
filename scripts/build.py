@@ -54,6 +54,8 @@ def main() -> int:
         if (DATA_DIR / "forward_returns.json").exists() else None,
         "signal_map": load_json("signal_map.json")
         if (DATA_DIR / "signal_map.json").exists() else None,
+        "lens1_calibration": load_json("lens1_calibration.json")
+        if (DATA_DIR / "lens1_calibration.json").exists() else None,
     }
     # "</" is escaped so no JSON string can terminate the surrounding
     # <script> element early; "<\/" is an identical string in JSON.

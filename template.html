@@ -190,6 +190,15 @@ a:hover { text-decoration: underline; }
 .fwd-tile-big { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--t1); }
 .fwd-tile-lab { font-size: 10px; color: var(--t3); margin-top: 2px; line-height: 1.35; }
 .fwd-subhead { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--t3); margin: 16px 0 2px; }
+
+/* Lens 1 firing-bar calibration table */
+.cal-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
+.cal-table th { text-align: right; font-weight: 600; color: var(--t3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px 6px; border-bottom: 1px solid var(--bd2); }
+.cal-table th:first-child, .cal-table td:first-child { text-align: left; }
+.cal-table td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--bd); font-family: var(--mono); }
+.cal-table td:first-child { font-family: var(--sans); }
+.cal-table tr.cal-current td { background: var(--g-bg); font-weight: 700; color: var(--t1); }
+.cal-table tr.cal-fade td { color: var(--t3); }
 @media (max-width: 620px) { .fwd-hero-body { grid-template-columns: 1fr; } .fwd-tiles { grid-template-columns: 1fr; } }
 
 /* Error strip */
@@ -354,6 +363,17 @@ a:hover { text-decoration: underline; }
       <div id="map-chart" class="plot-block" style="height:340px" role="img"
            aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></div>
       <div class="chart-note" id="map-note"></div>
+    </div>
+  </section>
+
+  <section class="card" id="cal-card" style="display:none">
+    <div class="card-head">
+      <div class="card-title">Design note · why Lens 1 fires on a single indicator</div>
+      <div class="card-sub">A filed point-in-time calibration (1970–2026) behind the worst-of firing rule. Raising the bar looks prudent but is counterproductive.</div>
+    </div>
+    <div class="card-body">
+      <div id="cal-table"></div>
+      <div class="card-foot" id="cal-foot"></div>
     </div>
   </section>
 
@@ -1118,6 +1138,39 @@ function renderMap(map) {
   /* Card already revealed before plotting (see top of renderMap). */
 }
 
+function renderLens1Calibration(cal) {
+  if (!cal || !cal.rules) return;
+  const wrap = document.getElementById("cal-table");
+  wrap.replaceChildren();
+  const table = el("table", "cal-table");
+  const head = el("tr");
+  for (const c of ["Lens 1 firing rule", "Months active", "Recessions caught",
+                   "False alarms", "Deep drawdowns caught (act rule)"]) {
+    head.appendChild(el("th", null, c));
+  }
+  table.appendChild(head);
+  for (const r of cal.rules) {
+    const tr = el("tr", r.k === cal.current_k ? "cal-current" : "cal-fade");
+    tr.appendChild(el("td", null, r.label));
+    tr.appendChild(el("td", null, r.active_months + " (" + r.active_pct + "%)"));
+    tr.appendChild(el("td", null, r.recessions_caught + " of " + cal.recession_count));
+    tr.appendChild(el("td", null, String(r.false_alarm_episodes)));
+    tr.appendChild(el("td", null, String(r.combined_deep_drawdowns)));
+    table.appendChild(tr);
+  }
+  wrap.appendChild(table);
+
+  const foot = document.getElementById("cal-foot");
+  foot.replaceChildren();
+  foot.appendChild(document.createTextNode(cal.finding + " " + cal.core_note + " "));
+  const link = el("a", null, "Full calibration memo ↗");
+  link.href = cal.memo_url; link.target = "_blank"; link.rel = "noopener";
+  foot.appendChild(link);
+  foot.appendChild(document.createTextNode(
+    " · computed " + formatIsoInstant(cal.computed_as_of) + "."));
+  document.getElementById("cal-card").style.display = "block";
+}
+
 /* ------------------------------------------------------------------ */
 /* Lens 3 chart: Plotly with unified hover, per the design.md chart DNA.  */
 
@@ -1189,6 +1242,7 @@ function render(data) {
   }
   if (data.forward_returns) renderForward(data.forward_returns);
   if (data.signal_map) renderMap(data.signal_map);
+  if (data.lens1_calibration) renderLens1Calibration(data.lens1_calibration);
   document.getElementById("build-stamp").textContent = data.generated_at
     ? "Page generated " + formatIsoInstant(data.generated_at) + " by scripts/build.py"
     : "Development preview — data loaded via fetch fallback from data/.";
@@ -1220,10 +1274,12 @@ if (window.__DATA__) {
     fetchJson("data/forward_returns.json").catch(() => null),  /* optional panel */
     fetchJson("data/signal_map.json").catch(() => null),       /* optional map */
     fetchJson("data/thresholds.json").catch(() => null),       /* chart threshold lines */
+    fetchJson("data/lens1_calibration.json").catch(() => null),/* optional design note */
   ])
-    .then(([lens1, lens2, lens3, forward, map, thresholds]) =>
+    .then(([lens1, lens2, lens3, forward, map, thresholds, cal]) =>
       render({ lens1: lens1, lens2: lens2, lens3: lens3, forward_returns: forward,
-               signal_map: map, thresholds: thresholds, generated_at: null }))
+               signal_map: map, thresholds: thresholds, lens1_calibration: cal,
+               generated_at: null }))
     .catch((error) =>
       showError(
         "Data failed to load (" + error.message + "). Serve the project root — for example " +

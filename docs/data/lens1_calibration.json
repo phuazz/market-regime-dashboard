@@ -1,0 +1,51 @@
+{
+  "computed_as_of": "2026-07-04T11:36:05Z",
+  "sample_start": "1970-09-30",
+  "sample_end": "2026-07-02",
+  "sample_months": 671,
+  "recession_count": 8,
+  "base_median_pct": 11.2,
+  "base_hit_pct": 76,
+  "current_k": 1,
+  "core_note": "Point-in-time 1970–2026, reconstructed on the three status indicators with clean free history (yield curve, Sahm, labour); HY spreads, PMI, and LEI have no free history to reconstruct. Recession capture = fired within 12 months before an NBER onset. The live lens ORs all six, so it fires somewhat more than this core.",
+  "finding": "Raising the bar is counterproductive: recession capture and combined-rule drawdown protection both fall, because the core indicators lead by different amounts and rarely align before onset. Specificity comes from the Lens 3 confirmation gate, not a higher Lens 1 bar. The 1-of (worst-of) bar is kept; the slots show the depth.",
+  "memo_url": "https://github.com/phuazz/market-regime-dashboard/blob/main/reviews/2026-07-04_lens1-firing-bar-calibration.md",
+  "rules": [
+    {
+      "k": 1,
+      "label": "≥ 1 of 3 (current)",
+      "active_months": 207,
+      "active_pct": 31,
+      "episodes": 15,
+      "recessions_caught": 6,
+      "false_alarm_episodes": 9,
+      "cond_median_pct": 11.9,
+      "combined_episodes": 17,
+      "combined_deep_drawdowns": 7
+    },
+    {
+      "k": 2,
+      "label": "≥ 2 of 3",
+      "active_months": 161,
+      "active_pct": 24,
+      "episodes": 13,
+      "recessions_caught": 3,
+      "false_alarm_episodes": 11,
+      "cond_median_pct": 11.9,
+      "combined_episodes": 13,
+      "combined_deep_drawdowns": 5
+    },
+    {
+      "k": 3,
+      "label": "≥ 3 of 3",
+      "active_months": 8,
+      "active_pct": 1,
+      "episodes": 2,
+      "recessions_caught": 0,
+      "false_alarm_episodes": 2,
+      "cond_median_pct": -19.2,
+      "combined_episodes": 2,
+      "combined_deep_drawdowns": 2
+    }
+  ]
+}
