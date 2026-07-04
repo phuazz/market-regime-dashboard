@@ -12,7 +12,7 @@ plateaus to point-optimised thresholds.
 ## Question
 
 Which composite alarm level (share of froth gauges triggered) should arm
-Lens 2 in the act rule — 50, 62.5, 75, or 87.5 percent — judged by S&P 500
+Lens 2 in the risk-reduction signal — 50, 62.5, 75, or 87.5 percent — judged by S&P 500
 forward returns over 1/3/6/12-month horizons, macro-fund style?
 
 ## Method
@@ -62,7 +62,7 @@ Signal episodes that mattered:
   exactly the episodes that matter.
 - **False arms absorbed by design**: 1991-98 and 2003-04 melt-ups, 2016-18,
   2020-08 — strong positive forwards, but Lens 3 never confirmed a bear
-  cross in the window, so the act rule stayed silent. The one costly joint
+  cross in the window, so the risk-reduction signal stayed silent. The one costly joint
   false positive: 2018-06 arm (57%) plus the brief 2018-12 cross, ahead of
   the +29% 2019 rally. The 2001-02 arms (60%) were post-crash
   loose-money reads with bad forwards — a reminder the composite is not a
@@ -87,7 +87,7 @@ wider gauge set where unanimity is structurally rarer.
   2000-window arm, and with the IPO gauge live it is the modern
   equivalent of the 4-of-7 line that marked both 2021 arms. 50% remains
   visible on the dashboard as the composite share itself (a de facto
-  watch level) without arming the act rule through every melt-up.
+  watch level) without arming the risk-reduction signal through every melt-up.
 
 ## Recommendation
 

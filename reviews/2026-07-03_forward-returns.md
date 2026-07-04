@@ -8,7 +8,7 @@ calibration (2026-07-03) and reuses its point-in-time machinery.
 ## Question
 
 What have S&P 500 forward 3/6/12-month returns looked like when each lens
-— and the combined act rule — was active, versus base rates (SPEC.md
+— and the risk-reduction signal — was active, versus base rates (SPEC.md
 section 7)?
 
 ## Method
@@ -17,7 +17,7 @@ Point-in-time monthly grid from 1970 (bounded by stored daily S&P closes).
 Signals: Lens 1 recession core (yield-curve re-steepening window from
 1982, real-time Sahm at 0.50, labour momentum — HY/PMI/LEI excluded, no
 free history), Lens 2 composite at the adopted 62.5% alarm (from 1990),
-Lens 3 bear trigger (50/150 SMA with slope confirmation), and the act rule
+Lens 3 bear trigger (50/150 SMA with slope confirmation), and the risk-reduction signal
 ((L1 or L2) and L3), with unavailable arms treated as quiet — which only
 removes historical signals, never adds them. The three pre-registered
 silent-failure mitigations apply (expanding/absolute triggers; per-episode
@@ -30,7 +30,7 @@ reporting; vintage and publication-lag caveats).
 | Lens 1 core | 207 / 15 | +11.9% / 75% | +11.2% / 76% |
 | Lens 2 at 62.5% | 36 / 16 | +9.0% / 72% | +12.0% / 80% |
 | Lens 3 bear | 123 / 37 | +10.6% / 67% | +11.2% / 76% |
-| Combined act | 57 / 17 | +10.7% / 61% | +11.2% / 76% |
+| Risk-reduction signal | 57 / 17 | +10.7% / 61% | +11.2% / 76% |
 
 Combined-rule episodes, the decision-relevant view: onset at 2000-10 /
 2001-01 / 2001-07 / 2002-05 (forward 12m −25.9 / −17.3 / −24.7 / −9.7%)

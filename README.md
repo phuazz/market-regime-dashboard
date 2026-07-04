@@ -17,7 +17,7 @@ from public data. No proprietary third-party values are reproduced.
 https://phuazz.github.io/market-regime-dashboard/** with scheduled GitHub
 Actions refreshes. All three lenses are live: Lens 1 (seven recession-risk
 indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
-= share triggered, alarm level pending confirmation), and Lens 3 (50-day vs
+= share triggered, alarm confirmed at 62.5%), and Lens 3 (50-day vs
 150-day SMA with an inline-SVG chart; Yahoo feed cross-checked against FRED
 `SP500` on every run). The combined read is live: the Lens 2 alarm was
 adopted at 62.5% (5 of 8 gauges) on 2026-07-03 from the filed calibration
@@ -34,9 +34,12 @@ Lens 2 alarm crossings, and risk-reduction-signal strips; regenerate with
 section 8's 2006 so the dot-com episode — the strongest signal case —
 stays visible.
 
-All status thresholds are independently chosen proposed defaults, held in
-`data/thresholds.json` and marked in the UI, **pending confirmation by ZH
-before go-live**.
+All status thresholds are independently chosen parameters held in
+`data/thresholds.json`, **confirmed by ZH on 2026-07-03** for the
+proof-of-concept phase (the yield-curve sustained-inversion definition and
+the HY OAS absolute anchors were accepted with documented caveats — see the
+`_meta` block). The Lens 2 alarm and the Lens 1 firing bar are backed by
+filed calibrations in `reviews/`.
 
 ## Automation and publication
 

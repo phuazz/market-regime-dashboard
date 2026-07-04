@@ -7,7 +7,7 @@ reuses their reconstruction machinery.
 
 ## Question
 
-The live act rule fires Lens 1 when *any one* of its indicators reaches
+The live risk-reduction signal fires Lens 1 when *any one* of its indicators reaches
 elevated (the worst-of / 1-of rule). ZH challenged the low bar: does it make
 sense, or should firing require 2+ elevated? Judged point-in-time against
 recession capture, false alarms, forward returns, and combined-rule
@@ -27,7 +27,7 @@ a fortiori.
 
 ## Results
 
-| Lens 1 rule | Active months | Recessions caught (fired ≤12m before onset) | False-alarm episodes | Combined act rule: deep drawdowns caught |
+| Lens 1 rule | Active months | Recessions caught (fired ≤12m before onset) | False-alarm episodes | Risk-reduction signal: deep drawdowns caught |
 |---|---|---|---|---|
 | ≥ 1 of 3 (current) | 207 / 671 (31%) | **6 of 8** | 9 of 15 | **7** (of 17 episodes) |
 | ≥ 2 of 3 | 161 / 671 (24%) | 3 of 8 | 11 of 13 | 5 (of 13) |
@@ -47,7 +47,7 @@ pre-recession window. Requiring 2+ therefore does not sharpen the signal; it
 blinds the lens to recessions where the inputs do not align (capture
 collapses 6/8 → 3/8 → 0/8), while barely improving the false-alarm fraction
 (the survivors are mid-cycle stress episodes where inputs happen to coincide).
-Decisively, in the combined act rule — the only thing acted on — a higher
+Decisively, in the risk-reduction signal — the only thing acted on — a higher
 Lens 1 bar *reduces* deep-drawdown capture (7 → 5 → 2), i.e. it makes the
 framework miss bears.
 

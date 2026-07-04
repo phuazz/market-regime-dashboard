@@ -139,10 +139,8 @@ a:hover { text-decoration: underline; }
 .row-name .qualifier { color: var(--t3); font-weight: 400; }
 .row-desc { font-size: 13px; color: var(--t2); margin-top: 2px; max-width: 640px; }
 .row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
-/* Parameter chip: amber while a threshold awaits ZH confirmation, green
-   once confirmed. Colour follows state, never a class-time default. */
+/* Parameter chip: shown only for an unconfirmed (pending) threshold. */
 .chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; margin-left: 6px; vertical-align: 1px; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); }
-.chip.chip-confirmed { background: var(--g-bg); border-color: rgba(26,135,84,0.2); color: var(--g); }
 .row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
@@ -242,7 +240,7 @@ a:hover { text-decoration: underline; }
   </p>
   <p class="intro-meta">
     Every value is from sourced public data with a primary and secondary source per data point.
-    Every threshold is an independently chosen proposed default, pending confirmation. Nothing on this page is a
+    Every threshold is an independently chosen parameter, confirmed by ZH. Nothing on this page is a
     third-party proprietary figure.
   </p>
 
@@ -881,18 +879,11 @@ function renderLensRows(rowsId, subId, lensData) {
     if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
     const threshold = el("div", "row-threshold", "Threshold: " + ind.threshold);
-    /* Chip only where there is a confirmable parameter block; context rows
-       with no threshold parameters (e.g. SLOOS) carry none. */
+    /* Only flag the exception: an unconfirmed parameter. Confirmed is the
+       default state and carries no chip (that would badge every row). */
     const params = (window.__THRESHOLDS__ || {})[ind.id];
-    if (params && "confirmed_by_zh" in params) {
-      const confirmed = params.confirmed_by_zh === true;
-      const chip = el("span", "chip" + (confirmed ? " chip-confirmed" : ""),
-        confirmed ? "Confirmed parameter" : "Proposed default · pending confirmation");
-      const meta = (window.__THRESHOLDS__ || {})._meta;
-      if (confirmed && meta && meta.confirmed_by_zh_on) {
-        chip.title = "Confirmed by ZH on " + meta.confirmed_by_zh_on;
-      }
-      threshold.appendChild(chip);
+    if (params && params.confirmed_by_zh === false) {
+      threshold.appendChild(el("span", "chip", "Proposed default · pending confirmation"));
     }
     main.appendChild(threshold);
     if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
