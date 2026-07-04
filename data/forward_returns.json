@@ -624,7 +624,7 @@
     },
     {
       "id": "combined_act",
-      "name": "Combined act rule",
+      "name": "Risk-reduction signal",
       "availability_note": "(Lens 1 core OR Lens 2 at alarm) AND Lens 3 confirms. Arms are treated as quiet before a series exists, which only removes historical signals, never adds them.",
       "sample_start": "1970-09-30",
       "sample_end": "2026-07-02",

@@ -179,7 +179,7 @@ def main() -> int:
          "deal-froth eras."),
         ("lens3_bear", "Lens 3 — trend bear trigger",
          "50-day below 150-day with both flat or falling, daily closes from 1970."),
-        ("combined_act", "Combined act rule",
+        ("combined_act", "Risk-reduction signal",
          "(Lens 1 core OR Lens 2 at alarm) AND Lens 3 confirms. Arms are treated as "
          "quiet before a series exists, which only removes historical signals, never "
          "adds them."),

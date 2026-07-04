@@ -21,17 +21,17 @@ indicators), Lens 2 (eight froth gauges plus a SLOOS context row, composite
 150-day SMA with an inline-SVG chart; Yahoo feed cross-checked against FRED
 `SP500` on every run). The combined read is live: the Lens 2 alarm was
 adopted at 62.5% (5 of 8 gauges) on 2026-07-03 from the filed calibration
-study in `reviews/`, and the act rule (Lens 1 elevated or Lens 2 at alarm,
+study in `reviews/`, and the risk-reduction signal (Lens 1 elevated or Lens 2 at alarm,
 confirmed by Lens 3) renders prominently on the page. The current read is
 on the live page. Phase 5 is live: conditional forward-return panels per
-lens and for the act rule (point-in-time reconstruction 1970–2026, filed
+lens and for the risk-reduction signal (point-in-time reconstruction 1970–2026, filed
 in `reviews/2026-07-03_forward-returns.md`; recompute on demand with
 `python scripts/forward_returns.py` — deliberately not in the scheduled
 workflows). Phase 6 is live: the signal map (log-scale S&P 500 from 1990
 with NBER recession shading via verified `USREC`, Lens 1 elevated bands,
-Lens 2 alarm crossings, and act-rule strips; regenerate with
+Lens 2 alarm crossings, and risk-reduction-signal strips; regenerate with
 `python scripts/signal_map.py`). The map starts 1990 rather than SPEC
-section 8's 2006 so the dot-com episode — the strongest act-rule case —
+section 8's 2006 so the dot-com episode — the strongest signal case —
 stays visible.
 
 All status thresholds are independently chosen proposed defaults, held in

@@ -80,6 +80,8 @@ a:hover { text-decoration: underline; }
 
 /* Overall read */
 .combined-note { font-size: 13px; color: var(--t2); padding: 12px 0 4px; max-width: 860px; }
+.combined-record { font-size: 12px; color: var(--t2); margin-top: 8px; padding: 7px 12px; border-left: 3px solid var(--bd-strong); background: var(--bg3); border-radius: 0 var(--radius) var(--radius) 0; max-width: 860px; }
+.combined-record strong { font-family: var(--mono); color: var(--t1); }
 .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--bd); border: 1px solid var(--bd); border-radius: var(--radius-lg); overflow: hidden; margin-top: 12px; }
 .slot { background: var(--bg2); padding: 14px 16px; }
 .slot-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; color: var(--t3); }
@@ -176,7 +178,7 @@ a:hover { text-decoration: underline; }
 .fwd-table .base { color: var(--t3); }
 .fwd-note { font-size: 10.5px; color: var(--t3); margin-top: 8px; border-top: 1px dashed var(--bd); padding-top: 6px; }
 
-/* Combined act rule — the framework's output, given visual primacy. */
+/* Risk-reduction signal — the framework's output, given visual primacy. */
 .fwd-hero { border: 1px solid var(--bd2); border-left: 4px solid var(--r); border-radius: var(--radius); background: linear-gradient(180deg, var(--r-bg) 0%, var(--bg2) 60%); padding: 16px 18px; margin-bottom: 8px; }
 .fwd-hero-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .fwd-hero-title { font-size: 15px; font-weight: 700; color: var(--t1); }
@@ -233,8 +235,8 @@ a:hover { text-decoration: underline; }
   <p class="intro">
     <strong>Recession risk</strong> (is the economy turning?), <strong>market-peak froth</strong>
     (is the market priced and positioned like a top?), and <strong>price trend</strong>
-    (is the market actually rolling over?). A single lens firing is not an act signal:
-    the act rule is Lens&nbsp;1 elevated <strong>or</strong> Lens&nbsp;2 at or above its alarm level,
+    (is the market actually rolling over?). A single lens firing is not the signal:
+    the risk-reduction signal is Lens&nbsp;1 elevated <strong>or</strong> Lens&nbsp;2 at or above its alarm level,
     <strong>then confirmed by</strong> Lens&nbsp;3. When the combination confirms, the action is to
     reduce risk, not liquidate — the signals carry false positives.
   </p>
@@ -249,21 +251,22 @@ a:hover { text-decoration: underline; }
   <section class="card">
     <div class="card-head">
       <div class="card-title">Overall read</div>
-      <div class="card-sub">Act rule: Lens 1 elevated or Lens 2 at alarm, confirmed by Lens 3 — reduce risk, not liquidate.</div>
+      <div class="card-sub">Risk-reduction signal: Lens 1 elevated or Lens 2 at its alarm, confirmed by Lens 3 — reduce risk, not liquidate.</div>
     </div>
     <div class="card-body">
       <div class="combined-banner" id="combined-banner" style="display:none">
         <span class="dot"></span><span id="combined-text"></span>
       </div>
+      <div class="combined-record" id="combined-record" style="display:none"></div>
       <div class="slots" id="slots"></div>
       <p class="combined-note" id="combined-note">
         <strong>When each lens fires:</strong> Lens&nbsp;1 when <em>any one</em> of its six
         status indicators reaches elevated (the worst-of rule; valuation is context and excluded).
         This is a deliberately sensitive bar — each indicator's "elevated" is itself a serious,
-        individually-calibrated recession trigger, and a single lens firing is <em>not</em> an act
+        individually-calibrated recession trigger, and a single lens firing is <em>not</em> the
         signal, so the slots above show the depth (how many indicators are elevated), not just the
         binary. Lens&nbsp;2 fires at the 62.5% froth alarm; Lens&nbsp;3 when the 50-day crosses
-        below the 150-day with both flat or falling. The act signal is Lens&nbsp;1 <em>or</em>
+        below the 150-day with both flat or falling. The risk-reduction signal is Lens&nbsp;1 <em>or</em>
         Lens&nbsp;2, <em>then confirmed by Lens&nbsp;3</em> — unconfirmed arms cost nothing by
         design. Thresholds are independently chosen and confirmed; the Lens&nbsp;2 alarm and the
         Lens&nbsp;1 firing bar are documented in filed calibrations.
@@ -341,7 +344,7 @@ a:hover { text-decoration: underline; }
     </div>
     <div class="card-body">
       <div id="fwd-hero"></div>
-      <div class="fwd-subhead">Input signals feeding the rule</div>
+      <div class="fwd-subhead">The three lenses feeding the signal</div>
       <div class="fwd-grid" id="fwd-grid"></div>
       <div class="card-foot" id="fwd-foot"></div>
     </div>
@@ -350,7 +353,7 @@ a:hover { text-decoration: underline; }
   <section class="card" id="map-card" style="display:none">
     <div class="card-head">
       <div class="card-title">Signal map</div>
-      <div class="card-sub">S&amp;P 500 (log, monthly). Colour tells the escalation: grey recession context, amber where recession-risk (Lens 1 core) was elevated, purple dots where froth (Lens 2) crossed its alarm, red where the act rule actually fired and was confirmed. "Lens 1 core" is the historical reconstruction (yield curve, Sahm, or labour) — a subset of the live seven-indicator lens.</div>
+      <div class="card-sub">S&amp;P 500 (log, monthly). Colour tells the escalation: grey recession context, amber where recession-risk (Lens 1 core) was elevated, purple dots where froth (Lens 2) crossed its alarm, red where the risk-reduction signal fired (confirmed). "Lens 1 core" is the historical reconstruction (yield curve, Sahm, or labour) — a subset of the live seven-indicator lens.</div>
     </div>
     <div class="card-body">
       <div class="chart-legend">
@@ -358,7 +361,7 @@ a:hover { text-decoration: underline; }
         <span><i style="background:rgba(26,26,24,0.10);border:1px solid rgba(26,26,24,0.2);width:14px;height:11px"></i>NBER recession (context)</span>
         <span><i style="background:rgba(180,83,9,0.16);border:1px solid rgba(180,83,9,0.4);width:14px;height:11px"></i>Lens 1 recession-risk elevated</span>
         <span><i style="background:#7c3aed;border-radius:50%;width:9px;height:9px"></i>Lens 2 froth alarm crossing</span>
-        <span><i style="border:1.5px solid #c0392b;background:rgba(192,57,43,0.15);width:14px;height:11px"></i>Act rule fired (confirmed)</span>
+        <span><i style="border:1.5px solid #c0392b;background:rgba(192,57,43,0.15);width:14px;height:11px"></i>Risk-reduction signal fired (confirmed)</span>
       </div>
       <div id="map-chart" class="plot-block" style="height:340px" role="img"
            aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></div>
@@ -545,7 +548,7 @@ function renderCombined(data) {
   let cls, message;
   if (armed.length && lens3Confirms) {
     cls = "combined-act";
-    message = "ACT — reduce risk, not liquidate: " + armed.join(" and ") +
+    message = "RISK-REDUCTION SIGNAL FIRED — reduce risk, not liquidate: " + armed.join(" and ") +
       ", confirmed by the price-trend bear trigger.";
   } else if (armed.length) {
     cls = "combined-armed";
@@ -553,12 +556,32 @@ function renderCombined(data) {
       "; no action until Lens 3 confirms with the trend bear trigger.";
   } else {
     cls = "combined-none";
-    message = "No combined signal — recession risk is not elevated and the froth composite (" +
+    message = "No risk-reduction signal — recession risk is not elevated and the froth composite (" +
       fmtShare(c.share_pct) + "%) is below the " + fmtShare(c.alarm_share_pct) + "% alarm.";
   }
   banner.classList.add(cls);
   banner.style.display = "flex";
   document.getElementById("combined-text").textContent = message;
+
+  /* Compact reliability line, drawn from the filed forward-return record so
+     the live read carries its own track record. Framed as episode counts,
+     not a precise accuracy — the sample is small. */
+  const rec = document.getElementById("combined-record");
+  const fr = data.forward_returns;
+  const cr = fr && fr.signals ? fr.signals.find((s) => s.id === "combined_act") : null;
+  if (cr && cr.tail) {
+    rec.replaceChildren();
+    rec.appendChild(document.createTextNode("Track record since " + cr.sample_start.slice(0, 4) + ": fired "));
+    rec.appendChild(el("strong", null, String(cr.episode_count)));
+    rec.appendChild(document.createTextNode(" times, and preceded a fall worse than 20% within a year "));
+    rec.appendChild(el("strong", null, cr.tail.deep_drawdown_onsets + " of " + cr.episode_count));
+    rec.appendChild(document.createTextNode(
+      " — flagging every major bear in the sample. It is a small sample; specificity comes from " +
+      "requiring the Lens 3 confirmation, so unconfirmed arms cost nothing. Full record below."));
+    rec.style.display = "block";
+  } else {
+    rec.style.display = "none";
+  }
 }
 
 function renderSlots(data) {
@@ -969,7 +992,7 @@ function renderForwardHero(signal) {
   const t = signal.tail || {};
 
   const head = el("div", "fwd-hero-head");
-  head.appendChild(el("div", "fwd-hero-title", "Combined act rule — the framework's output"));
+  head.appendChild(el("div", "fwd-hero-title", "Risk-reduction signal — the framework's output"));
   head.appendChild(el("div", "fwd-hero-tag", "when confirmed: reduce risk, not liquidate"));
   hero.appendChild(head);
   hero.appendChild(el("div", "fwd-hero-meta",
@@ -1083,7 +1106,7 @@ function renderMap(map) {
     const shape = bandShape(span, "rgba(180,83,9,0.16)", 0, 1);
     if (shape) shapes.push(shape);
   }
-  /* Act rule active — the framework's output — as full-height bracketed
+  /* Risk-reduction signal active — the framework's output — as full-height bracketed
      bands (translucent fill plus solid red edges) so each confirmed window
      is legible against the price and stays distinct from the soft Lens 1
      tint it usually sits inside. Rendered above the context tints. */
@@ -1145,7 +1168,7 @@ function renderLens1Calibration(cal) {
   const table = el("table", "cal-table");
   const head = el("tr");
   for (const c of ["Lens 1 firing rule", "Months active", "Recessions caught",
-                   "False alarms", "Deep drawdowns caught (act rule)"]) {
+                   "False alarms", "Deep drawdowns caught (signal)"]) {
     head.appendChild(el("th", null, c));
   }
   table.appendChild(head);
