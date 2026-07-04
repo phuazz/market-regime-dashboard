@@ -248,9 +248,13 @@ a:hover { text-decoration: underline; }
       </div>
       <div class="slots" id="slots"></div>
       <p class="combined-note" id="combined-note">
-        A single lens firing is not an act signal; unconfirmed arms cost nothing by design.
-        The Lens&nbsp;2 alarm level was adopted from a filed point-in-time calibration
-        (1990–2026); every threshold remains an independently chosen parameter.
+        <strong>When each lens fires:</strong> Lens&nbsp;1 when <em>any one</em> of its seven
+        indicators reaches elevated (the worst-of rule; the valuation context row is excluded).
+        Lens&nbsp;2 when the froth composite reaches its 62.5% alarm. Lens&nbsp;3 when the 50-day
+        crosses below the 150-day with both flat or falling. A single lens firing is not an act
+        signal — only Lens&nbsp;1 <em>or</em> Lens&nbsp;2, then confirmed by Lens&nbsp;3, and
+        unconfirmed arms cost nothing by design. The Lens&nbsp;2 alarm was adopted from a filed
+        1990–2026 calibration; every threshold is an independently chosen parameter, confirmed.
       </p>
     </div>
   </section>
@@ -334,15 +338,15 @@ a:hover { text-decoration: underline; }
   <section class="card" id="map-card" style="display:none">
     <div class="card-head">
       <div class="card-title">Signal map</div>
-      <div class="card-sub">S&amp;P 500 (log scale, monthly closes) with NBER recessions, Lens 1 elevated bands, Lens 2 alarm crossings, and act-rule confirmations — the filed reconstructions, rendered spatially.</div>
+      <div class="card-sub">S&amp;P 500 (log, monthly). Colour tells the escalation: grey recession context, amber where recession-risk (Lens 1 core) was elevated, purple dots where froth (Lens 2) crossed its alarm, red where the act rule actually fired and was confirmed. "Lens 1 core" is the historical reconstruction (yield curve, Sahm, or labour) — a subset of the live seven-indicator lens.</div>
     </div>
     <div class="card-body">
       <div class="chart-legend">
         <span><i style="border-color:#1a1a18"></i>S&amp;P 500 (log)</span>
-        <span><i style="border-color:rgba(26,26,24,0.25);border-top-width:8px"></i>NBER recession</span>
-        <span><i style="border-color:rgba(192,57,43,0.35);border-top-width:8px"></i>Lens 1 elevated (core)</span>
-        <span><i style="border-color:#b45309;border-top-width:6px"></i>● Lens 2 alarm crossing</span>
-        <span><i style="border:1.25px solid #c0392b;background:rgba(192,57,43,0.15);width:14px;height:11px"></i>Act rule active</span>
+        <span><i style="background:rgba(26,26,24,0.10);border:1px solid rgba(26,26,24,0.2);width:14px;height:11px"></i>NBER recession (context)</span>
+        <span><i style="background:rgba(180,83,9,0.16);border:1px solid rgba(180,83,9,0.4);width:14px;height:11px"></i>Lens 1 recession-risk elevated</span>
+        <span><i style="background:#7c3aed;border-radius:50%;width:9px;height:9px"></i>Lens 2 froth alarm crossing</span>
+        <span><i style="border:1.5px solid #c0392b;background:rgba(192,57,43,0.15);width:14px;height:11px"></i>Act rule fired (confirmed)</span>
       </div>
       <div id="map-chart" class="plot-block" style="height:340px" role="img"
            aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></div>
@@ -1029,13 +1033,16 @@ function renderMap(map) {
       y0: y0, y1: y1, fillcolor: fill, line: { width: 0 }, layer: "below",
     };
   };
+  /* Distinct hues per overlay so the lenses do not blur together:
+     grey = recession context, amber = Lens 1 recession-risk input,
+     red = the confirmed act output (below), purple dots = Lens 2. */
   const shapes = [];
   for (const span of map.recessions) {
     const shape = bandShape(span, "rgba(26,26,24,0.07)", 0, 1);
     if (shape) shapes.push(shape);
   }
   for (const span of map.lens1_spans) {
-    const shape = bandShape(span, "rgba(192,57,43,0.10)", 0, 1);
+    const shape = bandShape(span, "rgba(180,83,9,0.16)", 0, 1);
     if (shape) shapes.push(shape);
   }
   /* Act rule active — the framework's output — as full-height bracketed
@@ -1061,8 +1068,8 @@ function renderMap(map) {
       x: map.lens2_crossings.map((c) => c.iso),
       y: map.lens2_crossings.map((c) => c.close),
       type: "scatter", mode: "markers", name: "Lens 2 alarm crossing",
-      marker: { color: "#b45309", size: 8, line: { color: "#ffffff", width: 1.2 } },
-      hovertemplate: "Lens 2 crossed the alarm<br>%{x|%b %Y} · S&P %{y:,.0f}<extra></extra>",
+      marker: { color: "#7c3aed", size: 9, line: { color: "#ffffff", width: 1.4 } },
+      hovertemplate: "Lens 2 froth crossed its 62.5% alarm<br>%{x|%b %Y} · S&P %{y:,.0f}<extra></extra>",
     },
   ];
   Plotly.newPlot(plot, traces, {
