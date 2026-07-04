@@ -342,7 +342,7 @@ a:hover { text-decoration: underline; }
         <span><i style="border-color:rgba(26,26,24,0.25);border-top-width:8px"></i>NBER recession</span>
         <span><i style="border-color:rgba(192,57,43,0.35);border-top-width:8px"></i>Lens 1 elevated (core)</span>
         <span><i style="border-color:#b45309;border-top-width:6px"></i>● Lens 2 alarm crossing</span>
-        <span><i style="border-color:#c0392b;border-top-width:4px"></i>Act rule active</span>
+        <span><i style="border:1.25px solid #c0392b;background:rgba(192,57,43,0.15);width:14px;height:11px"></i>Act rule active</span>
       </div>
       <div id="map-chart" class="plot-block" style="height:340px" role="img"
            aria-label="S&amp;P 500 log-scale signal map with recession shading and lens signal overlays"></div>
@@ -1038,9 +1038,18 @@ function renderMap(map) {
     const shape = bandShape(span, "rgba(192,57,43,0.10)", 0, 1);
     if (shape) shapes.push(shape);
   }
+  /* Act rule active — the framework's output — as full-height bracketed
+     bands (translucent fill plus solid red edges) so each confirmed window
+     is legible against the price and stays distinct from the soft Lens 1
+     tint it usually sits inside. Rendered above the context tints. */
   for (const span of map.act_spans) {
-    const shape = bandShape(span, "#c0392b", 0, 0.03);
-    if (shape) { shape.layer = "above"; shapes.push(shape); }
+    const edges = spanEdges(span);
+    if (!edges) continue;
+    shapes.push({
+      type: "rect", xref: "x", yref: "paper", x0: edges[0], x1: edges[1],
+      y0: 0, y1: 1, fillcolor: "rgba(192,57,43,0.15)",
+      line: { color: "#c0392b", width: 1.25 }, layer: "above",
+    });
   }
 
   const traces = [
