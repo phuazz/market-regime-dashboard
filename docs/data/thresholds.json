@@ -2,7 +2,8 @@
   "_meta": {
     "description": "Independently chosen status parameters. All confirmed by ZH on 2026-07-03 for the proof-of-concept phase (SPEC.md section 3). Every threshold is an independent construction from public data; none is inherited from any third party. Published public-research conventions (the Sahm 0.50 trigger, the PMI 50 expansion line) are cited where used. Two carry documented open caveats accepted as-is: the sustained-inversion definition (yield_curve_10y3m; the 60-observation rule excludes the choppy 1989 and 2019 inversions) and the HY OAS absolute anchors (hy_credit_spreads; used because the free FRED endpoint serves the ICE series only from mid-2023). Re-open either if a fuller data source is added.",
     "last_updated": "2026-07-03",
-    "confirmed_by_zh_on": "2026-07-03"
+    "confirmed_by_zh_on": "2026-07-03",
+    "lens1_firing_rule": "Lens 1 fires when any one status indicator reaches elevated (worst-of). Kept after the 2026-07-04 filed calibration (reviews/2026-07-04_lens1-firing-bar-calibration.md): raising the bar degrades recession capture and combined-rule drawdown protection because the core indicators lead by different amounts. Valuation is context and excluded."
   },
   "yield_curve_10y3m": {
     "watch_rule": "Latest spread below zero (curve inverted).",

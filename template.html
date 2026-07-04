@@ -248,13 +248,16 @@ a:hover { text-decoration: underline; }
       </div>
       <div class="slots" id="slots"></div>
       <p class="combined-note" id="combined-note">
-        <strong>When each lens fires:</strong> Lens&nbsp;1 when <em>any one</em> of its seven
-        indicators reaches elevated (the worst-of rule; the valuation context row is excluded).
-        Lens&nbsp;2 when the froth composite reaches its 62.5% alarm. Lens&nbsp;3 when the 50-day
-        crosses below the 150-day with both flat or falling. A single lens firing is not an act
-        signal — only Lens&nbsp;1 <em>or</em> Lens&nbsp;2, then confirmed by Lens&nbsp;3, and
-        unconfirmed arms cost nothing by design. The Lens&nbsp;2 alarm was adopted from a filed
-        1990–2026 calibration; every threshold is an independently chosen parameter, confirmed.
+        <strong>When each lens fires:</strong> Lens&nbsp;1 when <em>any one</em> of its six
+        status indicators reaches elevated (the worst-of rule; valuation is context and excluded).
+        This is a deliberately sensitive bar — each indicator's "elevated" is itself a serious,
+        individually-calibrated recession trigger, and a single lens firing is <em>not</em> an act
+        signal, so the slots above show the depth (how many indicators are elevated), not just the
+        binary. Lens&nbsp;2 fires at the 62.5% froth alarm; Lens&nbsp;3 when the 50-day crosses
+        below the 150-day with both flat or falling. The act signal is Lens&nbsp;1 <em>or</em>
+        Lens&nbsp;2, <em>then confirmed by Lens&nbsp;3</em> — unconfirmed arms cost nothing by
+        design. Thresholds are independently chosen and confirmed; the Lens&nbsp;2 alarm and the
+        Lens&nbsp;1 firing bar are documented in filed calibrations.
       </p>
     </div>
   </section>
@@ -438,26 +441,40 @@ function worstStatus(indicators) {
   );
 }
 
+/* Depth, not just the worst status: a lens elevated off one indicator is a
+   far weaker state than one elevated across four, and the worst-of rule
+   alone hides that. */
+function statusCounts(indicators) {
+  const status = indicators.filter((i) => i.status in STATUS_RANK);
+  return {
+    total: status.length,
+    elevated: status.filter((i) => i.status === "elevated").length,
+    watch: status.filter((i) => i.status === "watch").length,
+    context: indicators.length - status.length,
+  };
+}
+
 function lensSlotDef(label, lensData, pendingText) {
   if (!lensData || !lensData.indicators || !lensData.indicators.length) {
     return { label: label, status: "pending", statusText: "Pending", detail: pendingText };
   }
   const status = worstStatus(lensData.indicators);
-  const statusCount = lensData.indicators.filter((i) => i.status in STATUS_RANK).length;
-  const contextCount = lensData.indicators.length - statusCount;
+  const n = statusCounts(lensData.indicators);
   const worstRows = lensData.indicators
     .filter((i) => i.status === status)
     .map((i) => i.name)
     .join(", ");
-  return {
-    label: label,
-    status: status,
-    statusText: STATUS_LABEL[status],
-    detail:
-      statusCount + (statusCount === 1 ? " status indicator" : " status indicators") +
-      (contextCount ? " · " + contextCount + " context row" : "") +
-      (status !== "benign" ? " · driven by: " + worstRows : ""),
-  };
+  let detail;
+  if (status === "elevated") {
+    detail = n.elevated + " of " + n.total + " indicators elevated" +
+      (n.watch ? ", " + n.watch + " on watch" : "") + " · " + worstRows;
+  } else if (status === "watch") {
+    detail = n.watch + " of " + n.total + " on watch, none elevated · " + worstRows;
+  } else {
+    detail = "all " + n.total + " benign, none elevated" +
+      (n.context ? " · " + n.context + " context row" : "");
+  }
+  return { label: label, status: status, statusText: STATUS_LABEL[status], detail: detail };
 }
 
 /* Shares can be fractional (62.5% = 5 of 8); show one decimal only when needed. */
@@ -496,11 +513,12 @@ function renderCombined(data) {
     return;
   }
   const c = data.lens2.composite;
+  const n1 = statusCounts(data.lens1.indicators);
   const lens1Fires = worstStatus(data.lens1.indicators) === "elevated";
   const lens2Fires = c.alarm_state === "at_or_above";
   const lens3Confirms = worstStatus(data.lens3.indicators) === "elevated";
   const armed = [];
-  if (lens1Fires) armed.push("recession risk is elevated");
+  if (lens1Fires) armed.push("recession risk is elevated (" + n1.elevated + " of " + n1.total + " indicators)");
   if (lens2Fires) armed.push("the froth composite is at alarm");
 
   banner.classList.remove("combined-none", "combined-armed", "combined-act");
