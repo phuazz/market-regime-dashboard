@@ -1,4 +1,10 @@
-# Date arithmetic only through a date library (CLAUDE.md). No other runtime
-# dependencies: the pipeline deliberately uses the standard library plus
-# python-dateutil so GitHub Actions installs stay minimal.
+# Runtime dependencies for the data pipeline. Kept small so GitHub Actions
+# installs stay fast; all date arithmetic goes through a date library (CLAUDE.md).
+#   python-dateutil — date arithmetic.
+#   xlrd            — reads the AAII sentiment .xls workbook (xlrd 2.x reads
+#                     .xls only, which is the format AAII serves).
+#                     scripts/sources/sentiment.py, scripts/alarm_calibration.py.
+#   openpyxl        — reads .xlsx workbooks in scripts/alarm_calibration.py.
 python-dateutil>=2.9
+xlrd>=2.0.1
+openpyxl>=3.1
