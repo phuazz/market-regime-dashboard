@@ -1,0 +1,44 @@
+# Emails a weekly "what changed" digest for the three-lens dashboard. It reads
+# the current data files and their committed state roughly seven days ago, then
+# reports the combined risk-reduction signal, the Lens 2 froth composite, and
+# any indicator status flips. Read-only: it never writes data or docs.
+name: Weekly digest
+
+on:
+  schedule:
+    # 01:00 UTC every Saturday = 09:00 Singapore (SGT is UTC+8), a weekend read.
+    # The Friday daily refresh (23:30 UTC Fri) has committed ~1.5h earlier, so
+    # this reflects the full US trading week through Friday's close. No US data
+    # lands over the weekend, so Saturday and Sunday would carry identical
+    # content; switch dow 6 -> 0 for a Sunday send.
+    - cron: "0 1 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the digest can read the data files as of ~7 days ago.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run offline tests
+        run: python -m unittest discover -s tests
+
+      - name: Build and send the weekly digest
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python scripts/weekly_digest.py --send

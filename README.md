@@ -44,7 +44,7 @@ filed calibrations in `reviews/`.
 ## Automation and publication
 
 GitHub Pages serves `docs/` from `main` at
-https://phuazz.github.io/market-regime-dashboard/. Two workflows keep it
+https://phuazz.github.io/market-regime-dashboard/. Three workflows keep it
 fresh (`.github/workflows/`):
 
 - **daily.yml** — weekdays 23:30 UTC (07:30 Singapore next morning), after
@@ -53,8 +53,16 @@ fresh (`.github/workflows/`):
   Shiller CAPE. Monthly prints land on scattered days, so a weekly poll
   catches each within seven days; the history files append at most one
   point per reference month.
+- **weekly_digest.yml** — Saturdays 01:00 UTC (09:00 Singapore), a weekend read:
+  emails a "what changed" digest. `scripts/weekly_digest.py` diffs the three
+  lens files against their committed state ~7 days ago and reports the
+  combined risk-reduction signal, the Lens 2 composite, and any indicator
+  status flips, mirroring the dashboard's own roll-up. Read-only; sends via
+  Gmail SMTP using three repository secrets (`MAIL_USERNAME`, `MAIL_PASSWORD`,
+  `MAIL_TO`) so no address is committed. Preview locally with
+  `python scripts/weekly_digest.py --print`.
 
-Both run the offline tests first, commit only when data changed, and mark
+The data workflows run the offline tests first, commit only when data changed, and mark
 the run failed if any builder failed — in that case the affected rows keep
 their previous values (stale-but-sourced, with the run visible in the
 Actions tab). The `reference/` folder and this machine's local files are
