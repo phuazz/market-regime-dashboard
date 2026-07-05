@@ -55,11 +55,15 @@ fresh (`.github/workflows/`):
   point per reference month.
 - **weekly_digest.yml** — Saturdays 01:00 UTC (09:00 Singapore), a weekend read:
   emails a "what changed" digest. `scripts/weekly_digest.py` diffs the three
-  lens files against their committed state ~7 days ago and reports the
-  combined risk-reduction signal, the Lens 2 composite, and any indicator
-  status flips, mirroring the dashboard's own roll-up. Read-only; sends via
-  Gmail SMTP using three repository secrets (`MAIL_USERNAME`, `MAIL_PASSWORD`,
-  `MAIL_TO`) so no address is committed. Preview locally with
+  lens files against their committed state ~7 days ago and reports a one-line
+  takeaway, the week's top movers (ranked, with direction), and a full by-lens
+  breakdown — each indicator's value, weekly change, distance to its trigger,
+  and status — mirroring the dashboard's own roll-up. Distance-to-trigger is
+  shown only where the value is the quantity the threshold tests (see
+  `INDICATOR_META`, cross-checked against `thresholds.json`); status-only
+  elsewhere, never a fabricated distance. Read-only; sends via Gmail SMTP using
+  three repository secrets (`MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_TO`) so no
+  address is committed. Preview locally with
   `python scripts/weekly_digest.py --print`.
 
 The data workflows run the offline tests first, commit only when data changed, and mark

@@ -1,13 +1,25 @@
 """Weekly regime-dashboard digest.
 
 Diffs the three lens data files against their committed state roughly seven days
-ago (read out of git history) and produces a short email describing what moved:
-the combined risk-reduction signal, the Lens 2 froth composite, and any
-indicator status flips across the three lenses.
+ago (read out of git history) and produces an email that gives, at a glance, a
+sense of what moved this week:
+
+  1. a one-line takeaway synthesising the week;
+  2. "this week's moves" — the top few movers, ranked, with direction and a
+     one-line rationale (arrow glyph = direction, colour = improving/worsening);
+  3. a full by-lens breakdown — every indicator with its value, weekly change,
+     distance to its nearest trigger, and status.
 
 The roll-up logic here mirrors template.html exactly (STATUS_RANK, worstStatus,
 lens2SlotDef, renderCombined) so the email reports the same states the live
 dashboard shows. If that logic changes on the page, change it here too.
+
+Distance-to-trigger is shown as a number only where the displayed value is the
+quantity the threshold tests (INDICATOR_META below, cross-checked against
+data/thresholds.json). Where the trigger is a percentile or a derived quantity
+the raw value does not equal (LEI six-month change, the multi-factor labour
+read, IPO annualised pace), no distance is claimed — status only. No fabricated
+precision.
 
 Date handling (CLAUDE.md): the seven-day look-back is a datetime.timedelta.
 timedelta rolls across month and year boundaries without any manual month
@@ -59,6 +71,39 @@ STATUS_LABEL = {
 
 # Short unit suffixes for value formatting in the email body.
 UNIT_SUFFIX = {"pct": "%", "pp": " pp", "usd_bn": "bn", "index": "", "ratio": "", "bp": " bp"}
+
+# Per-indicator interpretation, cross-checked against data/thresholds.json.
+#   polarity: +1 if a higher value is deterioration (toward recession / froth),
+#             -1 if a lower value is deterioration, 0 if the displayed value is
+#             not itself the signal (weekly move shown neutrally, no distance).
+#   trigger : how to measure distance to the nearest firing line, in the value's
+#             own units, or None where the trigger is a percentile / derived
+#             quantity the raw value does not equal.
+#             ("level", L, "below"|"above", name) — benign side is below/above L.
+#             ("chart_line", name)                — line is the indicator's own
+#                                                    chart_line.value (native units).
+#   delta_pct: show the weekly change as a percentage of the prior level.
+INDICATOR_META = {
+    # Lens 1 — recession risk
+    "yield_curve_10y3m":         {"polarity": -1, "trigger": ("level", 0.0, "above", "inversion")},
+    "sahm_rule":                 {"polarity": 1,  "trigger": ("level", 0.35, "below", "the watch line")},
+    "hy_credit_spreads":         {"polarity": 1,  "trigger": ("level", 4.0, "below", "the watch line")},
+    "pmi_manufacturing_proxy":   {"polarity": -1, "trigger": ("level", 50.0, "above", "the 50 line")},
+    "leading_indicators":        {"polarity": 0,  "trigger": None},
+    "labour_market":             {"polarity": 1,  "trigger": None},
+    "shiller_cape":              {"polarity": 0,  "trigger": None},
+    # Lens 2 — market-peak froth
+    "consumer_confidence_proxy": {"polarity": 1,  "trigger": ("chart_line", "the 75th-pct trigger")},
+    "retail_euphoria_aaii":      {"polarity": 1,  "trigger": ("chart_line", "the top-decile line")},
+    "manager_bullishness_naaim": {"polarity": 1,  "trigger": ("level", 90.0, "below", "the 90 all-in line")},
+    "growth_expectation_pe":     {"polarity": 1,  "trigger": ("chart_line", "the 90th-pct trigger")},
+    "deal_ipo_froth":            {"polarity": 0,  "trigger": None},
+    "rule_of_20":                {"polarity": 1,  "trigger": None},
+    "value_vs_growth":           {"polarity": 1,  "trigger": ("level", 10.0, "below", "the 10pp trigger")},
+    "credit_complacency_nfci":   {"polarity": -1, "trigger": ("chart_line", "the complacent tail")},
+    # Lens 3 — price trend
+    "sma_trend_sp500":           {"polarity": -1, "trigger": None, "delta_pct": True},
+}
 
 
 # --------------------------------------------------------------------------- #
@@ -209,29 +254,82 @@ def fmt_value(ind: dict) -> str:
     if value is None:
         return "—"
     decimals = ind.get("decimals", 2)
-    text = f"{value:.{decimals}f}"
+    text = f"{value:,.{decimals}f}"  # comma grouping reads index levels cleanly
     if ind.get("signed") and value > 0:
         text = "+" + text
     return text + UNIT_SUFFIX.get(ind.get("unit"), "")
 
 
 # --------------------------------------------------------------------------- #
+# Distance to trigger (headroom)
+# --------------------------------------------------------------------------- #
+def headroom(record: dict):
+    """Return (room, line_name) or None.
+
+    room > 0 means the indicator is that far from its firing line (not yet
+    triggered); room < 0 means it is that far past the line (triggered). Units
+    are the indicator's own. None where no clean single trigger applies.
+    """
+    meta = INDICATOR_META.get(record.get("id"))
+    if not meta or not meta.get("trigger"):
+        return None
+    value = record.get("value")
+    if value is None:
+        return None
+    trig = meta["trigger"]
+    if trig[0] == "level":
+        _, line, benign, name = trig
+        room = (line - value) if benign == "below" else (value - line)
+    elif trig[0] == "chart_line":
+        line = record.get("chart_line")
+        if line is None:
+            return None
+        name = trig[1]
+        room = (line - value) if meta["polarity"] > 0 else (value - line)
+    else:
+        return None
+    return room, name
+
+
+def headroom_text(record: dict):
+    hr = headroom(record)
+    if hr is None:
+        return None
+    room, name = hr
+    decimals = record.get("decimals", 2)
+    mag = f"{abs(room):,.{decimals}f}"
+    return f"{mag} from {name}" if room >= 0 else f"{mag} past {name}"
+
+
+# --------------------------------------------------------------------------- #
 # Snapshot and diff
 # --------------------------------------------------------------------------- #
+def _ind_record(ind: dict) -> dict:
+    chart_line = ind.get("chart_line") or {}
+    return {
+        "id": ind["id"],
+        "name": ind.get("name", ind["id"]),
+        "status": ind.get("status"),
+        "value": ind.get("value"),
+        "value_text": fmt_value(ind),
+        "unit": ind.get("unit"),
+        "signed": ind.get("signed", False),
+        "decimals": ind.get("decimals", 2),
+        "as_of": ind.get("as_of"),
+        "chart_line": chart_line.get("value"),
+    }
+
+
 def snapshot(lens1: dict, lens2: dict, lens3: dict) -> dict:
-    """Compact the three lens files into the fields the digest compares."""
+    """Compact the three lens files into the fields the digest compares.
+
+    Each lensN is an ordered id -> record map (Python dicts preserve insertion
+    order, so iterating yields file/display order).
+    """
     state, message = combined_state(lens1, lens2, lens3)
 
     def index(lens):
-        return {
-            ind["id"]: {
-                "name": ind.get("name", ind["id"]),
-                "status": ind.get("status"),
-                "value_text": fmt_value(ind),
-                "as_of": ind.get("as_of"),
-            }
-            for ind in lens["indicators"]
-        }
+        return {ind["id"]: _ind_record(ind) for ind in lens["indicators"]}
 
     composite = lens2["composite"]
     return {
@@ -240,6 +338,10 @@ def snapshot(lens1: dict, lens2: dict, lens3: dict) -> dict:
         "lens2": index(lens2),
         "lens3": index(lens3),
         "counts1": status_counts(lens1["indicators"]),
+        "lens_status": {
+            "lens1": worst_status(lens1["indicators"]),
+            "lens3": worst_status(lens3["indicators"]),
+        },
         "composite": {
             "share_pct": composite["share_pct"],
             "triggered_count": composite["triggered_count"],
@@ -308,6 +410,183 @@ def diff_snapshots(old: dict | None, new: dict) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- #
+# Weekly moves
+# --------------------------------------------------------------------------- #
+def _delta_text(delta: float, record: dict, is_pct: bool, new_print: bool, arrow: str) -> str:
+    if delta is None:
+        return "—"
+    if arrow == "flat":
+        return "unchanged" if new_print else "no new print"
+    sign = "+" if delta > 0 else "-"
+    if is_pct or record.get("unit") == "pct":
+        return f"{sign}{abs(delta):.1f}% wk" if is_pct else f"{sign}{abs(delta):.{record.get('decimals', 2)}f}% wk"
+    return f"{sign}{abs(delta):.{record.get('decimals', 2)}f} wk"
+
+
+def compute_moves(old: dict | None, new: dict) -> dict:
+    """Return id -> move record for every current indicator.
+
+    Empty when there is no baseline. A move carries the weekly delta, a
+    direction arrow, a sense (better / worse / neutral from the indicator's
+    polarity), whether a fresh print landed, and any status change.
+    """
+    moves: dict = {}
+    if old is None:
+        return moves
+    for lens_key in ("lens1", "lens2", "lens3"):
+        old_lens = old.get(lens_key, {})
+        for ind_id, cur in new[lens_key].items():
+            prev = old_lens.get(ind_id)
+            if not prev:
+                continue
+            ov, nv = prev.get("value"), cur.get("value")
+            new_print = prev.get("as_of") != cur.get("as_of")
+            status_changed = prev.get("status") != cur.get("status")
+            meta = INDICATOR_META.get(ind_id, {})
+            is_pct = bool(meta.get("delta_pct"))
+            if ov is None or nv is None:
+                moves[ind_id] = {"delta": None, "arrow": "flat", "sense": "neutral",
+                                 "is_pct": is_pct, "new_print": new_print,
+                                 "status_changed": status_changed, "old_status": prev.get("status"),
+                                 "text": "—"}
+                continue
+            delta = (nv - ov) / ov * 100.0 if (is_pct and ov) else (nv - ov)
+            arrow = "up" if delta > 1e-9 else ("down" if delta < -1e-9 else "flat")
+            polarity = meta.get("polarity", 0)
+            if arrow == "flat" or polarity == 0:
+                sense = "neutral"
+            else:
+                sense = "worse" if (delta * polarity > 0) else "better"
+            moves[ind_id] = {
+                "delta": delta, "arrow": arrow, "sense": sense, "is_pct": is_pct,
+                "new_print": new_print, "status_changed": status_changed,
+                "old_status": prev.get("status"),
+                "text": _delta_text(delta, cur, is_pct, new_print, arrow),
+            }
+    return moves
+
+
+def _mover_rationale(record: dict, mv: dict) -> str:
+    if mv["status_changed"]:
+        base = (f"{STATUS_LABEL.get(mv['old_status'], mv['old_status'])} → "
+                f"{STATUS_LABEL.get(record['status'], record['status'])}")
+    else:
+        base = mv["text"]
+    hr = headroom_text(record)
+    return f"{base}, {hr}" if hr else base
+
+
+def rank_movers(new: dict, moves: dict, limit: int = 3) -> list[dict]:
+    """Rank the week's most material indicator moves, most material first.
+
+    Score: a status flip dominates; otherwise a move is weighted by the fraction
+    of its remaining headroom it consumed toward the trigger (a small absolute
+    move that eats a lot of the room to the line is material), with a percentage
+    move for the index trend and a small floor for any other real move.
+    """
+    scored = []
+    for lens_key in ("lens1", "lens2", "lens3"):
+        for ind_id, rec in new[lens_key].items():
+            mv = moves.get(ind_id)
+            if not mv:
+                continue
+            if not mv["status_changed"] and mv["arrow"] == "flat":
+                continue
+            score = 0.0
+            if mv["status_changed"]:
+                score += 2.0
+                if rec["status"] in ("elevated", "triggered"):
+                    score += 0.5
+            if mv["delta"] is not None and mv["arrow"] != "flat":
+                hr = headroom(rec)
+                if hr and hr[0] > 0 and mv["sense"] == "worse":
+                    score += min(1.0, abs(mv["delta"]) / hr[0])
+                elif mv["is_pct"]:
+                    score += min(1.0, abs(mv["delta"]) / 2.0)
+                else:
+                    score += 0.15
+            scored.append((score, ind_id, rec, mv))
+
+    scored.sort(key=lambda t: (t[0], abs(t[3]["delta"] or 0.0)), reverse=True)
+    movers = []
+    for score, ind_id, rec, mv in scored[:limit]:
+        if score <= 0:
+            continue
+        movers.append({
+            "id": ind_id, "name": rec["name"], "value_text": rec["value_text"],
+            "arrow": mv["arrow"], "sense": mv["sense"], "status": rec["status"],
+            "rationale": _mover_rationale(rec, mv),
+        })
+    return movers
+
+
+# --------------------------------------------------------------------------- #
+# Narrative and lens headers
+# --------------------------------------------------------------------------- #
+def narrative(new: dict, movers: list[dict], has_baseline: bool, changes: list[dict]) -> str:
+    """A one-to-two sentence, rules-generated synthesis of the week."""
+    state = new["combined"]["state"]
+    comp = new["composite"]
+    share = fmt_share(comp["share_pct"])
+    alarm = fmt_share(comp["alarm_share_pct"])
+    alarm_rel = "at" if comp["alarm_state"] == "at_or_above" else "below"
+    c = new["counts1"]
+    l1, l3 = new["lens_status"]["lens1"], new["lens_status"]["lens3"]
+
+    if l1 == "elevated":
+        l1w = f"recession risk elevated ({c['elevated']} of {c['total']})"
+    elif l1 == "watch":
+        l1w = f"recession risk on watch ({c['watch']} of {c['total']}, none elevated)"
+    else:
+        l1w = "recession risk benign"
+    l3w = {"benign": "trend intact", "watch": "trend weakening",
+           "elevated": "trend confirming the downturn"}[l3]
+
+    if state == "fired":
+        lead = f"Risk-reduction signal fired this week — {l3w}."
+    elif state == "armed":
+        lead = f"A lens is armed and awaiting Lens 3 confirmation; {l3w}."
+    else:
+        opener = "Quiet week" if (has_baseline and not changes) else "No risk-reduction signal"
+        lead = f"{opener} — {l1w}; froth {share}% ({alarm_rel} the {alarm}% alarm); {l3w}."
+
+    if movers:
+        drift = f"Biggest move: {movers[0]['name']} — {movers[0]['rationale']}."
+    elif not has_baseline:
+        drift = "Week-over-week moves begin once the digest holds a full week of history (from ~9 July)."
+    else:
+        drift = "No indicator changed tier and no notable weekly move."
+    return f"{lead} {drift}"
+
+
+def lens_header(new: dict, lens_key: str) -> dict:
+    """Return {word, detail, chip} for a lens section header."""
+    if lens_key == "lens2":
+        comp = new["composite"]
+        rel = "at" if comp["alarm_state"] == "at_or_above" else "below"
+        return {
+            "word": f"{fmt_share(comp['share_pct'])}% triggered",
+            "detail": f"{comp['triggered_count']} of {comp['gauge_count']} gauges · "
+                      f"{rel} the {fmt_share(comp['alarm_share_pct'])}% alarm",
+            "chip": "elevated" if comp["alarm_state"] == "at_or_above" else "benign",
+        }
+    if lens_key == "lens1":
+        status = new["lens_status"]["lens1"]
+        c = new["counts1"]
+        if status == "elevated":
+            detail = f"{c['elevated']} of {c['total']} elevated" + (f", {c['watch']} on watch" if c["watch"] else "")
+        elif status == "watch":
+            detail = f"{c['watch']} of {c['total']} on watch, none elevated"
+        else:
+            detail = f"all {c['total']} benign, none elevated"
+        return {"word": STATUS_LABEL[status], "detail": detail, "chip": status}
+    # lens3
+    status = new["lens_status"]["lens3"]
+    word = {"benign": "Intact", "watch": "Weakening", "elevated": "Confirming"}[status]
+    return {"word": word, "detail": "50-day vs 150-day trend", "chip": status}
+
+
+# --------------------------------------------------------------------------- #
 # Rendering
 # --------------------------------------------------------------------------- #
 def render_subject(new: dict, changes: list[dict]) -> str:
@@ -323,43 +602,43 @@ def render_subject(new: dict, changes: list[dict]) -> str:
     return f"Regime dashboard: {lead}{suffix}"
 
 
-def _standings_rows(new: dict) -> list[tuple[str, str, str]]:
-    """(label, value, status_label) rows for the current-standings table."""
-    c = new["counts1"]
-    comp = new["composite"]
-    combined_word = {"none": "No signal", "armed": "Armed", "fired": "Signal fired"}[
-        new["combined"]["state"]
-    ]
-    return [
-        ("Risk-reduction signal", combined_word, new["combined"]["state"]),
-        ("Lens 1 · Recession risk",
-         f"{c['elevated']} elevated, {c['watch']} watch of {c['total']}",
-         "elevated" if c["elevated"] else ("watch" if c["watch"] else "benign")),
-        ("Lens 2 · Market-peak froth",
-         f"{fmt_share(comp['share_pct'])}% triggered ({comp['triggered_count']} of {comp['gauge_count']})",
-         "elevated" if comp["alarm_state"] == "at_or_above" else "benign"),
-        ("Lens 3 · Price trend",
-         next(iter(new["lens3"].values()))["value_text"],
-         next(iter(new["lens3"].values()))["status"]),
-    ]
+_LENS_TITLES = (("lens1", "RECESSION RISK"), ("lens2", "MARKET-PEAK FROTH"), ("lens3", "PRICE TREND"))
+_ARROW_TEXT = {"up": "▲", "down": "▼", "flat": "–"}
 
 
-def render_text(new: dict, changes: list[dict], baseline_label: str) -> str:
-    lines = ["REGIME DASHBOARD — WEEKLY DIGEST", ""]
-    if changes:
-        lines.append(f"What changed ({baseline_label}):")
-        for ch in changes:
-            lines.append(f"  • {ch['headline']}")
-            lines.append(f"    {ch['detail']}")
+def _moves_empty_note(moves: dict) -> str:
+    if not moves:
+        return "Week-over-week moves begin once the digest holds a full week of history (from ~9 July)."
+    return "No notable moves — a quiet week."
+
+
+def render_text(new: dict, movers: list[dict], moves: dict, narrative_text: str, baseline_label: str) -> str:
+    lines = ["REGIME DASHBOARD — WEEKLY DIGEST", baseline_label, "", narrative_text, ""]
+
+    lines.append("THIS WEEK'S MOVES")
+    if movers:
+        for m in movers:
+            lines.append(f"  {_ARROW_TEXT[m['arrow']]} {m['name']} — {m['rationale']} "
+                         f"[{STATUS_LABEL.get(m['status'], m['status'])}]")
     else:
-        lines.append(f"No changes {baseline_label}. Current standings:")
+        lines.append(f"  {_moves_empty_note(moves)}")
     lines.append("")
-    lines.append("Where things stand:")
-    for label, value, _status in _standings_rows(new):
-        lines.append(f"  {label}: {value}")
-    lines.append("")
+
+    for lens_key, title in _LENS_TITLES:
+        head = lens_header(new, lens_key)
+        lines.append(f"{title} — {head['word']} · {head['detail']}")
+        for ind_id, rec in new[lens_key].items():
+            mv = moves.get(ind_id, {})
+            dtxt = mv.get("text", "")
+            piece = rec["value_text"]
+            if dtxt and dtxt not in ("—",):
+                piece += f" ({dtxt})"
+            hr = headroom_text(rec)
+            tail = f", {hr}" if hr else ""
+            lines.append(f"  {rec['name']}: {piece}{tail} — {STATUS_LABEL.get(rec['status'], rec['status'])}")
+        lines.append("")
+
     lines.append(new["combined"]["message"])
-    lines.append("")
     lines.append(f"Full dashboard: {DASHBOARD_URL}")
     return "\n".join(lines)
 
@@ -370,57 +649,95 @@ STATUS_COLOUR = {
     "context": "#6b7280", "triggered": "#b45309", "quiet": "#6b7280",
     "eased": "#1a8754",
 }
+DELTA_COLOUR = {"better": "#1a8754", "worse": "#b45309", "neutral": "#8a8f98"}
 
 
-def render_html(new: dict, changes: list[dict], baseline_label: str) -> str:
-    def chip(status: str) -> str:
-        colour = STATUS_COLOUR.get(status, "#6b7280")
-        label = STATUS_LABEL.get(status, status.capitalize())
-        return (
-            f'<span style="display:inline-block;padding:2px 8px;border-radius:10px;'
-            f'font-size:12px;font-weight:600;color:#fff;background:{colour}">{label}</span>'
-        )
+def _chip_html(status: str) -> str:
+    colour = STATUS_COLOUR.get(status, "#6b7280")
+    label = STATUS_LABEL.get(status, status.capitalize())
+    return (f'<span style="display:inline-block;padding:2px 8px;border-radius:10px;'
+            f'font-size:12px;font-weight:600;color:#fff;background:{colour}">{label}</span>')
 
+
+def _delta_html(mv: dict) -> str:
+    if not mv or mv.get("delta") is None or mv.get("arrow") == "flat":
+        txt = mv.get("text", "") if mv else ""
+        return f'<span style="color:#8a8f98;font-size:12px">{txt}</span>' if txt else ""
+    glyph = "▲" if mv["arrow"] == "up" else "▼"
+    colour = DELTA_COLOUR.get(mv["sense"], "#8a8f98")
+    return (f'<span style="color:{colour};font-size:12px;white-space:nowrap">'
+            f'{glyph} {mv["text"]}</span>')
+
+
+def _section_html(new: dict, lens_key: str, moves: dict) -> str:
+    head = lens_header(new, lens_key)
+    title = {"lens1": "Recession risk", "lens2": "Market-peak froth", "lens3": "Price trend"}[lens_key]
     parts = [
-        '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;'
-        'max-width:640px;margin:0 auto;color:#1f2328;font-size:15px;line-height:1.5">',
-        '<h2 style="font-size:18px;margin:0 0 4px">Regime dashboard — weekly digest</h2>',
-        f'<p style="color:#6b7280;font-size:13px;margin:0 0 20px">{baseline_label}</p>',
+        '<div style="margin:22px 0 6px;display:flex;align-items:baseline;justify-content:space-between;gap:8px">',
+        f'<span style="font-size:15px;font-weight:600">{title}</span>',
+        f'<span style="font-size:12px;color:#6b7280">{head["word"]} · {head["detail"]}</span>',
+        '</div>',
+        '<table style="border-collapse:collapse;width:100%;font-size:14px">',
     ]
-
-    if changes:
-        parts.append('<h3 style="font-size:15px;margin:0 0 8px">What changed</h3>')
-        parts.append('<ul style="padding-left:18px;margin:0 0 20px">')
-        for ch in changes:
-            parts.append(
-                f'<li style="margin-bottom:8px"><strong>{ch["headline"]}</strong>'
-                f'<br><span style="color:#4b5563;font-size:14px">{ch["detail"]}</span></li>'
-            )
-        parts.append("</ul>")
-    else:
-        parts.append(
-            f'<p style="padding:10px 14px;background:#f0f6f2;border-left:3px solid #1a8754;'
-            f'border-radius:0 6px 6px 0;margin:0 0 20px">No changes {baseline_label}. '
-            f'Standings below.</p>'
-        )
-
-    parts.append('<h3 style="font-size:15px;margin:0 0 8px">Where things stand</h3>')
-    parts.append('<table style="border-collapse:collapse;width:100%;font-size:14px">')
-    for label, value, status in _standings_rows(new):
+    for ind_id, rec in new[lens_key].items():
+        hr = headroom_text(rec) or ""
         parts.append(
             '<tr>'
-            f'<td style="padding:7px 12px 7px 0;border-bottom:1px solid #eee;color:#4b5563">{label}</td>'
-            f'<td style="padding:7px 8px;border-bottom:1px solid #eee">{value}</td>'
-            f'<td style="padding:7px 0;border-bottom:1px solid #eee;text-align:right">{chip(status)}</td>'
+            f'<td style="padding:6px 8px 6px 0;border-bottom:1px solid #f0f0f0;color:#1f2328">{rec["name"]}</td>'
+            f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-family:ui-monospace,Menlo,Consolas,monospace;'
+            f'font-size:13px;color:#4b5563;white-space:nowrap">{rec["value_text"]}</td>'
+            f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">{_delta_html(moves.get(ind_id))}</td>'
+            f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;color:#6b7280;font-size:12px">{hr}</td>'
+            f'<td style="padding:6px 0;border-bottom:1px solid #f0f0f0;text-align:right">{_chip_html(rec["status"])}</td>'
             '</tr>'
         )
     parts.append("</table>")
+    return "".join(parts)
+
+
+def render_html(new: dict, movers: list[dict], moves: dict, narrative_text: str, baseline_label: str) -> str:
+    parts = [
+        '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;'
+        'max-width:660px;margin:0 auto;color:#1f2328;font-size:15px;line-height:1.5">',
+        '<h2 style="font-size:18px;margin:0 0 2px">Regime dashboard — weekly digest</h2>',
+        f'<p style="color:#6b7280;font-size:13px;margin:0 0 16px">{baseline_label}</p>',
+        f'<div style="padding:12px 14px;background:#f0f6f2;border-radius:8px;font-size:14px;'
+        f'line-height:1.6;margin:0 0 8px">{narrative_text}</div>',
+    ]
+
+    parts.append('<h3 style="font-size:15px;margin:22px 0 6px">This week’s moves</h3>')
+    if movers:
+        parts.append('<table style="border-collapse:collapse;width:100%;font-size:14px">')
+        for m in movers:
+            glyph = _ARROW_TEXT[m["arrow"]]
+            colour = DELTA_COLOUR.get(m["sense"], "#8a8f98")
+            parts.append(
+                '<tr>'
+                f'<td style="padding:7px 8px 7px 0;border-bottom:1px solid #f0f0f0;'
+                f'color:{colour};font-size:15px;width:14px">{glyph}</td>'
+                f'<td style="padding:7px 8px;border-bottom:1px solid #f0f0f0">'
+                f'<strong>{m["name"]}</strong> '
+                f'<span style="color:#4b5563;font-size:13px">— {m["rationale"]}</span></td>'
+                f'<td style="padding:7px 8px;border-bottom:1px solid #f0f0f0;font-family:ui-monospace,Menlo,Consolas,monospace;'
+                f'font-size:13px;color:#4b5563;text-align:right;white-space:nowrap">{m["value_text"]}</td>'
+                f'<td style="padding:7px 0;border-bottom:1px solid #f0f0f0;text-align:right">{_chip_html(m["status"])}</td>'
+                '</tr>'
+            )
+        parts.append("</table>")
+    else:
+        parts.append(
+            f'<p style="padding:10px 14px;background:#f6f6f4;border-left:3px solid #c9c9c4;'
+            f'border-radius:0 6px 6px 0;margin:0;color:#4b5563;font-size:14px">{_moves_empty_note(moves)}</p>'
+        )
+
+    for lens_key, _title in _LENS_TITLES:
+        parts.append(_section_html(new, lens_key, moves))
 
     parts.append(
-        f'<p style="margin:18px 0 6px;color:#4b5563;font-size:14px">{new["combined"]["message"]}</p>'
+        f'<p style="margin:22px 0 6px;color:#4b5563;font-size:14px">{new["combined"]["message"]}</p>'
     )
     parts.append(
-        f'<p style="margin:18px 0 0"><a href="{DASHBOARD_URL}" '
+        f'<p style="margin:14px 0 0"><a href="{DASHBOARD_URL}" '
         f'style="color:#1d4ed8;text-decoration:none;font-weight:600">Open the full dashboard →</a></p>'
     )
     parts.append("</div>")
@@ -453,6 +770,9 @@ def build_digest(since_ref: str | None) -> tuple[str, str, str]:
             old = None
 
     changes = diff_snapshots(old, new)
+    moves = compute_moves(old, new)
+    movers = rank_movers(new, moves)
+    narrative_text = narrative(new, movers, old is not None, changes)
 
     if is_inception:
         baseline_label = "since the dashboard went live"
@@ -462,8 +782,8 @@ def build_digest(since_ref: str | None) -> tuple[str, str, str]:
         baseline_label = f"since {ref}"
 
     subject = render_subject(new, changes)
-    text = render_text(new, changes, baseline_label)
-    html = render_html(new, changes, baseline_label)
+    text = render_text(new, movers, moves, narrative_text, baseline_label)
+    html = render_html(new, movers, moves, narrative_text, baseline_label)
     return subject, text, html
 
 

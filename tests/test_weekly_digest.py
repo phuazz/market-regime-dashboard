@@ -15,12 +15,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from weekly_digest import (
     combined_state,
+    compute_moves,
     diff_snapshots,
+    headroom,
+    headroom_text,
     lookback_cutoff,
+    narrative,
     parse_recipients,
+    rank_movers,
     render_subject,
     snapshot,
 )
+
+LENS1_IDS = ["yield_curve_10y3m", "sahm_rule", "hy_credit_spreads", "pmi_manufacturing_proxy",
+             "leading_indicators", "labour_market", "shiller_cape"]
 
 
 def make_indicator(ind_id, status, value=1.0, name=None, unit="index", decimals=1, signed=False):
@@ -32,11 +40,24 @@ def make_indicator(ind_id, status, value=1.0, name=None, unit="index", decimals=
 
 def make_lens1(statuses):
     # Seven-indicator lens; the last is valuation context (unranked), as live.
-    ids = ["yield_curve_10y3m", "sahm_rule", "hy_credit_spreads", "pmi_manufacturing_proxy",
-           "leading_indicators", "labour_market", "shiller_cape"]
-    inds = [make_indicator(i, s) for i, s in zip(ids, statuses)]
+    inds = [make_indicator(i, s) for i, s in zip(LENS1_IDS, statuses)]
     inds[-1]["status"] = "context"  # valuation never ranks
     return {"lens": 1, "indicators": inds}
+
+
+def make_lens1_vals(values, statuses=None):
+    """Lens 1 with specific per-id values (for move/headroom tests)."""
+    statuses = statuses or ["benign"] * 7
+    inds = [make_indicator(i, s) for i, s in zip(LENS1_IDS, statuses)]
+    inds[-1]["status"] = "context"
+    for ind in inds:
+        if ind["id"] in values:
+            ind["value"] = values[ind["id"]]
+    return {"lens": 1, "indicators": inds}
+
+
+def make_lens3_val(value, status="benign"):
+    return {"lens": 3, "indicators": [make_indicator("sma_trend_sp500", status, value, unit="index", decimals=2)]}
 
 
 def make_lens2(share_pct, triggered, alarm_state, alarm_share=62.5, gauges=8):
@@ -175,6 +196,112 @@ class Recipients(unittest.TestCase):
     def test_empty_or_none(self):
         self.assertEqual(parse_recipients(""), [])
         self.assertEqual(parse_recipients(None), [])
+
+
+class Headroom(unittest.TestCase):
+    """Distance-to-trigger is claimed only where the value is the trigger quantity."""
+
+    def test_level_below_sahm(self):
+        room, name = headroom({"id": "sahm_rule", "value": 0.07, "decimals": 2})
+        self.assertAlmostEqual(room, 0.28)  # 0.35 watch - 0.07
+        self.assertIn("watch", name)
+
+    def test_level_above_yield_curve(self):
+        room, _ = headroom({"id": "yield_curve_10y3m", "value": 0.67, "decimals": 2})
+        self.assertAlmostEqual(room, 0.67)  # above inversion at zero
+
+    def test_chart_line_positive_polarity_triggered(self):
+        # Growth P/E above its trigger line reads as negative room (past the line).
+        room, _ = headroom({"id": "growth_expectation_pe", "value": 32.15, "decimals": 2, "chart_line": 23.65})
+        self.assertAlmostEqual(room, -8.5)
+
+    def test_chart_line_negative_polarity_nfci(self):
+        # NFCI triggers when loose enough (value <= line); above the tail is positive room.
+        room, _ = headroom({"id": "credit_complacency_nfci", "value": -0.504, "decimals": 2, "chart_line": -0.633})
+        self.assertAlmostEqual(room, 0.129)
+
+    def test_none_where_trigger_is_derived(self):
+        self.assertIsNone(headroom({"id": "leading_indicators", "value": 99.3, "decimals": 1}))
+        self.assertIsNone(headroom({"id": "labour_market", "value": 4.2, "decimals": 1}))
+
+    def test_text_from_and_past(self):
+        self.assertIn("from", headroom_text({"id": "sahm_rule", "value": 0.07, "decimals": 2}))
+        self.assertIn("past", headroom_text({"id": "value_vs_growth", "value": 15.4, "decimals": 1}))
+
+
+class Moves(unittest.TestCase):
+    def _snap(self, l1, l2, l3):
+        return snapshot(l1, l2, l3)
+
+    def test_no_baseline_is_empty(self):
+        s = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        self.assertEqual(compute_moves(None, s), {})
+
+    def test_direction_sense_by_polarity(self):
+        # Spread widening = worse (polarity +1); curve steepening = better (polarity -1).
+        old = self._snap(make_lens1_vals({"hy_credit_spreads": 2.5, "yield_curve_10y3m": 0.5}),
+                         make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        new = self._snap(make_lens1_vals({"hy_credit_spreads": 2.7, "yield_curve_10y3m": 0.7}),
+                         make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        moves = compute_moves(old, new)
+        self.assertEqual(moves["hy_credit_spreads"]["arrow"], "up")
+        self.assertEqual(moves["hy_credit_spreads"]["sense"], "worse")
+        self.assertEqual(moves["yield_curve_10y3m"]["sense"], "better")
+
+    def test_trend_delta_is_percentage(self):
+        old = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3_val(7000.0))
+        new = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3_val(7140.0))
+        mv = compute_moves(old, new)["sma_trend_sp500"]
+        self.assertTrue(mv["is_pct"])
+        self.assertAlmostEqual(mv["delta"], 2.0)  # +2%
+
+    def test_no_new_print_labelled(self):
+        s = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        self.assertEqual(compute_moves(s, s)["sahm_rule"]["text"], "no new print")
+
+
+class Movers(unittest.TestCase):
+    def _snap(self, l1, l2, l3):
+        return snapshot(l1, l2, l3)
+
+    def test_status_flip_ranks_first(self):
+        old = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        new = self._snap(make_lens1(["benign", "benign", "benign", "benign", "watch", "benign", "context"]),
+                         make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        movers = rank_movers(new, compute_moves(old, new))
+        self.assertTrue(movers)
+        self.assertEqual(movers[0]["id"], "leading_indicators")
+
+    def test_move_closer_to_trigger_outranks_far_move(self):
+        # HY eats half its remaining room to the watch line; PMI barely dents its own.
+        old = self._snap(make_lens1_vals({"hy_credit_spreads": 3.9, "pmi_manufacturing_proxy": 60.0}),
+                         make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        new = self._snap(make_lens1_vals({"hy_credit_spreads": 3.95, "pmi_manufacturing_proxy": 59.0}),
+                         make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        ids = [m["id"] for m in rank_movers(new, compute_moves(old, new))]
+        self.assertIn("hy_credit_spreads", ids)
+        self.assertIn("pmi_manufacturing_proxy", ids)
+        self.assertLess(ids.index("hy_credit_spreads"), ids.index("pmi_manufacturing_proxy"))
+
+
+class Narrative(unittest.TestCase):
+    def test_no_baseline_flags_history_window(self):
+        new = snapshot(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        text = narrative(new, [], has_baseline=False, changes=[])
+        self.assertIn("No risk-reduction signal", text)
+        self.assertIn("history", text)
+
+    def test_quiet_week_reports_lens_on_watch(self):
+        new = snapshot(make_lens1(["benign", "benign", "benign", "benign", "watch", "benign", "context"]),
+                       make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        text = narrative(new, [], has_baseline=True, changes=[])
+        self.assertIn("Quiet week", text)
+        self.assertIn("on watch", text)
+
+    def test_fired_leads(self):
+        new = snapshot(make_lens1(["elevated", "benign", "benign", "benign", "benign", "benign", "context"]),
+                       make_lens2(62.5, 5, "at_or_above"), make_lens3("elevated"))
+        self.assertIn("fired", narrative(new, [], True, []).lower())
 
 
 if __name__ == "__main__":
