@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-03T15:24:45Z",
+  "updated_at": "2026-07-05T06:07:02Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -61,7 +61,7 @@
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-03",
+      "as_of": "2026-07-05",
       "status": "quiet",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
       "threshold": "Triggered at or above 90 (all-in positioning).",

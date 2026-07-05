@@ -3,7 +3,7 @@
   "name": "Chicago Fed National Financial Conditions Index",
   "unit": "index",
   "source_url": "https://fred.stlouisfed.org/series/NFCI",
-  "updated_at": "2026-07-03T15:24:36Z",
+  "updated_at": "2026-07-05T06:07:01Z",
   "dates": [
     "1971-01-08",
     "1971-01-15",
