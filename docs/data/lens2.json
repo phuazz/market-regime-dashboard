@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-05T06:07:02Z",
+  "updated_at": "2026-07-06T15:46:45Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -84,7 +84,7 @@
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-03",
+      "as_of": "2026-07-06",
       "status": "triggered",
       "description": "How many dollars investors pay per dollar of earnings. A high historical percentile means optimism is already priced. Forward P/E needs a vendor feed, so the trailing multiple from multpl is the documented free proxy.",
       "threshold": "Triggered at or above the 90th percentile of monthly history since 1871.",
