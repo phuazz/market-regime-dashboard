@@ -2,25 +2,25 @@
   "lens": 3,
   "title": "Price trend",
   "subtitle": "Confirmation that the market is actually rolling over.",
-  "updated_at": "2026-07-05T06:07:02Z",
+  "updated_at": "2026-07-07T01:17:43Z",
   "indicators": [
     {
       "id": "sma_trend_sp500",
       "name": "50-day vs 150-day SMA",
       "qualifier": "S&P 500 daily closes",
       "lens": 3,
-      "value": 7483.24,
+      "value": 7537.43,
       "unit": "index",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-02",
+      "as_of": "2026-07-06",
       "status": "benign",
       "description": "The trend-confirmation gauge: historically the signal that a bear market is actually underway rather than merely feared. The 200-day SMA is shown for context and does not drive the status.",
       "threshold": "50-day SMA below the 150-day with both flat or falling over 20 sessions (within +0.1%) = elevated (bear trigger). Below without slope confirmation = watch. Otherwise benign.",
       "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
       "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
-      "notes": "Uptrend intact: the 50-day SMA (7,395) is above the 150-day (7,019). Cross-checked against FRED SP500 over 5 sessions (max diff 0.000%). Feeds verified against each other and logged in VERIFICATION.md."
+      "notes": "Uptrend intact: the 50-day SMA (7,403) is above the 150-day (7,025). Cross-checked against FRED SP500 over 5 sessions (max diff 0.000%). Feeds verified against each other and logged in VERIFICATION.md."
     }
   ]
 }
