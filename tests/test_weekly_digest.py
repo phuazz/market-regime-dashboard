@@ -17,6 +17,7 @@ from weekly_digest import (
     combined_state,
     compute_moves,
     diff_snapshots,
+    distance_text,
     headroom,
     headroom_text,
     lookback_cutoff,
@@ -25,7 +26,13 @@ from weekly_digest import (
     rank_movers,
     render_subject,
     snapshot,
+    trigger_metric_text,
 )
+
+LEI_METRIC = {"label": "6-month change", "value": -0.3, "unit": "pct", "decimals": 1,
+              "watch_at": 0.0, "elevated_at": -2.0, "benign_side": "above"}
+LABOUR_METRIC = {"label": "unemployment rise", "value": 0.07, "unit": "pp", "decimals": 2,
+                 "watch_at": 0.2, "elevated_at": 0.35, "benign_side": "below"}
 
 LENS1_IDS = ["yield_curve_10y3m", "sahm_rule", "hy_credit_spreads", "pmi_manufacturing_proxy",
              "leading_indicators", "labour_market", "shiller_cape"]
@@ -227,6 +234,36 @@ class Headroom(unittest.TestCase):
     def test_text_from_and_past(self):
         self.assertIn("from", headroom_text({"id": "sahm_rule", "value": 0.07, "decimals": 2}))
         self.assertIn("past", headroom_text({"id": "value_vs_growth", "value": 15.4, "decimals": 1}))
+
+
+class TriggerMetric(unittest.TestCase):
+    """Distance-to-trigger for rows whose displayed value is not the trigger quantity."""
+
+    def test_lei_on_watch_measures_to_elevated(self):
+        text = trigger_metric_text(LEI_METRIC, "watch")
+        self.assertIn("6-month change -0.3%", text)
+        self.assertIn("1.7 from the -2.0% elevated line", text)
+
+    def test_labour_benign_measures_to_watch(self):
+        text = trigger_metric_text(LABOUR_METRIC, "benign")
+        self.assertIn("unemployment rise +0.07 pp", text)
+        self.assertIn("0.13 from the 0.20 pp watch line", text)
+
+    def test_crossed_reads_past(self):
+        crossed = dict(LEI_METRIC, value=-2.1)
+        self.assertIn("0.1 past the -2.0% elevated line", trigger_metric_text(crossed, "elevated"))
+
+    def test_missing_target_shows_metric_only(self):
+        no_watch = dict(LABOUR_METRIC, watch_at=None)
+        self.assertEqual(trigger_metric_text(no_watch, "benign"), "unemployment rise +0.07 pp")
+
+    def test_distance_text_prefers_metric_then_falls_back(self):
+        # A record with a trigger metric uses it...
+        rec = {"id": "leading_indicators", "status": "watch", "trigger_metric": LEI_METRIC}
+        self.assertIn("elevated line", distance_text(rec))
+        # ...one without falls back to headroom on the displayed value.
+        sahm = {"id": "sahm_rule", "value": 0.07, "decimals": 2, "status": "benign"}
+        self.assertIn("from the watch line", distance_text(sahm))
 
 
 class Moves(unittest.TestCase):

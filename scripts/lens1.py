@@ -383,6 +383,18 @@ def build_lei(thresholds: dict) -> dict:
             "(about -4% annualised, aligned with the Conference Board's published "
             "recession-signal research) = elevated."
         ).format(e=params["elevated_six_month_pct"]),
+        # The quantity the status actually tests. The displayed value is the LEI
+        # level, but the trigger is the six-month change, so expose it as a field
+        # for the weekly digest to show distance-to-trigger. Watch line is zero.
+        "trigger_metric": {
+            "label": "6-month change",
+            "value": scraped["six_month_pct"],
+            "unit": "pct",
+            "decimals": 1,
+            "watch_at": 0.0,
+            "elevated_at": params["elevated_six_month_pct"],
+            "benign_side": "above",
+        },
         "source_url": scraped["source_url"],
         "secondary_source_url": "https://www.prnewswire.com/news/the-conference-board/",
         "notes": (
@@ -502,6 +514,19 @@ def build_labour(thresholds: dict) -> dict:
             wu=params["watch_uemp27ov_yoy_pct"], wc=params["watch_ccsa_26wk_pct"],
             er=params["elevated_rise"],
         ),
+        # Primary (Sahm-style) trigger metric for the digest's distance-to-trigger.
+        # The displayed value is the unemployment level; the headline driver is the
+        # three-month-average rise above its 12-month low. Payroll and internals can
+        # also drive the status, so this is the leading, not the only, condition.
+        "trigger_metric": {
+            "label": "unemployment rise",
+            "value": inputs["rise"],
+            "unit": "pp",
+            "decimals": 2,
+            "watch_at": params["watch_rise"],
+            "elevated_at": params["elevated_rise"],
+            "benign_side": "below",
+        },
         "source_url": "https://fred.stlouisfed.org/series/UNRATE",
         "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm",
         "notes": (

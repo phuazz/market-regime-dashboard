@@ -301,6 +301,45 @@ def headroom_text(record: dict):
     return f"{mag} from {name}" if room >= 0 else f"{mag} past {name}"
 
 
+def trigger_metric_text(tm: dict, status: str):
+    """Render "<label> <metric> · <distance> from the <line> <tier> line".
+
+    For indicators whose displayed value is not the quantity the threshold tests.
+    Distance is measured to the next worse tier from the current status, in the
+    metric's own units, so the reader sees both the metric and how much room is
+    left before it escalates.
+    """
+    if not tm or tm.get("value") is None:
+        return None
+    dec = tm.get("decimals", 2)
+    suffix = UNIT_SUFFIX.get(tm.get("unit"), "")
+    metric_str = f"{tm.get('label', 'metric')} {tm['value']:+.{dec}f}{suffix}"
+
+    if status == "elevated":
+        target, tier = tm.get("elevated_at"), "elevated"
+    elif status == "watch":
+        target, tier = tm.get("elevated_at"), "elevated"
+    else:  # benign or unranked
+        target, tier = tm.get("watch_at"), "watch"
+    if target is None:
+        return metric_str
+
+    # benign_side says which side of the line is safe; room > 0 means not yet crossed.
+    room = (tm["value"] - target) if tm.get("benign_side") == "above" else (target - tm["value"])
+    rel = "from" if room >= 0 else "past"
+    line_str = f"{target:.{dec}f}{suffix}"
+    return f"{metric_str} · {abs(room):.{dec}f} {rel} the {line_str} {tier} line"
+
+
+def distance_text(record: dict):
+    """Distance-to-trigger for a row: the trigger metric if one is supplied,
+    otherwise the headroom computed from the displayed value."""
+    tm = record.get("trigger_metric")
+    if tm:
+        return trigger_metric_text(tm, record.get("status"))
+    return headroom_text(record)
+
+
 # --------------------------------------------------------------------------- #
 # Snapshot and diff
 # --------------------------------------------------------------------------- #
@@ -317,6 +356,11 @@ def _ind_record(ind: dict) -> dict:
         "decimals": ind.get("decimals", 2),
         "as_of": ind.get("as_of"),
         "chart_line": chart_line.get("value"),
+        # Some indicators display one value but the status tests another (LEI level
+        # vs its six-month change; the labour level vs the Sahm-style rise). When
+        # the builder supplies that metric and its lines, the digest shows distance
+        # to the next tier in the metric's own units.
+        "trigger_metric": ind.get("trigger_metric"),
     }
 
 
@@ -472,7 +516,7 @@ def _mover_rationale(record: dict, mv: dict) -> str:
                 f"{STATUS_LABEL.get(record['status'], record['status'])}")
     else:
         base = mv["text"]
-    hr = headroom_text(record)
+    hr = distance_text(record)
     return f"{base}, {hr}" if hr else base
 
 
@@ -633,7 +677,7 @@ def render_text(new: dict, movers: list[dict], moves: dict, narrative_text: str,
             piece = rec["value_text"]
             if dtxt and dtxt not in ("—",):
                 piece += f" ({dtxt})"
-            hr = headroom_text(rec)
+            hr = distance_text(rec)
             tail = f", {hr}" if hr else ""
             lines.append(f"  {rec['name']}: {piece}{tail} — {STATUS_LABEL.get(rec['status'], rec['status'])}")
         lines.append("")
@@ -680,7 +724,7 @@ def _section_html(new: dict, lens_key: str, moves: dict) -> str:
         '<table style="border-collapse:collapse;width:100%;font-size:14px">',
     ]
     for ind_id, rec in new[lens_key].items():
-        hr = headroom_text(rec) or ""
+        hr = distance_text(rec) or ""
         parts.append(
             '<tr>'
             f'<td style="padding:6px 8px 6px 0;border-bottom:1px solid #f0f0f0;color:#1f2328">{rec["name"]}</td>'

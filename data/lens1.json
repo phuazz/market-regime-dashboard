@@ -90,6 +90,15 @@
       "status": "watch",
       "description": "Composite of ten forward-looking inputs built to turn down before the economy does. Status is driven by the six-month growth rate, not the monthly level.",
       "threshold": "Six-month change below zero = watch. At or below -2.0% over six months (about -4% annualised, aligned with the Conference Board's published recession-signal research) = elevated.",
+      "trigger_metric": {
+        "label": "6-month change",
+        "value": -0.3,
+        "unit": "pct",
+        "decimals": 1,
+        "watch_at": 0.0,
+        "elevated_at": -2.0,
+        "benign_side": "above"
+      },
       "source_url": "https://www.conference-board.org/topics/us-leading-indicators",
       "secondary_source_url": "https://www.prnewswire.com/news/the-conference-board/",
       "notes": "The six-month change of -0.3% is negative. Monthly change +0.1%. Licence note: only the publicly announced headline figures are displayed; no licensed series is redistributed. Series identity verified against two sources (VERIFICATION.md)."
@@ -108,6 +117,15 @@
       "status": "benign",
       "description": "Unemployment rate and payroll momentum, checked against internals (long-term unemployed, continued claims). These confirm a downturn once underway; the trend matters more than the headline level.",
       "threshold": "Unemployment 3-month average at least 0.20 pp above its 12-month low, payroll 3-month average below 75k, or softening internals (long-term unemployed over 15% YoY and continued claims over 5% in 26 weeks) = watch. Rise at or above 0.35 pp or negative payroll 3-month average = elevated.",
+      "trigger_metric": {
+        "label": "unemployment rise",
+        "value": 0.07,
+        "unit": "pp",
+        "decimals": 2,
+        "watch_at": 0.2,
+        "elevated_at": 0.35,
+        "benign_side": "below"
+      },
       "source_url": "https://fred.stlouisfed.org/series/UNRATE",
       "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm",
       "notes": "Headline and internals are steady: unemployment rise +0.07 pp, payroll 3-month average +111k, long-term unemployed +17% YoY, continued claims -2.5% over 26 weeks. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md)."
