@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-08T01:00:50Z",
+  "updated_at": "2026-07-09T01:10:12Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -61,7 +61,7 @@
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-08",
+      "as_of": "2026-07-09",
       "status": "quiet",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
       "threshold": "Triggered at or above 90 (all-in positioning).",
@@ -136,18 +136,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 13.4,
+      "value": 15.0,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-07-07",
+      "as_of": "2026-07-08",
       "status": "triggered",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +13.4 pp over six months — the crowding pattern of froth-on leadership. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Growth leads value by +15.0 pp over six months — the crowding pattern of froth-on leadership. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "credit_complacency_nfci",
@@ -159,18 +159,18 @@
       "qualifier": "Chicago Fed NFCI",
       "lens": 2,
       "in_composite": true,
-      "value": -0.504,
+      "value": -0.515,
       "unit": "index",
       "signed": true,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-06-26",
+      "as_of": "2026-07-03",
       "status": "quiet",
       "description": "The Chicago Fed's weekly composite of financial conditions; negative is looser than average. Deeply loose conditions signal complacent risk appetite — the fuel of late-cycle froth.",
       "threshold": "Triggered when conditions are in the loosest 20% of weekly readings since 1971.",
       "source_url": "https://fred.stlouisfed.org/series/NFCI",
       "secondary_source_url": "https://www.chicagofed.org/research/data/nfci/current-data",
-      "notes": "Financial conditions (-0.50) sit at the 38th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Financial conditions (-0.52) sit at the 37th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "sloos_tightening",
