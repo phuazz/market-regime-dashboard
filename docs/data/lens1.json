@@ -2,25 +2,25 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-17T01:02:55Z",
+  "updated_at": "2026-07-18T00:56:46Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
       "name": "Yield Curve (10yr - 3mo)",
       "qualifier": "term spread",
       "lens": 1,
-      "value": 0.73,
+      "value": 0.7,
       "unit": "pct",
       "signed": true,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-16",
+      "as_of": "2026-07-17",
       "status": "benign",
       "description": "The 10-year minus 3-month Treasury constant-maturity spread. A negative reading (inversion) has historically preceded US recessions; the risk window extends through the re-steepening that follows a sustained inversion.",
       "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign.",
       "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
       "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-      "notes": "The spread is positive (+0.73) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The spread is positive (+0.70) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "sahm_rule",
@@ -50,13 +50,13 @@
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-15",
+      "as_of": "2026-07-16",
       "status": "benign",
       "description": "Option-adjusted spread of the ICE BofA US High Yield Index over Treasuries. The cleanest market-priced stress gauge: it widens sharply into downturns, and unusually tight spreads signal complacency rather than safety.",
       "threshold": "At or above 4.00, or widening 100 bp over 63 trading days = watch. At or above 5.50, or widening 200 bp = elevated. At or below 3.00 adds a complacency note without changing status.",
       "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
-      "notes": "OAS of 2.71 is below the 4.00 watch level with a 63-trading-day change of -16 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-07-17 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "OAS of 2.71 is below the 4.00 watch level with a 63-trading-day change of -14 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-07-18 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "pmi_manufacturing_proxy",
