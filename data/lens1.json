@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-07-18T00:56:46Z",
+  "updated_at": "2026-07-20T14:20:26Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -135,12 +135,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 42.18,
+      "value": 41.52,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-10",
+      "as_of": "2026-07-17",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
