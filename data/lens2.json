@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-20T14:20:26Z",
+  "updated_at": "2026-07-21T00:59:34Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -61,7 +61,7 @@
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-18",
+      "as_of": "2026-07-21",
       "status": "triggered",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
       "threshold": "Triggered at or above 90 (all-in positioning).",
@@ -136,18 +136,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 7.0,
+      "value": 7.2,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-07-17",
+      "as_of": "2026-07-20",
       "status": "quiet",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +7.0 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Growth leads value by +7.2 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "credit_complacency_nfci",
