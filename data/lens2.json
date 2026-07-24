@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-23T01:02:46Z",
+  "updated_at": "2026-07-24T00:56:42Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -37,18 +37,18 @@
       "qualifier": "AAII bull-bear survey",
       "lens": 2,
       "in_composite": true,
-      "value": 12.0,
+      "value": -12.8,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "weekly",
-      "as_of": "2026-07-16",
-      "status": "quiet",
+      "as_of": "2026-07-23",
+      "status": "eased",
       "description": "Share of individual investors bullish minus bearish in the weekly AAII survey. Extreme bullishness is a contrarian warning — when everyone is optimistic, the buyers are already in.",
       "threshold": "Triggered when the spread reaches the top decile of the full weekly history (currently +28.1 pp); eased when bears outnumber bulls.",
       "source_url": "https://www.aaii.com/sentimentsurvey",
       "secondary_source_url": "https://www.aaii.com/files/surveys/sentiment.xls",
-      "notes": "The bull-bear spread of +12.0 pp is below the top-decile line (+28.1 pp). This week: bulls 44.9%, bears 32.9%; spread percentile 61 across 2,032 weeks since 1987. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Bears outnumber bulls (spread -12.8 pp) — retail euphoria is off. This week: bulls 29.6%, bears 42.3%; spread percentile 15 across 2,033 weeks since 1987. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "manager_bullishness_naaim",
@@ -56,18 +56,18 @@
       "qualifier": "NAAIM exposure",
       "lens": 2,
       "in_composite": true,
-      "value": 95.64,
+      "value": 84.02,
       "unit": "index",
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-23",
-      "status": "triggered",
+      "as_of": "2026-07-24",
+      "status": "quiet",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
       "threshold": "Triggered at or above 90 (all-in positioning).",
       "source_url": "https://naaim.org/programs/naaim-exposure-index/",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "Active managers report 96% average equity exposure — effectively all-in, with little cash left to add. As-of stamped at collection time; NAAIM posts the number weekly without a machine-readable date. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Active managers report 84% average equity exposure, below the 90 all-in line. As-of stamped at collection time; NAAIM posts the number weekly without a machine-readable date. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "growth_expectation_pe",
@@ -136,18 +136,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 8.2,
+      "value": 9.2,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-07-22",
+      "as_of": "2026-07-23",
       "status": "quiet",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +8.2 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Growth leads value by +9.2 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "credit_complacency_nfci",
@@ -194,9 +194,9 @@
   ],
   "composite": {
     "gauge_count": 8,
-    "triggered_count": 4,
-    "eased_count": 0,
-    "share_pct": 50.0,
+    "triggered_count": 3,
+    "eased_count": 1,
+    "share_pct": 37.5,
     "alarm_share_pct": 62.5,
     "alarm_state": "below"
   }
