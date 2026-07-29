@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-07-28T00:56:22Z",
+  "updated_at": "2026-07-29T00:58:34Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -61,7 +61,7 @@
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-28",
+      "as_of": "2026-07-29",
       "status": "quiet",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
       "threshold": "Triggered at or above 90 (all-in positioning).",
@@ -136,18 +136,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 4.2,
+      "value": -0.3,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-07-27",
-      "status": "quiet",
+      "as_of": "2026-07-28",
+      "status": "eased",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +4.2 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Value leads growth over six months (-0.3 pp) — froth leadership has switched off. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "credit_complacency_nfci",
@@ -195,7 +195,7 @@
   "composite": {
     "gauge_count": 8,
     "triggered_count": 3,
-    "eased_count": 1,
+    "eased_count": 2,
     "share_pct": 37.5,
     "alarm_share_pct": 62.5,
     "alarm_state": "below"
