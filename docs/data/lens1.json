@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-08-01T01:04:08Z",
+  "updated_at": "2026-08-03T14:52:17Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -63,7 +63,7 @@
       "name": "Manufacturing PMI",
       "qualifier": "S&P Global, ISM proxy",
       "lens": 1,
-      "value": 53.8,
+      "value": 53.9,
       "unit": "index",
       "signed": false,
       "decimals": 1,
@@ -74,7 +74,7 @@
       "threshold": "Below 50 = watch. Below 48 and lower than three months earlier = elevated.",
       "source_url": "https://tradingeconomics.com/united-states/manufacturing-pmi",
       "secondary_source_url": "https://www.pmi.spglobal.com/Public/Release/PressReleases",
-      "notes": "PMI of 53.8 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "PMI of 53.9 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "leading_indicators",
@@ -135,12 +135,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 40.46,
+      "value": 40.91,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-07-24",
+      "as_of": "2026-07-31",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
