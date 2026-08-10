@@ -3,7 +3,7 @@
   "name": "SLOOS: net share of banks tightening C&I standards",
   "unit": "pct",
   "source_url": "https://fred.stlouisfed.org/series/DRTSCILM",
-  "updated_at": "2026-08-03T14:52:18Z",
+  "updated_at": "2026-08-10T13:21:18Z",
   "dates": [
     "1990-04-01",
     "1990-07-01",
@@ -149,7 +149,8 @@
     "2025-07-01",
     "2025-10-01",
     "2026-01-01",
-    "2026-04-01"
+    "2026-04-01",
+    "2026-07-01"
   ],
   "values": [
     54.4,
@@ -296,6 +297,7 @@
     9.5,
     6.5,
     5.3,
-    8.1
+    8.1,
+    0.0
   ]
 }

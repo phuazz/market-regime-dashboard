@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-08-07T23:59:58Z",
+  "updated_at": "2026-08-10T13:21:18Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -79,12 +79,12 @@
       "qualifier": "trailing P/E percentile, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 28.84,
+      "value": 29.88,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-08-03",
+      "as_of": "2026-08-10",
       "status": "triggered",
       "description": "How many dollars investors pay per dollar of earnings. A high historical percentile means optimism is already priced. Forward P/E needs a vendor feed, so the trailing multiple from multpl is the documented free proxy.",
       "threshold": "Triggered at or above the 90th percentile of monthly history since 1871.",
@@ -117,7 +117,7 @@
       "qualifier": "P/E + CPI inflation",
       "lens": 2,
       "in_composite": true,
-      "value": 32.3,
+      "value": 33.3,
       "unit": "index",
       "signed": false,
       "decimals": 1,
@@ -128,7 +128,7 @@
       "threshold": "Triggered above 20 and at or above the 80th percentile of monthly history since 1948.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://fred.stlouisfed.org/series/CPIAUCSL",
-      "notes": "P/E plus inflation totals 32.3, well above the 20 fair-value line and at the 94th percentile of history since 1948. Inputs: trailing P/E 28.84 (multpl), CPI +3.5% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "P/E plus inflation totals 33.3, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.88 (multpl), CPI +3.5% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "value_vs_growth",
@@ -178,18 +178,18 @@
       "qualifier": "Fed SLOOS, C&I standards",
       "lens": 2,
       "in_composite": false,
-      "value": 8.1,
+      "value": 0.0,
       "unit": "pct",
       "signed": true,
       "decimals": 1,
       "cadence": "quarterly",
-      "as_of": "2026-04-01",
+      "as_of": "2026-07-01",
       "status": "context",
       "description": "Net share of banks tightening commercial-loan standards in the Fed's quarterly Senior Loan Officer Survey. A froth-off read: tightening credit withdraws the fuel. Context only — it does not feed the composite.",
       "threshold": "Context row — net tightening (above zero) is a froth-off pressure note.",
       "source_url": "https://fred.stlouisfed.org/series/DRTSCILM",
       "secondary_source_url": "https://www.federalreserve.gov/data/sloos.htm",
-      "notes": "A net +8.1% of banks are tightening standards for large and mid-sized firms — froth-off pressure building in credit supply. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "A net +0.0% of banks report easing standards — no tightening pressure from bank credit. Series identity verified against two sources (VERIFICATION.md)."
     }
   ],
   "composite": {
