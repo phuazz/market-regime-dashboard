@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-08-11T13:04:35Z",
+  "updated_at": "2026-08-11T13:37:59Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -53,21 +53,21 @@
     {
       "id": "manager_bullishness_naaim",
       "name": "Manager Bullishness",
-      "qualifier": "NAAIM exposure",
+      "qualifier": "NAAIM exposure — feed unavailable",
       "lens": 2,
-      "in_composite": true,
-      "value": 79.7,
+      "in_composite": false,
+      "value": 93.79,
       "unit": "index",
       "signed": false,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-07-31",
-      "status": "quiet",
+      "as_of": "2026-04-29",
+      "status": "context",
       "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
-      "threshold": "Triggered at or above 90 (all-in positioning).",
-      "source_url": "https://naaim.org/programs/naaim-exposure-index/",
+      "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
+      "source_url": "https://index.naaim.org/embeddable/table",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "Active managers report 80% average equity exposure, below the 90 all-in line. As-of stamped at collection time; NAAIM posts the number weekly without a machine-readable date. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "PARKED 2026-08-11 — NAAIM's feed has not published a dated reading since 2026-04-29 (104 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-04-29 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "growth_expectation_pe",
@@ -193,10 +193,10 @@
     }
   ],
   "composite": {
-    "gauge_count": 8,
+    "gauge_count": 7,
     "triggered_count": 4,
     "eased_count": 1,
-    "share_pct": 50.0,
+    "share_pct": 57.1,
     "alarm_share_pct": 62.5,
     "alarm_state": "below"
   }
