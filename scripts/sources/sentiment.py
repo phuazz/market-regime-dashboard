@@ -13,7 +13,7 @@ from datetime import date, datetime
 
 import xlrd
 
-from sources.scrape import ScrapeError, fetch_bytes, fetch_text
+from sources.scrape import ScrapeError, StaleFeedError, fetch_bytes, fetch_text
 
 AAII_XLS_URL = "https://www.aaii.com/files/surveys/sentiment.xls"
 NAAIM_URL = "https://naaim.org/programs/naaim-exposure-index/"
@@ -125,14 +125,16 @@ def fetch_naaim(today: date | None = None) -> dict:
 
     age_days = ((today or date.today()) - week_ending).days
     if age_days > NAAIM_MAX_AGE_DAYS:
-        raise ScrapeError(
+        raise StaleFeedError(
             f"NAAIM feed is stale, not misparsed: newest dated row is "
             f"{week_ending.isoformat()}, {age_days} days old (budget {NAAIM_MAX_AGE_DAYS}). "
             f"Parsed {len(parsed)} rows from {NAAIM_TABLE_URL}. As at 2026-08-11 the "
             f"/embeddable/number widget also returns an empty body, so no current reading is "
             f"retrievable from NAAIM's published widgets. Whether NAAIM has paused the survey "
             f"or its migration is incomplete cannot be determined from here -- this dashboard "
-            f"did scrape a value in late July, so do not assume the series ended in April."
+            f"did scrape a value in late July, so do not assume the series ended in April.",
+            reading={"exposure": exposure, "as_of": week_ending.isoformat()},
+            age_days=age_days,
         )
     return {"exposure": exposure, "as_of": week_ending.isoformat()}
 

@@ -133,5 +133,80 @@ class TestFetchNaaim(unittest.TestCase):
         self.assertNotIsInstance(got["exposure"], list)
 
 
+class TestBuildNaaimParking(unittest.TestCase):
+    """The builder's policy layer: park a stale feed, still fail a broken parser.
+
+    `today` is injected rather than patched -- datetime.date is immutable, so
+    mock.patch.object on date.today raises TypeError.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        cls.thresholds = json.loads(
+            (Path(__file__).resolve().parent.parent / "data" / "thresholds.json")
+            .read_text(encoding="utf-8")
+        )
+
+    def _build(self, html, today):
+        """Build the row with no side effects.
+
+        append_scrape_history is stubbed deliberately. Without it the non-parked
+        path writes to data/history/naaim_exposure.json, and an earlier draft of
+        these tests did exactly that -- committing a fixture value of 61.2
+        "as of 2026-08-05" into the real accumulated history. A unit test must
+        not be able to contaminate published data.
+        """
+        import lens2
+        with mock.patch.object(sentiment, "fetch_text", return_value=html), \
+             mock.patch.object(lens2, "append_scrape_history") as appended:
+            row = lens2.build_naaim(self.thresholds, today=today)
+        self._appended = appended
+        return row
+
+    def test_parked_row_does_not_append_to_history(self):
+        self._build(TABLE_HTML, date(2026, 8, 11))
+        self._appended.assert_not_called()
+
+    def test_fresh_row_does_append_to_history(self):
+        self._build(_one_row("08/05/2026", "61.20"), date(2026, 8, 11))
+        self._appended.assert_called_once()
+
+    def test_stale_feed_parks_instead_of_failing_the_build(self):
+        row = self._build(TABLE_HTML, date(2026, 8, 11))
+        self.assertEqual(row["status"], "context")
+        self.assertFalse(row["in_composite"], "a stale row must not drive the composite")
+        self.assertEqual(row["as_of"], "2026-04-29", "must carry the true week-ending date")
+        self.assertEqual(row["value"], 93.79)
+        self.assertIn("PARKED", row["notes"])
+        self.assertIn("104 days", row["notes"])
+
+    def test_parked_row_keeps_a_renderable_value(self):
+        """template.html formatValue calls toLocaleString; null would throw."""
+        row = self._build(TABLE_HTML, date(2026, 8, 11))
+        self.assertIsInstance(row["value"], float)
+
+    def test_fresh_feed_is_not_parked(self):
+        row = self._build(_one_row("08/05/2026", "61.20"), date(2026, 8, 11))
+        self.assertTrue(row["in_composite"], "a fresh reading must rejoin the composite")
+        self.assertNotEqual(row["status"], "context")
+        self.assertEqual(row["as_of"], "2026-08-05")
+        self.assertNotIn("PARKED", row["notes"])
+
+    def test_unparks_on_the_first_fresh_run(self):
+        """Same fixture, two clocks: parked, then not, with no code change."""
+        html = _one_row("08/05/2026", "61.20")
+        self.assertFalse(self._build(html, date(2026, 9, 30))["in_composite"])
+        self.assertTrue(self._build(html, date(2026, 8, 11))["in_composite"])
+
+    def test_layout_change_still_fails_the_build(self):
+        import lens2
+        with mock.patch.object(sentiment, "fetch_text",
+                               return_value="<html><body>Welcome!</body></html>"):
+            with self.assertRaises(ScrapeError) as ctx:
+                lens2.build_naaim(self.thresholds, today=date(2026, 8, 11))
+        self.assertIn("layout changed", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

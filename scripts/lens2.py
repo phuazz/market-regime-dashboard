@@ -271,9 +271,83 @@ def build_aaii(thresholds: dict) -> dict:
     }
 
 
-def build_naaim(thresholds: dict) -> dict:
+def _naaim_parked_row(reading: dict, stale, today: date | None = None) -> dict:
+    """The NAAIM card while the upstream feed is unavailable.
+
+    Carries a real number so the card renders (template formatValue calls
+    toLocaleString on the value and would throw on null), but the number is the
+    last one NAAIM published a DATE for, and as_of carries that date.
+    """
+    return {
+        "id": "manager_bullishness_naaim",
+        "name": "Manager Bullishness",
+        "qualifier": "NAAIM exposure — feed unavailable",
+        "lens": 2,
+        "in_composite": False,
+        "value": reading["exposure"],
+        "unit": "index",
+        "signed": False,
+        "decimals": 2,
+        "cadence": "weekly",
+        "as_of": reading["as_of"],
+        "status": "context",
+        "description": (
+            "Active money managers' reported average equity exposure on a 0-200 scale. "
+            "Near 100 means managers are all-in with little cash left to deploy — "
+            "crowded positioning."
+        ),
+        "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
+        "source_url": sentiment.NAAIM_TABLE_URL,
+        "secondary_source_url": "https://naaim.org/",
+        "notes": (
+            f"PARKED {(today or date.today()).isoformat()} — NAAIM's feed has not published a dated "
+            f"reading since {reading['as_of']} ({stale.age_days} days). The value shown is that "
+            f"last dated observation, not a current one, and this row is excluded from the "
+            f"Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to "
+            f"index.naaim.org; the dated table and chart both end {reading['as_of']} and the "
+            f"number widget returns an empty document. Unparks automatically on the first run "
+            f"that finds a reading inside the freshness budget. {VERIFIED_NOTE}"
+        ),
+    }
+
+
+def build_naaim(thresholds: dict, today: date | None = None) -> dict:
+    """NAAIM manager exposure, with an explicit parked state.
+
+    `today` is injectable for tests only; datetime.date is immutable and cannot
+    be monkeypatched, and the parking decision is entirely date-dependent.
+
+    Parked 2026-08-11. NAAIM migrated its widgets to index.naaim.org; the dated
+    feeds end 2026-04-29 and the number widget returns an empty body, so no
+    current reading is retrievable. Rather than fail the daily build forever --
+    which trains the operator to ignore a red run, the failure mode that hid the
+    original breakage for a week -- the row parks on the newest reading NAAIM
+    still publishes a DATE for, and says so.
+
+    Parking deliberately does three things at once:
+      * shows the value with its true week-ending date, so the staleness is
+        visible on the card rather than implied to be current. The unparked
+        history had 79.7 stamped 2026-07-31, which was the collection date of a
+        value whose actual vintage was unknown -- worse than an old date;
+      * drops the row out of the composite (in_composite False), so a stale
+        reading cannot drive the Lens 2 signal;
+      * demotes it to "context" so it cannot fire a trigger.
+
+    A StaleFeedError is parked. A bare ScrapeError still propagates and fails
+    the build, because that means the parser no longer matches the page and is a
+    code fix, not an upstream outage. Keeping those apart is the point.
+    """
     params = thresholds["manager_bullishness_naaim"]
-    reading = sentiment.fetch_naaim()
+    try:
+        reading = sentiment.fetch_naaim(today=today)
+        parked = None
+    except sentiment.StaleFeedError as stale:
+        reading = stale.reading
+        parked = stale
+        if not reading.get("as_of") or reading.get("exposure") is None:
+            raise                       # nothing datable to park on; fail loudly
+    if parked is not None:
+        return _naaim_parked_row(reading, parked, today)
     status, detail = classify_naaim(reading["exposure"], params)
     as_of = reading["as_of"] or utc_now_iso()[:10]
     as_of_note = "" if reading["as_of"] else (

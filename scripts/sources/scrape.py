@@ -35,6 +35,25 @@ class ScrapeError(RuntimeError):
     """Raised when a page cannot be fetched or its expected pattern is absent."""
 
 
+class StaleFeedError(ScrapeError):
+    """Raised when a source parses cleanly but its newest observation is too old.
+
+    Deliberately distinct from a bare ScrapeError, because the two demand
+    different responses. A ScrapeError means the parser no longer matches the
+    page and someone must fix code. A StaleFeedError means the code is fine and
+    the publisher has stopped, which no amount of parsing will repair -- the
+    caller may choose to park the row rather than fail the build indefinitely.
+
+    Carries the last good observation so the caller can park on a dated,
+    verifiable reading instead of inventing one or holding an undated value.
+    """
+
+    def __init__(self, message: str, reading: dict | None = None, age_days: int | None = None):
+        super().__init__(message)
+        self.reading = reading or {}
+        self.age_days = age_days
+
+
 RETRY_DELAYS_SECONDS = (0, 5, 15)
 
 
