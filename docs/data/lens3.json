@@ -2,7 +2,7 @@
   "lens": 3,
   "title": "Price trend",
   "subtitle": "Confirmation that the market is actually rolling over.",
-  "updated_at": "2026-08-14T00:08:07Z",
+  "updated_at": "2026-08-14T23:49:07Z",
   "indicators": [
     {
       "id": "sma_trend_sp500",
@@ -20,7 +20,7 @@
       "threshold": "50-day SMA below the 150-day with both flat or falling over 20 sessions (within +0.1%) = elevated (bear trigger). Below without slope confirmation = watch. Otherwise benign.",
       "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
       "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
-      "notes": "Uptrend intact: the 50-day SMA (7,514) is above the 150-day (7,144). Cross-checked against FRED SP500 over 5 sessions (max diff 0.000%). Feeds verified against each other and logged in VERIFICATION.md."
+      "notes": "Uptrend intact: the 50-day SMA (7,508) is above the 150-day (7,155). Cross-checked against FRED SP500 over 5 sessions (max diff 0.000%). Feeds verified against each other and logged in VERIFICATION.md."
     }
   ]
 }
