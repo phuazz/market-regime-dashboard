@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-08-18T23:48:33Z",
+  "updated_at": "2026-08-19T23:48:45Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -67,7 +67,7 @@
       "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
       "source_url": "https://index.naaim.org/embeddable/table",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "PARKED 2026-08-18 — NAAIM's feed has not published a dated reading since 2026-05-13 (97 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-13 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "PARKED 2026-08-19 — NAAIM's feed has not published a dated reading since 2026-05-13 (98 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-13 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "growth_expectation_pe",
@@ -136,18 +136,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 15.3,
+      "value": 11.2,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-08-17",
+      "as_of": "2026-08-18",
       "status": "triggered",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +15.3 pp over six months — the crowding pattern of froth-on leadership. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Growth leads value by +11.2 pp over six months — the crowding pattern of froth-on leadership. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "credit_complacency_nfci",
@@ -159,18 +159,18 @@
       "qualifier": "Chicago Fed NFCI",
       "lens": 2,
       "in_composite": true,
-      "value": -0.549,
+      "value": -0.559,
       "unit": "index",
       "signed": true,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-08-07",
+      "as_of": "2026-08-14",
       "status": "quiet",
       "description": "The Chicago Fed's weekly composite of financial conditions; negative is looser than average. Deeply loose conditions signal complacent risk appetite — the fuel of late-cycle froth.",
       "threshold": "Triggered when conditions are in the loosest 20% of weekly readings since 1971.",
       "source_url": "https://fred.stlouisfed.org/series/NFCI",
       "secondary_source_url": "https://www.chicagofed.org/research/data/nfci/current-data",
-      "notes": "Financial conditions (-0.55) sit at the 32th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Financial conditions (-0.56) sit at the 30th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "sloos_tightening",
