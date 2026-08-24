@@ -3,7 +3,7 @@
   "name": "Shiller CAPE (monthly)",
   "unit": "ratio",
   "source_url": "https://www.multpl.com/shiller-pe",
-  "updated_at": "2026-08-24T22:52:33Z",
+  "updated_at": "2026-08-24T22:53:07Z",
   "dates": [
     "1871-02-01",
     "1871-03-01",
