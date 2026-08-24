@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-08-24T13:00:50Z",
+  "updated_at": "2026-08-24T22:52:37Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -79,7 +79,7 @@
       "qualifier": "trailing P/E percentile, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 29.58,
+      "value": 29.49,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
@@ -98,18 +98,18 @@
       "qualifier": "US IPO proceeds, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 144.0,
+      "value": 145.8,
       "unit": "usd_bn",
       "signed": false,
       "decimals": 1,
       "cadence": "monthly",
-      "as_of": "2026-08-03",
+      "as_of": "2026-08-24",
       "status": "triggered",
       "description": "New-listing volume clusters at tops, when cheap financing and high confidence embolden dealmakers. US IPO proceeds from Renaissance Capital serve as the documented free proxy for broader issuance.",
       "threshold": "Triggered when the annualised year-to-date proceeds pace reaches the 80th percentile of the prior years available (from 2016).",
       "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
       "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
-      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $144.0bn across 7 months (93 IPOs); annualised $247bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $145.8bn across 8 months (104 IPOs); annualised $219bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "rule_of_20",
@@ -117,7 +117,7 @@
       "qualifier": "P/E + CPI inflation",
       "lens": 2,
       "in_composite": true,
-      "value": 32.9,
+      "value": 32.8,
       "unit": "index",
       "signed": false,
       "decimals": 1,
@@ -128,7 +128,7 @@
       "threshold": "Triggered above 20 and at or above the 80th percentile of monthly history since 1948.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://fred.stlouisfed.org/series/CPIAUCSL",
-      "notes": "P/E plus inflation totals 32.9, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.58 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "P/E plus inflation totals 32.8, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.49 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md)."
     },
     {
       "id": "value_vs_growth",
