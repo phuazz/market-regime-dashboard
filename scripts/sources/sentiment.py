@@ -8,6 +8,7 @@ headline-plus-derivation pattern applies to NAAIM and multpl.
 """
 from __future__ import annotations
 
+import json
 import re
 from datetime import date, datetime
 
@@ -179,37 +180,110 @@ def fetch_multpl_pe_history() -> tuple[list[str], list[float], list[bool]]:
     )
 
 
+def _highcharts_configs(text: str) -> list[dict]:
+    """Return every Highcharts option object embedded in the page, parsed.
+
+    Each chart on the Renaissance stats page is emitted as
+    `var ChartOptions = {...};Highcharts.chart("<id>",ChartOptions);`. The
+    object is walked brace by brace rather than matched with a regex, because
+    the config nests several levels deep and its string values contain braces
+    of their own ("pointFormat":"{series.name}: <b>{point.y}</b>"), so the scan
+    tracks whether it is inside a string literal.
+
+    Parsing the object is what makes the caller indifferent to key order. The
+    previous regex required "data" before "name" within a series; the annual
+    chart writes them in that order and the monthly charts write them the other
+    way round, which is what broke the monthly parse.
+    """
+    configs = []
+    for match in re.finditer(r"var ChartOptions\s*=\s*\{", text):
+        start = match.end() - 1
+        depth, in_string, escaped = 0, False, False
+        for index in range(start, len(text)):
+            char = text[index]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                continue
+            if char == '"':
+                in_string = True
+            elif char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        configs.append(json.loads(text[start : index + 1]))
+                    except json.JSONDecodeError:
+                        pass
+                    break
+    return configs
+
+
+def _chart_series(config: dict, name: str) -> list[float]:
+    """Return the y values of the named series in a parsed Highcharts config."""
+    for series in config.get("series", []):
+        if series.get("name") == name:
+            return [float(point["y"]) for point in series.get("data", [])]
+    raise ScrapeError(f"Renaissance layout changed: no '{name}' series in chart")
+
+
 def fetch_renaissance_ipo_stats() -> dict:
     """Return US IPO issuance statistics from the Renaissance Capital page.
 
-    The page embeds Highcharts configs: an annual chart (year categories
-    with "Proceeds in Billions (US$)" and "Number of IPOs" series) and a
-    monthly chart for the current year. Series are matched by name and by
-    length against the category count, so chart order changes do not break
-    the parse.
+    The page embeds Highcharts configs: an annual chart (year categories with
+    "Proceeds in Billions (US$)" and "Number of IPOs" series) and one monthly
+    chart per year, each rendering into `pricings<year>Chart`. The annual chart
+    is found by its year categories and the monthly chart is bound to the
+    current year by its render target, so neither the order of the charts on
+    the page nor the presence of the prior-year monthly chart can select the
+    wrong series.
     """
     text = fetch_text(RENAISSANCE_STATS_URL)
-    years_match = re.search(r'"categories":\[((?:"(?:19|20)[0-9]{2}",?)+)\]', text)
-    if not years_match:
+    configs = _highcharts_configs(text)
+    if not configs:
+        raise ScrapeError("Renaissance layout changed: no Highcharts config found")
+
+    def categories(config: dict) -> list[str]:
+        axes = config.get("xAxis") or [{}]
+        return axes[0].get("categories", [])
+
+    annual = next(
+        (c for c in configs if all(re.fullmatch(r"(19|20)[0-9]{2}", x) for x in categories(c) or ["-"])),
+        None,
+    )
+    if annual is None:
         raise ScrapeError("Renaissance layout changed: year categories not found")
-    years = [int(y) for y in re.findall(r"[0-9]{4}", years_match.group(1))]
+    years = [int(y) for y in categories(annual)]
+    current_year = years[-1]
 
-    series: dict[str, list[list[float]]] = {}
-    for data_blob, name in re.findall(
-        r'"data":\[((?:\{"y":[0-9.]+\},?)+)\][^\[\]]*?"name":"([^"]+)"', text
-    ):
-        values = [float(v) for v in re.findall(r'"y":([0-9.]+)', data_blob)]
-        series.setdefault(name, []).append(values)
+    proceeds = _chart_series(annual, "Proceeds in Billions (US$)")
+    counts = _chart_series(annual, "Number of IPOs")
+    if len(proceeds) != len(years) or len(counts) != len(years):
+        raise ScrapeError("Renaissance layout changed: annual series do not match the year axis")
 
-    def pick(name: str, length: int) -> list[float]:
-        for candidate in series.get(name, []):
-            if len(candidate) == length:
-                return candidate
-        raise ScrapeError(f"Renaissance layout changed: no '{name}' series of length {length}")
-
-    proceeds = pick("Proceeds in Billions (US$)", len(years))
-    counts = pick("Number of IPOs", len(years))
-    monthly_counts = pick("Number of IPOs", 12)
+    target = f"pricings{current_year}Chart"
+    monthly = next((c for c in configs if c.get("chart", {}).get("renderTo") == target), None)
+    if monthly is None:
+        raise ScrapeError(f"Renaissance layout changed: no monthly chart rendering into {target}")
+    monthly_counts = _chart_series(monthly, "Number of IPOs")
+    if len(monthly_counts) != 12:
+        raise ScrapeError(
+            f"Renaissance layout changed: {target} has {len(monthly_counts)} months, expected 12"
+        )
+    # Guard against having taken the monthly chart of the wrong year, which
+    # would corrupt months_elapsed and therefore the annualised pace without
+    # producing anything that looks wrong. The two charts are rendered from the
+    # same snapshot and have agreed exactly in every year checked.
+    if int(sum(monthly_counts)) != int(counts[-1]):
+        raise ScrapeError(
+            f"Renaissance mismatch: {target} sums to {int(sum(monthly_counts))} IPOs but the "
+            f"annual chart reports {int(counts[-1])} for {current_year}"
+        )
 
     as_of = date.today().isoformat()
     stamp = re.search(r"as of ([0-9]{2})/([0-9]{2})/([0-9]{4})", text)
@@ -224,7 +298,6 @@ def fetch_renaissance_ipo_stats() -> dict:
     if months_elapsed == 0:
         raise ScrapeError("Renaissance layout changed: monthly counts are all zero")
 
-    current_year = years[-1]
     return {
         "current_year": current_year,
         "as_of": as_of,

@@ -349,7 +349,12 @@ def classify_lei(six_month_pct: float | None, params: dict) -> tuple[str, str]:
 def build_lei(thresholds: dict) -> dict:
     params = thresholds["leading_indicators"]
     scraped = scrape.fetch_conference_board_lei()
-    status, detail = classify_lei(scraped["six_month_pct"], params)
+    # Record the level before classifying, not after. Classification refuses to
+    # run without the six-month change, and when the release reworded that
+    # sentence in July 2026 the raise came first and cost three months of
+    # accumulation: the history file still held the single point written before
+    # the break. The level parses independently of the six-month sentence, so
+    # there is no reason to lose it when the sentence moves again.
     append_scrape_history(
         "lei_conference_board.json",
         {
@@ -362,6 +367,7 @@ def build_lei(thresholds: dict) -> dict:
         scraped["reference_month"],
         scraped["level"],
     )
+    status, detail = classify_lei(scraped["six_month_pct"], params)
     return {
         "id": "leading_indicators",
         "name": "Leading Economic Index",

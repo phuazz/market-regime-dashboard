@@ -213,30 +213,94 @@ def fetch_spglobal_pmi() -> dict:
         return parsed
 
 
+# Words the Conference Board uses for the direction of a change, mapped to the
+# sign to apply to the magnitude that follows them. Both noun forms ("an
+# increase of 0.2%") and verb forms ("fell by 2.4%") appear, and the release
+# rewords month to month, so the sign is taken from an explicit word list
+# rather than inferred from sentence shape.
+_LEI_DIRECTION_SIGN = {
+    "increase": 1, "increased": 1, "rose": 1, "grew": 1, "growth": 1, "gain": 1,
+    "expanded": 1, "up": 1, "ticked up": 1, "edged up": 1,
+    "decrease": -1, "decreased": -1, "decline": -1, "declined": -1, "fell": -1,
+    "drop": -1, "dropped": -1, "contraction": -1, "contracted": -1, "down": -1,
+    "ticked down": -1, "edged down": -1,
+}
+_LEI_DIRECTIONS = "|".join(sorted(_LEI_DIRECTION_SIGN, key=len, reverse=True))
+
+# The month-over-month headline: "(LEI) for the US increased by 0.2% in July
+# 2026 to 99.5 (2016=100)". The same sentence shape is used for the CEI and the
+# LAG further down the release, so callers must anchor on "(LEI)" before it --
+# see _lei_release_window.
+_LEI_LEVEL_RE = re.compile(
+    rf"({_LEI_DIRECTIONS})[^.]{{0,120}}?"
+    rf"([0-9]+\.[0-9]+)% in ({_MONTH_NAMES}) (20[0-9]{{2}}) to ([0-9]{{2,3}}\.[0-9]+)"
+)
+
+# The six-month growth rate, in the two shapes the release has used. Ordered:
+# the first is the August 2026 rewrite, the second the earlier wording. Both put
+# the direction word before the magnitude.
+#
+# The August 2026 sentence reads: "the LEI's six-month growth rate turned
+# positive, to an increase of 0.2% between January and July 2026, a sharp
+# reversal from its 1.3% contraction over the previous six months." Neither
+# pattern can match that trailing 1.3% -- it is a magnitude-then-direction
+# clause about the PRIOR window -- and test_lei_source pins that, because
+# picking it up would flip the sign of the published figure silently.
+_LEI_SIX_MONTH_PATTERNS = (
+    re.compile(rf"six[- ]month growth rate[^.]{{0,100}}?({_LEI_DIRECTIONS}) of ([0-9]+\.[0-9]+)%"),
+    re.compile(rf"({_LEI_DIRECTIONS})(?: just| by)? ([0-9]+\.[0-9]+)% over the six[- ]month"),
+)
+
+
+def _lei_release_window(flat: str) -> str:
+    """Return the LEI paragraph of the press release, and only that paragraph.
+
+    The release repeats the same sentence shapes for the Coincident (CEI) and
+    Lagging (LAG) indexes, and the page also carries an explanatory blurb and
+    meta tags that name the LEI. Searching the whole page therefore works only
+    for as long as the LEI happens to come first -- it does today, which is why
+    the previous version of this parser was right by luck rather than by
+    construction. The window is cut from the LEI headline sentence to the start
+    of the CEI paragraph so a reordering upstream cannot silently substitute the
+    CEI's numbers for the LEI's.
+    """
+    for match in _LEI_LEVEL_RE.finditer(flat):
+        # A sentence belongs to whichever index was named most recently before
+        # it, so the test is the LAST marker in the prefix rather than the mere
+        # presence of "(LEI)". The explanatory blurb above the release names all
+        # three indexes, which is why presence alone is not enough.
+        markers = re.findall(r"\((?:LEI|CEI|LAG)\)", flat[max(0, match.start() - 400) : match.start()])
+        if not markers or markers[-1] != "(LEI)":
+            continue
+        window = flat[match.start() : match.start() + 1500]
+        cei = window.find("(CEI)")
+        return window[:cei] if cei > 0 else window
+    raise ScrapeError("Conference Board layout changed: LEI headline sentence not found")
+
+
 def fetch_conference_board_lei() -> dict:
     """Return the latest US LEI headline from the Conference Board topics page."""
-    text = fetch_text(CONFERENCE_BOARD_LEI_URL)
-    flat = re.sub(r"\s+", " ", text)
+    flat = re.sub(r"\s+", " ", fetch_text(CONFERENCE_BOARD_LEI_URL))
+    window = _lei_release_window(flat)
 
-    level_match = re.search(
-        rf"(?:increased|decreased|rose|fell|ticked (?:up|down))[^.]{{0,120}}?"
-        rf"([0-9]+\.[0-9]+)% in ({_MONTH_NAMES}) (20[0-9]{{2}}) to ([0-9]{{2,3}}\.[0-9]+)",
-        flat,
-    )
-    if not level_match:
-        raise ScrapeError("Conference Board layout changed: LEI headline sentence not found")
-    mom_pct = float(level_match.group(1))
-    if re.search(rf"(?:decreased|fell|ticked down)[^.]{{0,120}}?{re.escape(level_match.group(1))}% in", flat):
-        mom_pct = -mom_pct
-    reference_month = _month_name_to_first_of_month(level_match.group(2), int(level_match.group(3)))
-    level = float(level_match.group(4))
+    level_match = _LEI_LEVEL_RE.search(window)
+    mom_pct = float(level_match.group(2)) * _LEI_DIRECTION_SIGN[level_match.group(1)]
+    reference_month = _month_name_to_first_of_month(level_match.group(3), int(level_match.group(4)))
+    level = float(level_match.group(5))
 
-    six_match = re.search(r"(down|up|grew|contracted) (?:just |by )?([0-9]+\.[0-9]+)% over the six[- ]month", flat)
     six_month_pct = None
-    if six_match:
-        six_month_pct = float(six_match.group(2))
-        if six_match.group(1) in ("down", "contracted"):
-            six_month_pct = -six_month_pct
+    for pattern in _LEI_SIX_MONTH_PATTERNS:
+        six_match = pattern.search(window)
+        if six_match:
+            six_month_pct = float(six_match.group(2)) * _LEI_DIRECTION_SIGN[six_match.group(1)]
+            break
+    # A six-month change outside this band has never been printed, including
+    # 2008 and 2020, so it means the wrong number was picked up rather than a
+    # remarkable month. Refuse it instead of classifying on it.
+    if six_month_pct is not None and abs(six_month_pct) > 15:
+        raise ScrapeError(
+            f"Conference Board layout changed: implausible six-month change {six_month_pct:+.1f}%"
+        )
     return {
         "level": level,
         "mom_pct": mom_pct,
