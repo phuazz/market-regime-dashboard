@@ -3,7 +3,7 @@
   "name": "S&P 500 trailing P/E (monthly)",
   "unit": "ratio",
   "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
-  "updated_at": "2026-08-24T22:53:08Z",
+  "updated_at": "2026-08-25T02:10:26Z",
   "dates": [
     "1871-01-01",
     "1871-02-01",

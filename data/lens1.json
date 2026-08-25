@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-08-24T23:47:54Z",
+  "updated_at": "2026-08-25T02:10:31Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -20,7 +20,8 @@
       "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign.",
       "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
       "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-      "notes": "The spread is positive (+0.83) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The spread is positive (+0.83) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_yield_curve"
     },
     {
       "id": "sahm_rule",
@@ -38,7 +39,8 @@
       "threshold": "At or above 0.50 = elevated (published Sahm trigger). 0.35-0.50 = watch.",
       "source_url": "https://fred.stlouisfed.org/series/SAHMREALTIME",
       "secondary_source_url": "https://www.currentmarketvaluation.com/models/sahm-rule.php",
-      "notes": "The Sahm reading of -0.03 is below the watch band. The real-time variant (SAHMREALTIME) is used so historical values reflect data as originally published; construction recomputed from UNRATE. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The Sahm reading of -0.03 is below the watch band. The real-time variant (SAHMREALTIME) is used so historical values reflect data as originally published; construction recomputed from UNRATE. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_sahm"
     },
     {
       "id": "hy_credit_spreads",
@@ -56,7 +58,8 @@
       "threshold": "At or above 4.00, or widening 100 bp over 63 trading days = watch. At or above 5.50, or widening 200 bp = elevated. At or below 3.00 adds a complacency note without changing status.",
       "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
-      "notes": "OAS of 2.70 is below the 4.00 watch level with a 63-trading-day change of -1 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-08-25 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "OAS of 2.70 is below the 4.00 watch level with a 63-trading-day change of -1 bp. Complacency note: the spread is at or below 3.00 — historically tight, a sign of reach-for-yield rather than safety. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-08-25 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_hy_oas"
     },
     {
       "id": "pmi_manufacturing_proxy",
@@ -74,7 +77,8 @@
       "threshold": "Below 50 = watch. Below 48 and lower than three months earlier = elevated.",
       "source_url": "https://tradingeconomics.com/united-states/manufacturing-pmi",
       "secondary_source_url": "https://www.pmi.spglobal.com/Public/Release/PressReleases",
-      "notes": "PMI of 53.2 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "PMI of 53.2 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_pmi"
     },
     {
       "id": "leading_indicators",
@@ -101,7 +105,8 @@
       },
       "source_url": "https://www.conference-board.org/topics/us-leading-indicators",
       "secondary_source_url": "https://www.prnewswire.com/news/the-conference-board/",
-      "notes": "The six-month change of +0.2% is not negative. Monthly change +0.2%. Licence note: only the publicly announced headline figures are displayed; no licensed series is redistributed. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The six-month change of +0.2% is not negative. Monthly change +0.2%. Licence note: only the publicly announced headline figures are displayed; no licensed series is redistributed. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_lei"
     },
     {
       "id": "labour_market",
@@ -128,7 +133,8 @@
       },
       "source_url": "https://fred.stlouisfed.org/series/UNRATE",
       "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm",
-      "notes": "Watch: payroll 3-month average +20k. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Watch: payroll 3-month average +20k. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_labour"
     },
     {
       "id": "shiller_cape",
@@ -146,7 +152,8 @@
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
       "source_url": "https://www.multpl.com/shiller-pe",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio",
-      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.40, median 16.11), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer."
+      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.40, median 16.11), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer.",
+      "builder": "build_cape"
     }
   ]
 }

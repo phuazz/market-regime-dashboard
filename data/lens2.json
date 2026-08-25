@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-08-24T23:47:54Z",
+  "updated_at": "2026-08-25T02:10:31Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -25,7 +25,8 @@
       "threshold": "Triggered at or above the 75th percentile of the full monthly history.",
       "source_url": "https://fred.stlouisfed.org/series/UMCSENT",
       "secondary_source_url": "http://www.sca.isr.umich.edu/",
-      "notes": "Sentiment sits at the 0th percentile of its full history — nowhere near the optimism seen at tops. Proxy substitution: the Conference Board confidence index is licensed; Michigan sentiment is a different survey that can diverge from it. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Sentiment sits at the 0th percentile of its full history — nowhere near the optimism seen at tops. Proxy substitution: the Conference Board confidence index is licensed; Michigan sentiment is a different survey that can diverge from it. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_consumer_confidence"
     },
     {
       "id": "retail_euphoria_aaii",
@@ -48,9 +49,17 @@
       "threshold": "Triggered when the spread reaches the top decile of the full weekly history (currently +28.1 pp); eased when bears outnumber bulls.",
       "source_url": "https://www.aaii.com/sentimentsurvey",
       "secondary_source_url": "https://www.aaii.com/files/surveys/sentiment.xls",
-      "notes": "Bears outnumber bulls (spread -4.4 pp) — retail euphoria is off. This week: bulls 35.5%, bears 39.9%; spread percentile 28 across 2,037 weeks since 1987. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Bears outnumber bulls (spread -4.4 pp) — retail euphoria is off. This week: bulls 35.5%, bears 39.9%; spread percentile 28 across 2,037 weeks since 1987. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_aaii"
     },
     {
+      "stale": {
+        "kind": "stale_feed",
+        "parked": true,
+        "days": 97,
+        "as_of": "2026-05-20",
+        "reason": "NAAIM has published no dated reading inside the freshness budget."
+      },
       "id": "manager_bullishness_naaim",
       "name": "Manager Bullishness",
       "qualifier": "NAAIM exposure — feed unavailable",
@@ -67,7 +76,8 @@
       "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
       "source_url": "https://index.naaim.org/embeddable/table",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "PARKED 2026-08-24 — NAAIM's feed has not published a dated reading since 2026-05-20 (96 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-20 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "PARKED 2026-08-25 — NAAIM's feed has not published a dated reading since 2026-05-20 (97 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-20 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_naaim"
     },
     {
       "id": "growth_expectation_pe",
@@ -84,13 +94,14 @@
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-08-24",
+      "as_of": "2026-08-25",
       "status": "triggered",
       "description": "How many dollars investors pay per dollar of earnings. A high historical percentile means optimism is already priced. Forward P/E needs a vendor feed, so the trailing multiple from multpl is the documented free proxy.",
       "threshold": "Triggered at or above the 90th percentile of monthly history since 1871.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month",
-      "notes": "The trailing multiple sits at the 97th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "The trailing multiple sits at the 97th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_pe"
     },
     {
       "id": "deal_ipo_froth",
@@ -109,7 +120,8 @@
       "threshold": "Triggered when the annualised year-to-date proceeds pace reaches the 80th percentile of the prior years available (from 2016).",
       "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
       "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
-      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $145.8bn across 8 months (104 IPOs); annualised $219bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $145.8bn across 8 months (104 IPOs); annualised $219bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_ipo"
     },
     {
       "id": "rule_of_20",
@@ -128,7 +140,8 @@
       "threshold": "Triggered above 20 and at or above the 80th percentile of monthly history since 1948.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://fred.stlouisfed.org/series/CPIAUCSL",
-      "notes": "P/E plus inflation totals 32.8, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.49 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "P/E plus inflation totals 32.8, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.49 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_rule_of_20"
     },
     {
       "id": "value_vs_growth",
@@ -136,18 +149,19 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 7.4,
+      "value": 6.1,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-08-21",
+      "as_of": "2026-08-24",
       "status": "quiet",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +7.4 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Growth leads value by +6.1 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_value_growth"
     },
     {
       "id": "credit_complacency_nfci",
@@ -170,7 +184,8 @@
       "threshold": "Triggered when conditions are in the loosest 20% of weekly readings since 1971.",
       "source_url": "https://fred.stlouisfed.org/series/NFCI",
       "secondary_source_url": "https://www.chicagofed.org/research/data/nfci/current-data",
-      "notes": "Financial conditions (-0.56) sit at the 30th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "Financial conditions (-0.56) sit at the 30th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_nfci"
     },
     {
       "id": "sloos_tightening",
@@ -189,7 +204,8 @@
       "threshold": "Context row — net tightening (above zero) is a froth-off pressure note.",
       "source_url": "https://fred.stlouisfed.org/series/DRTSCILM",
       "secondary_source_url": "https://www.federalreserve.gov/data/sloos.htm",
-      "notes": "A net +0.0% of banks report easing standards — no tightening pressure from bank credit. Series identity verified against two sources (VERIFICATION.md)."
+      "notes": "A net +0.0% of banks report easing standards — no tightening pressure from bank credit. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_sloos"
     }
   ],
   "composite": {
