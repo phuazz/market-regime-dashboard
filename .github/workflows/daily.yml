@@ -45,16 +45,33 @@ jobs:
         run: python scripts/build.py
 
       - name: Commit and push refreshed data
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data docs
           if git diff --cached --quiet; then
             echo "No data changes to commit."
-          else
-            git commit -m "Automated daily data refresh"
-            git pull --rebase origin main
-            git push origin main
+            exit 0
+          fi
+          git commit -m "Automated daily data refresh"
+          # data/ and docs/ are regenerated outputs of the same deterministic
+          # pipeline over the same sources, so a run that published while this
+          # one was building holds a version as good as this one's. Yield to it
+          # rather than hand-merge generated JSON, and do not fail the run: the
+          # data is not lost, it is superseded, and the next run regenerates.
+          # Seen 2026-08-25 when the daily and monthly runs were dispatched
+          # seconds apart; the twelve-hour gap in the schedules normally
+          # prevents it, so this is the guard for the manual case.
+          if ! git pull --rebase origin main; then
+            git rebase --abort
+            git reset --hard origin/main
+            echo "A concurrent refresh published first; this run's data was superseded."
+            exit 0
+          fi
+          if ! git push origin main; then
+            echo "Push rejected by a concurrent refresh; this run's data was superseded."
+            exit 0
           fi
 
       # The run still goes red on the first failure — that is the earliest signal
