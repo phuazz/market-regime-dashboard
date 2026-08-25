@@ -35,12 +35,13 @@ jobs:
 
       - name: Update monthly-group and quarterly-group data
         id: update
+        shell: bash
         run: |
           set +e
-          python scripts/update_data.py --group monthly
-          monthly_exit=$?
-          python scripts/update_data.py --group quarterly
-          quarterly_exit=$?
+          python scripts/update_data.py --group monthly | tee refresh.log
+          monthly_exit=${PIPESTATUS[0]}
+          python scripts/update_data.py --group quarterly | tee -a refresh.log
+          quarterly_exit=${PIPESTATUS[0]}
           echo "exit_code=$((monthly_exit + quarterly_exit))" >> "$GITHUB_OUTPUT"
 
       - name: Build docs
@@ -59,8 +60,23 @@ jobs:
             git push origin main
           fi
 
+      # The run still goes red on the first failure — that is the earliest signal
+      # and a parser is usually a one-sitting fix. What changed is that the
+      # message names the builders and any row that parked, so four weeks of
+      # failures do not read as four identical emails. This workflow failed
+      # every run from 2026-07-27 to 2026-08-24 with the same body.
       - name: Surface builder failures
         if: steps.update.outputs.exit_code != '0'
+        shell: bash
         run: |
-          echo "One or more builders failed; previous values were retained for those rows."
+          {
+            echo "### Builder failures"
+            echo '```'
+            grep -E '^(ERROR|WARNING|  PARKED)' refresh.log || echo "(see the refresh step log)"
+            echo '```'
+            echo "Previous values were retained for those rows. A row parks once it has"
+            echo "been failing past its group budget: it is shown as context, excluded"
+            echo "from the lens roll-up, and labelled stale on the page and in the digest."
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -E '^(ERROR|WARNING|  PARKED)' refresh.log || true
           exit 1

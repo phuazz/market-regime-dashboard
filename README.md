@@ -68,8 +68,46 @@ fresh (`.github/workflows/`):
 
 The data workflows run the offline tests first, commit only when data changed, and mark
 the run failed if any builder failed — in that case the affected rows keep
-their previous values (stale-but-sourced, with the run visible in the
-Actions tab). The `reference/` folder and this machine's local files are
+their previous values (stale-but-sourced) and the failure step names the
+builders and any parked row rather than repeating a fixed message.
+
+### Stale rows
+
+A retained row is marked, not silently kept. Every successfully built row
+records the builder that produced it, so a later failure of that builder can
+be attributed back to the row. The row then carries a `stale` block, and once
+the outage passes the group's budget — four days for the daily group, sixteen
+for the weekly-polled monthly and quarterly groups — it **parks**:
+
+- `status` becomes `context`, which every roll-up and the digest exclude, so a
+  reading nobody can refresh cannot fire a trigger;
+- `in_composite` goes `false` where the key exists, so it cannot move the
+  Lens 2 share;
+- value and `as_of` are left alone. They are the last successful read, they
+  are dated, and showing them beside the label beats blanking them;
+- the page shows a red **Stale · not refreshed for N days** chip and a message
+  giving the date, the age and the reason; the weekly digest opens with a
+  DATA HEALTH line, replaces the row's distance-to-trigger with its age, and
+  leaves it out of the ranked movers (a parked row's week-over-week delta is a
+  change in what could be retrieved, not a move in the market).
+
+Parking reverses itself on the first successful rebuild. The budget is
+measured from the first failed run, not from `as_of`: `as_of` is a reference
+date, so a freshly published LEI row is dated the first of the reference month
+and is already weeks old on the day it lands.
+
+The same `stale` block is emitted by `build_naaim` when the feed itself has
+stopped publishing, with `kind: "stale_feed"` rather than `"builder_failure"`
+— the two faults stay distinct (one is a code fix, the other a sourcing
+decision) but wear the same label, because to a reader both mean the number is
+not current.
+
+This exists because the LEI row read "99.3, watch, six-month -0.3%, as of May
+2026" for four weeks after the reading had turned positive: the builder
+refused to guess and the workflow went red, but nothing on the page said the
+number had stopped refreshing.
+
+The `reference/` folder and this machine's local files are
 not needed by automation. Local sessions should start with
 `git pull --rebase origin main` to pick up bot commits.
 

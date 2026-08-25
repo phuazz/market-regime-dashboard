@@ -141,7 +141,13 @@ a:hover { text-decoration: underline; }
 .row-threshold { font-size: 11px; color: var(--t3); margin-top: 6px; max-width: 640px; }
 /* Parameter chip: shown only for an unconfirmed (pending) threshold. */
 .chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; margin-left: 6px; vertical-align: 1px; background: var(--a-bg); border: 1px solid rgba(180,83,9,0.2); color: var(--a); }
+/* Stale chip: the row's builder has been failing past its budget, so the number
+   beside it is the last successful read and not a current one. Red rather than
+   the amber of a pending threshold — a stale number is the more serious of the
+   two, because it reads as current unless something says otherwise. */
+.chip-stale { background: var(--r-bg); border-color: rgba(192,57,43,0.25); color: var(--r); }
 .row-notes { font-size: 11px; color: var(--t3); margin-top: 4px; max-width: 640px; }
+.row-stale { color: var(--r); background: var(--r-bg); border-left: 2px solid var(--r); padding: 4px 8px; border-radius: 0 var(--radius) var(--radius) 0; }
 .row-sources { font-size: 11px; color: var(--t3); margin-top: 6px; }
 .row-sources a { color: var(--t2); border-bottom: 1px dotted var(--bd-strong); }
 .row-toggle { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; background: var(--b-bg); border: 1px solid rgba(37,99,235,0.25); color: var(--b); cursor: pointer; margin-left: 8px; user-select: none; }
@@ -875,6 +881,15 @@ function renderLensRows(rowsId, subId, lensData) {
     const main = el("div", "row-main");
     const name = el("div", "row-name", ind.name + " ");
     if (ind.qualifier) name.appendChild(el("span", "qualifier", "(" + ind.qualifier + ")"));
+    /* A parked row: its builder has been failing past the group's budget, so the
+       value and date below are its last successful read. Say so on the row
+       itself — the previous design retained the number silently, which is how a
+       "watch" that had turned benign stayed on the page for four weeks. */
+    const stale = ind.stale && ind.stale.parked ? ind.stale : null;
+    if (stale) {
+      name.appendChild(el("span", "chip chip-stale",
+        "Stale · not refreshed for " + stale.days + " days"));
+    }
     main.appendChild(name);
     if (ind.description) main.appendChild(el("div", "row-desc", ind.description));
 
@@ -887,6 +902,7 @@ function renderLensRows(rowsId, subId, lensData) {
     }
     main.appendChild(threshold);
     if (ind.notes) main.appendChild(el("div", "row-notes", ind.notes));
+    if (stale && stale.message) main.appendChild(el("div", "row-notes row-stale", stale.message));
 
     const sources = el("div", "row-sources");
     sources.appendChild(document.createTextNode("Source: "));
@@ -923,9 +939,16 @@ function renderLens2(lens2) {
   const easedText = c.eased_count
     ? " " + c.eased_count + (c.eased_count === 1 ? " gauge has" : " gauges have") + " eased."
     : "";
+  /* Name the excluded rows from the data rather than by hand. The hard-coded
+     version said "the SLOOS row" and had been wrong since NAAIM parked in
+     August 2026: two rows sat outside a composite the page said had one. */
+  const outside = lens2.indicators.filter((i) => i.in_composite === false);
+  const outsideText = outside.length
+    ? " Outside the composite: " + outside.map((i) => i.name).join(", ") + "."
+    : "";
   document.getElementById("composite-note").textContent =
     c.triggered_count + " of " + c.gauge_count + " froth gauges are triggered." + easedText +
-    " The SLOOS row is context and sits outside the composite.";
+    outsideText;
   const alarmChip = document.getElementById("composite-alarm");
   alarmChip.textContent =
     c.alarm_share_pct === null

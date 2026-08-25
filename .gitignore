@@ -9,3 +9,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 .claude/settings.local.json
+# Written by the refresh workflows so the failure step can name what broke.
+refresh.log

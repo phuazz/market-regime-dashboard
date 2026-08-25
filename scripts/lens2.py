@@ -277,8 +277,23 @@ def _naaim_parked_row(reading: dict, stale, today: date | None = None) -> dict:
     Carries a real number so the card renders (template formatValue calls
     toLocaleString on the value and would throw on null), but the number is the
     last one NAAIM published a DATE for, and as_of carries that date.
+
+    The `stale` block is the display contract shared with rows parked by
+    update_data.mark_retained, so both wear the same chip and both drop out of
+    the digest's distance-to-trigger. `kind` keeps the two faults apart, because
+    `days` counts different things: here it is the age of the newest observation
+    the publisher offers, there it is how long the builder has been failing. No
+    `message` is set -- the notes field below already carries this row's full
+    explanation, and a second copy on the card would only repeat it.
     """
     return {
+        "stale": {
+            "kind": "stale_feed",
+            "parked": True,
+            "days": stale.age_days,
+            "as_of": reading["as_of"],
+            "reason": "NAAIM has published no dated reading inside the freshness budget.",
+        },
         "id": "manager_bullishness_naaim",
         "name": "Manager Bullishness",
         "qualifier": "NAAIM exposure — feed unavailable",

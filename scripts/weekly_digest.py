@@ -331,9 +331,26 @@ def trigger_metric_text(tm: dict, status: str):
     return f"{metric_str} · {abs(room):.{dec}f} {rel} the {line_str} {tier} line"
 
 
+def stale_text(record: dict):
+    """The staleness phrase for a parked row, or None if the row is current.
+
+    A parked row still carries the trigger metric of its last successful read,
+    and rendering distance-to-trigger from it would state a live-looking
+    headroom for a number that has stopped moving. The age replaces it.
+    """
+    stale = record.get("stale") or {}
+    if not stale.get("parked"):
+        return None
+    return f"stale — not refreshed for {stale['days']} days"
+
+
 def distance_text(record: dict):
     """Distance-to-trigger for a row: the trigger metric if one is supplied,
-    otherwise the headroom computed from the displayed value."""
+    otherwise the headroom computed from the displayed value. A parked row
+    reports its age instead, at every call site at once."""
+    stale = stale_text(record)
+    if stale:
+        return stale
     tm = record.get("trigger_metric")
     if tm:
         return trigger_metric_text(tm, record.get("status"))
@@ -361,6 +378,10 @@ def _ind_record(ind: dict) -> dict:
         # the builder supplies that metric and its lines, the digest shows distance
         # to the next tier in the metric's own units.
         "trigger_metric": ind.get("trigger_metric"),
+        # Set while the row's builder is failing. Past its budget the row is
+        # parked and its number is a last-successful read, so the digest must
+        # not present distance-to-trigger for it as though it were live.
+        "stale": ind.get("stale"),
     }
 
 
@@ -536,6 +557,13 @@ def rank_movers(new: dict, moves: dict, limit: int = 3) -> list[dict]:
                 continue
             if not mv["status_changed"] and mv["arrow"] == "flat":
                 continue
+            # A parked row can still show a week-over-week delta, but it is a
+            # change in what could be retrieved, not a move in the market: NAAIM's
+            # last dated reading advanced three weeks in one run and would have
+            # read as managers adding exposure. The staleness belongs in the data
+            # health line, and the ranked movers stay about the market.
+            if (rec.get("stale") or {}).get("parked"):
+                continue
             score = 0.0
             if mv["status_changed"]:
                 score += 2.0
@@ -656,8 +684,34 @@ def _moves_empty_note(moves: dict) -> str:
     return "No notable moves — a quiet week."
 
 
+def parked_rows(new: dict) -> list[dict]:
+    """Every row whose builder has been failing past its budget, worst first.
+
+    Surfaced at the top of the digest rather than left to be inferred from a row
+    that quietly reads Context. A number that has stopped refreshing is a change
+    in what the dashboard can tell you, which is the digest's whole subject.
+    """
+    rows = [rec for lens_key in ("lens1", "lens2", "lens3")
+            for rec in new[lens_key].values()
+            if (rec.get("stale") or {}).get("parked")]
+    return sorted(rows, key=lambda r: -r["stale"]["days"])
+
+
+def _parked_sentence(rows: list[dict]) -> str:
+    named = ", ".join(f"{r['name']} ({r['stale']['days']} days)" for r in rows)
+    verb = "row has" if len(rows) == 1 else "rows have"
+    return (f"{len(rows)} {verb} stopped refreshing and {'is' if len(rows) == 1 else 'are'} "
+            f"parked — shown as context, outside the roll-up, on the last successful read: {named}.")
+
+
 def render_text(new: dict, movers: list[dict], moves: dict, narrative_text: str, baseline_label: str) -> str:
     lines = ["REGIME DASHBOARD — WEEKLY DIGEST", baseline_label, "", narrative_text, ""]
+
+    parked = parked_rows(new)
+    if parked:
+        lines.append("DATA HEALTH")
+        lines.append(f"  {_parked_sentence(parked)}")
+        lines.append("")
 
     lines.append("THIS WEEK'S MOVES")
     if movers:
@@ -748,6 +802,14 @@ def render_html(new: dict, movers: list[dict], moves: dict, narrative_text: str,
         f'<div style="padding:12px 14px;background:#f0f6f2;border-radius:8px;font-size:14px;'
         f'line-height:1.6;margin:0 0 8px">{narrative_text}</div>',
     ]
+
+    parked = parked_rows(new)
+    if parked:
+        parts.append(
+            f'<p style="padding:10px 14px;background:#fdf0ee;border-left:3px solid #c0392b;'
+            f'border-radius:0 6px 6px 0;margin:8px 0 0;color:#c0392b;font-size:13px">'
+            f'{_parked_sentence(parked)}</p>'
+        )
 
     parts.append('<h3 style="font-size:15px;margin:22px 0 6px">This week’s moves</h3>')
     if movers:

@@ -37,8 +37,9 @@ jobs:
         id: update
         run: |
           set +e
-          python scripts/update_data.py --group daily
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          python scripts/update_data.py --group daily | tee refresh.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Build docs
         run: python scripts/build.py
@@ -56,8 +57,22 @@ jobs:
             git push origin main
           fi
 
+      # The run still goes red on the first failure — that is the earliest signal
+      # and a parser is usually a one-sitting fix. What changed is that the
+      # message names the builders and any row that parked, so four weeks of
+      # failures do not read as four identical emails.
       - name: Surface builder failures
         if: steps.update.outputs.exit_code != '0'
+        shell: bash
         run: |
-          echo "One or more builders failed; previous values were retained for those rows."
+          {
+            echo "### Builder failures"
+            echo '```'
+            grep -E '^(ERROR|WARNING|  PARKED)' refresh.log || echo "(see the refresh step log)"
+            echo '```'
+            echo "Previous values were retained for those rows. A row parks once it has"
+            echo "been failing past its group budget: it is shown as context, excluded"
+            echo "from the lens roll-up, and labelled stale on the page and in the digest."
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -E '^(ERROR|WARNING|  PARKED)' refresh.log || true
           exit 1

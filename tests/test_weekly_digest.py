@@ -22,6 +22,7 @@ from weekly_digest import (
     headroom_text,
     lookback_cutoff,
     narrative,
+    parked_rows,
     parse_recipients,
     rank_movers,
     render_subject,
@@ -264,6 +265,66 @@ class TriggerMetric(unittest.TestCase):
         # ...one without falls back to headroom on the displayed value.
         sahm = {"id": "sahm_rule", "value": 0.07, "decimals": 2, "status": "benign"}
         self.assertIn("from the watch line", distance_text(sahm))
+
+
+class ParkedRows(unittest.TestCase):
+    """A row whose builder has been failing must not be reported as though live."""
+
+    def _rec(self, days=29, parked=True):
+        return {
+            "id": "leading_indicators", "name": "Leading Economic Index", "status": "context",
+            "value": 99.3, "decimals": 1, "trigger_metric": LEI_METRIC,
+            "stale": {"parked": parked, "days": days, "since": "2026-07-27T12:00:00Z",
+                      "reason": "six-month change unavailable"},
+        }
+
+    def test_parked_row_reports_its_age_instead_of_distance_to_trigger(self):
+        text = distance_text(self._rec())
+        self.assertEqual(text, "stale — not refreshed for 29 days")
+        self.assertNotIn("elevated line", text)
+
+    def test_marked_but_not_yet_parked_still_reports_distance(self):
+        """Below the budget the row is current; only the bookkeeping exists."""
+        text = distance_text(self._rec(days=2, parked=False))
+        self.assertIn("6-month change", text)
+        self.assertNotIn("stale", text)
+
+    def test_row_without_a_stale_block_is_unaffected(self):
+        rec = self._rec()
+        del rec["stale"]
+        text = distance_text(rec)
+        self.assertIn("6-month change", text)
+        self.assertNotIn("stale", text)
+
+    def test_parked_rows_are_collected_worst_first(self):
+        new = {
+            "lens1": {"leading_indicators": self._rec(days=29)},
+            "lens2": {"deal_ipo_froth": dict(self._rec(days=44), id="deal_ipo_froth",
+                                             name="Deal & IPO Froth")},
+            "lens3": {"sma_trend_sp500": {"id": "sma_trend_sp500", "name": "Trend", "status": "benign"}},
+        }
+        rows = parked_rows(new)
+        self.assertEqual([r["id"] for r in rows], ["deal_ipo_froth", "leading_indicators"])
+
+    def test_no_parked_rows_yields_nothing_to_report(self):
+        new = {"lens1": {}, "lens2": {}, "lens3": {"x": {"id": "x", "name": "X", "status": "benign"}}}
+        self.assertEqual(parked_rows(new), [])
+
+    def test_parked_row_is_not_ranked_as_a_mover(self):
+        """Its delta is a retrieval artefact, not a move in the market."""
+        rec = dict(self._rec(days=97), id="manager_bullishness_naaim", name="Manager Bullishness",
+                   value=82.02, status="context")
+        new = {"lens1": {}, "lens2": {"manager_bullishness_naaim": rec}, "lens3": {}}
+        moves = {"manager_bullishness_naaim": {
+            "delta": 4.68, "arrow": "up", "sense": "worse", "is_pct": False,
+            "new_print": True, "status_changed": False, "old_status": "context", "text": "+4.68 wk"}}
+        self.assertEqual(rank_movers(new, moves), [])
+
+    def test_snapshot_carries_the_stale_block_through(self):
+        lens1 = make_lens1(["benign"] * 7)
+        lens1["indicators"][4]["stale"] = {"parked": True, "days": 29}
+        snap = snapshot(lens1, make_lens2(50.0, 4, "below"), make_lens3("benign"))
+        self.assertTrue(snap["lens1"]["leading_indicators"]["stale"]["parked"])
 
 
 class Moves(unittest.TestCase):
