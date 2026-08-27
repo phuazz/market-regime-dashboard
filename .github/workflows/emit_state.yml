@@ -1,0 +1,95 @@
+name: Emit state contract
+
+# Publishes data/state.json — the three lenses and the combined risk-reduction
+# read, in the shape a private consumer (the command centre) reads them in.
+#
+# WHY THIS EXISTS. That consumer used to reach INTO this repo for exact JSON
+# pointers in lens1/lens2/lens3.json, and separately re-implemented this repo's
+# combined firing rule in its own codebase. Both worked, and both left knowledge
+# that belongs here living somewhere else: rename a key or change the firing
+# bar, and the break surfaces over there, days later, in a file nobody was
+# editing at the time. This moves it back beside the data.
+#
+# WHY A SEPARATE WORKFLOW. Nothing in this repo reads data/state.json. It must
+# therefore never be able to fail the daily refresh, and a separate workflow
+# cannot, whatever it does.
+#
+# WHY BOTH TRIGGERS. Lens 2 and Lens 3 move on the daily cadence; Lens 1 carries
+# monthly and quarterly indicators. Emitting only after the daily run would
+# leave a Lens 1 change unpublished until the next weekday refresh happened to
+# rewrite the file.
+#
+# GUARD (CLAUDE.md: no unattended run without one). emit_state.py hard-asserts
+# every pointer and every lens vocabulary and REFUSES to write on failure,
+# leaving the previous emission intact rather than half-writing a new one. The
+# consumer then validates each emission against its own registry and rejects a
+# disagreeing one, and reads it in SHADOW — rendering its own independent
+# extraction and reporting any field-level divergence from this file. The
+# combined rule is deliberately computed on BOTH sides for now, so a drift
+# between this repo's rule and the consumer's is reported rather than resolved.
+#
+# tests/test_emit_state.py enumerates the combined rule's full 3 x 2 x 3 truth
+# table. NOTE it is a local guard, not a gate: this repo's CI does not run
+# pytest. Run it by hand after touching emit_state.py.
+#
+# Nothing non-public is emitted; every value comes from a file this repo
+# already commits publicly.
+
+on:
+  workflow_run:
+    workflows: ["Daily data refresh", "Monthly and quarterly data refresh"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: emit-state-contract
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  emit:
+    # Only copy from a run that actually produced fresh inputs. After a failed
+    # refresh the previous emission stays, and the consumer's own staleness
+    # rule reports it — a stale emission is visible there, a wrong one is not.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # No dependencies by design: the emitter reads this repo's own JSON with
+      # the standard library only, so it cannot break on a vendor package the
+      # rest of the pipeline happens to pin.
+      - name: Emit the state contract
+        run: python scripts/emit_state.py
+
+      - name: Commit the emission
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "State Contract Emitter"
+          git add data/state.json
+          if git diff --cached --quiet; then
+            echo "State unchanged — nothing to commit."
+            exit 0
+          fi
+          git commit -m "Emit state contract $(date -u +'%Y-%m-%d %H:%M') UTC"
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt — rebasing onto origin/main."
+            git pull --rebase --autostash origin main || exit 1
+          done
+          echo "::error::Could not push the state emission after 3 attempts."
+          exit 1
