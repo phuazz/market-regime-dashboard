@@ -15,8 +15,9 @@ table below is enumerated in full rather than spot-checked: all 3 x 2 x 3
 combinations of the three lens states, with the expected combined value written
 out. If someone changes the firing rule in one place, one of these fails.
 
-NOTE: this repo's CI does not run pytest, so these are a local guard rather than
-a gate. Run them by hand after touching emit_state.py.
+NOTE: since 2026-09-02 the refresh and digest workflows run the suite under
+pytest, so these gate them. Before that they were a local guard only: unittest
+discovery imported this module but collected none of its tests.
 
 Synthetic payloads stand in for the on-disk JSON, so the tests do not move with
 the market. Python datetime months are 1-indexed (January = 1).

@@ -28,10 +28,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt "pytest>=8"
 
+      # Run under pytest, not unittest discovery: tests/test_emit_state.py is
+      # pytest-style, so discovery imported it (failing for want of the module
+      # from 2026-08-27 to 2026-09-02) yet would never have collected its tests.
       - name: Run offline tests
-        run: python -m unittest discover -s tests
+        run: python -m pytest tests -q
 
       - name: Update monthly-group and quarterly-group data
         id: update

@@ -163,7 +163,7 @@ when the CDN is unreachable.
 ```
 python scripts/update_data.py --group all     # refresh data/
 python scripts/verify_series.py               # scripted two-source checks
-python -m unittest discover -s tests          # date and threshold tests
+python -m pytest tests -q                     # offline tests, as CI runs them
 python scripts/build.py                       # build docs/index.html
 npx serve .                                   # dev: open template.html (fetch fallback)
 npx serve docs                                # test the built output

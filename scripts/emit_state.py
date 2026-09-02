@@ -44,11 +44,12 @@ WHAT IT IS NOT
     disagree, the dashboard is right and this is broken.
   * NOT load-bearing here. Nothing in this repo reads data/state.json.
 
-NOTE ON COVERAGE. This repo's CI does not run pytest, so tests/test_emit_state.py
-is a local guard rather than a gate. The enforcing check is on the consumer
-side, which validates every emission against its own registry and rejects one
-that disagrees, and which compares this against its own independent extraction
-on every run.
+NOTE ON COVERAGE. Since 2026-09-02 the refresh and digest workflows run
+tests/test_emit_state.py under pytest, so it gates them (it was a local guard
+only before that). The enforcing check on the emission itself is on the
+consumer side, which validates every emission against its own registry and
+rejects one that disagrees, and which compares this against its own
+independent extraction on every run.
 
 Usage:
     python scripts/emit_state.py           # write data/state.json
