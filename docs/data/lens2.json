@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-09-02T07:01:26Z",
+  "updated_at": "2026-09-03T01:19:48Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -56,7 +56,7 @@
       "stale": {
         "kind": "stale_feed",
         "parked": true,
-        "days": 98,
+        "days": 99,
         "as_of": "2026-05-27",
         "reason": "NAAIM has published no dated reading inside the freshness budget."
       },
@@ -76,7 +76,7 @@
       "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
       "source_url": "https://index.naaim.org/embeddable/table",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "PARKED 2026-09-02 — NAAIM's feed has not published a dated reading since 2026-05-27 (98 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-27 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "PARKED 2026-09-03 — NAAIM's feed has not published a dated reading since 2026-05-27 (99 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-05-27 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_naaim"
     },
     {
@@ -166,25 +166,25 @@
     {
       "id": "credit_complacency_nfci",
       "chart_line": {
-        "value": -0.631,
+        "value": -0.627,
         "label": "complacent tail (loosest quintile since 1971)"
       },
       "name": "Credit Complacency",
       "qualifier": "Chicago Fed NFCI",
       "lens": 2,
       "in_composite": true,
-      "value": -0.566,
+      "value": -0.558,
       "unit": "index",
       "signed": true,
       "decimals": 2,
       "cadence": "weekly",
-      "as_of": "2026-08-21",
+      "as_of": "2026-08-28",
       "status": "quiet",
       "description": "The Chicago Fed's weekly composite of financial conditions; negative is looser than average. Deeply loose conditions signal complacent risk appetite — the fuel of late-cycle froth.",
       "threshold": "Triggered when conditions are in the loosest 20% of weekly readings since 1971.",
       "source_url": "https://fred.stlouisfed.org/series/NFCI",
       "secondary_source_url": "https://www.chicagofed.org/research/data/nfci/current-data",
-      "notes": "Financial conditions (-0.57) sit at the 29th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "Financial conditions (-0.56) sit at the 30th loosest percentile since 1971, outside the complacent tail. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_nfci"
     },
     {
