@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-09-05T01:17:32Z",
+  "updated_at": "2026-09-07T17:37:26Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -14,18 +14,18 @@
       "qualifier": "Michigan sentiment, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 49.5,
+      "value": 55.2,
       "unit": "index",
       "signed": false,
       "decimals": 1,
       "cadence": "monthly",
-      "as_of": "2026-06-01",
+      "as_of": "2026-07-01",
       "status": "quiet",
       "description": "Household optimism, which runs hot near market tops. The Conference Board index is licensed, so the University of Michigan sentiment index is the documented free proxy.",
       "threshold": "Triggered at or above the 75th percentile of the full monthly history.",
       "source_url": "https://fred.stlouisfed.org/series/UMCSENT",
       "secondary_source_url": "http://www.sca.isr.umich.edu/",
-      "notes": "Sentiment sits at the 0th percentile of its full history — nowhere near the optimism seen at tops. Proxy substitution: the Conference Board confidence index is licensed; Michigan sentiment is a different survey that can diverge from it. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "Sentiment sits at the 2th percentile of its full history — nowhere near the optimism seen at tops. Proxy substitution: the Conference Board confidence index is licensed; Michigan sentiment is a different survey that can diverge from it. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_consumer_confidence"
     },
     {
@@ -82,25 +82,25 @@
     {
       "id": "growth_expectation_pe",
       "chart_line": {
-        "value": 23.67,
+        "value": 23.69,
         "label": "current trigger (90th percentile since 1871)"
       },
       "name": "Growth-Expectation Froth",
       "qualifier": "trailing P/E percentile, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 29.49,
+      "value": 26.36,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-08-25",
+      "as_of": "2026-09-07",
       "status": "triggered",
       "description": "How many dollars investors pay per dollar of earnings. A high historical percentile means optimism is already priced. Forward P/E needs a vendor feed, so the trailing multiple from multpl is the documented free proxy.",
       "threshold": "Triggered at or above the 90th percentile of monthly history since 1871.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month",
-      "notes": "The trailing multiple sits at the 97th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "The trailing multiple sits at the 94th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_pe"
     },
     {
@@ -114,13 +114,13 @@
       "signed": false,
       "decimals": 1,
       "cadence": "monthly",
-      "as_of": "2026-08-24",
+      "as_of": "2026-09-07",
       "status": "triggered",
       "description": "New-listing volume clusters at tops, when cheap financing and high confidence embolden dealmakers. US IPO proceeds from Renaissance Capital serve as the documented free proxy for broader issuance.",
       "threshold": "Triggered when the annualised year-to-date proceeds pace reaches the 80th percentile of the prior years available (from 2016).",
       "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
       "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
-      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $145.8bn across 8 months (104 IPOs); annualised $219bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $145.8bn across 9 months (106 IPOs); annualised $194bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_ipo"
     },
     {
@@ -129,7 +129,7 @@
       "qualifier": "P/E + CPI inflation",
       "lens": 2,
       "in_composite": true,
-      "value": 32.8,
+      "value": 29.7,
       "unit": "index",
       "signed": false,
       "decimals": 1,
@@ -140,7 +140,7 @@
       "threshold": "Triggered above 20 and at or above the 80th percentile of monthly history since 1948.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://fred.stlouisfed.org/series/CPIAUCSL",
-      "notes": "P/E plus inflation totals 32.8, well above the 20 fair-value line and at the 95th percentile of history since 1948. Inputs: trailing P/E 29.49 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "P/E plus inflation totals 29.7, well above the 20 fair-value line and at the 87th percentile of history since 1948. Inputs: trailing P/E 26.36 (multpl), CPI +3.3% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_rule_of_20"
     },
     {
