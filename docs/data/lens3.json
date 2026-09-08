@@ -2,7 +2,7 @@
   "lens": 3,
   "title": "Price trend",
   "subtitle": "Confirmation that the market is actually rolling over.",
-  "updated_at": "2026-09-05T01:17:32Z",
+  "updated_at": "2026-09-08T01:19:56Z",
   "indicators": [
     {
       "id": "sma_trend_sp500",

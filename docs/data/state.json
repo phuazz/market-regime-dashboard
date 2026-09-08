@@ -1,7 +1,7 @@
 {
   "contract_version": "1",
   "emitted_by": "market-regime-dashboard",
-  "emitted_at": "2026-09-05T01:17:43+00:00",
+  "emitted_at": "2026-09-07T17:37:40+00:00",
   "signals": {
     "regime_lens1": {
       "as_of": "2026-09-04",
@@ -11,21 +11,21 @@
       "action_hint": "watch",
       "cadence": "monthly",
       "source_file": "data/lens1.json",
-      "computed_at": "2026-09-05T01:17:32Z",
+      "computed_at": "2026-09-07T17:37:25Z",
       "role": "risk-state",
       "horizon": "months",
       "evidence_grade": "adopted-gate",
       "licence": "public"
     },
     "regime_lens2": {
-      "as_of": "2026-09-03",
+      "as_of": "2026-09-07",
       "state": "below",
       "value": 42.9,
       "zone": "3 of 7 triggered",
       "action_hint": "none",
       "cadence": "daily",
       "source_file": "data/lens2.json",
-      "computed_at": "2026-09-05T01:17:32Z",
+      "computed_at": "2026-09-07T17:37:26Z",
       "role": "risk-state",
       "horizon": "months",
       "evidence_grade": "adopted-gate",
@@ -46,14 +46,14 @@
       "licence": "public"
     },
     "regime_risk_reduction": {
-      "as_of": "2026-09-04",
+      "as_of": "2026-09-07",
       "state": "OFF",
       "value": null,
       "zone": "L1 watch · L2 below · L3 benign",
       "action_hint": "none",
       "cadence": "daily",
       "source_file": "data/lens1.json, data/lens2.json, data/lens3.json",
-      "computed_at": "2026-09-05T01:17:32Z",
+      "computed_at": "2026-09-07T17:37:26Z",
       "role": "risk-state",
       "horizon": "months",
       "evidence_grade": "adopted-gate",
