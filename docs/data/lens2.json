@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-09-08T01:19:56Z",
+  "updated_at": "2026-09-09T01:24:05Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -56,7 +56,7 @@
       "stale": {
         "kind": "stale_feed",
         "parked": true,
-        "days": 97,
+        "days": 98,
         "as_of": "2026-06-03",
         "reason": "NAAIM has published no dated reading inside the freshness budget."
       },
@@ -76,7 +76,7 @@
       "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
       "source_url": "https://index.naaim.org/embeddable/table",
       "secondary_source_url": "https://naaim.org/",
-      "notes": "PARKED 2026-09-08 — NAAIM's feed has not published a dated reading since 2026-06-03 (97 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-06-03 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "PARKED 2026-09-09 — NAAIM's feed has not published a dated reading since 2026-06-03 (98 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-06-03 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_naaim"
     },
     {
