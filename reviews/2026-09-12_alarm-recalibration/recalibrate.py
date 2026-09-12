@@ -48,7 +48,7 @@ from alarm_calibration import (          # noqa: E402  the filed run's own helpe
 from sources import sentiment            # noqa: E402
 from sources.fred import fetch_series    # noqa: E402
 from sources.prices import fetch_yahoo_daily  # noqa: E402
-from util import percentile_rank         # noqa: E402
+from sources.sentiment import percentile_rank  # noqa: E402  the live IPO rule's own
 from dateutil.relativedelta import relativedelta  # noqa: E402
 
 NAAIM_FROZEN = Path(r"C:\dev\sentiment-composite\archive\naaim.csv")
