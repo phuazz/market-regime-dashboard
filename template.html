@@ -621,7 +621,13 @@ const CHART_LAYOUT = {
   margin: { t: 10, b: 10, l: 10, r: 10 },
   xaxis: {
     gridcolor: '#eeeee8', linecolor: '#d5d3ca', linewidth: 1, showgrid: false,
-    tickformat: "%b '%y", dtick: 'M2', tickfont: { size: 9 }
+    tickformat: "%b '%y", dtick: 'M2', tickfont: { size: 9 },
+    // Ticks stay coarse, but the unified hover has to name the session.
+    // Without this Plotly reuses tickformat for the hover title, so every
+    // bar in a month read "Sep '26" — and on the long-span map chart, where
+    // tickformat is overridden to "%Y", every bar in a YEAR read "2025".
+    // Both overrides below spread this object, so they inherit the fix.
+    hoverformat: '%d %b %Y'
   },
   yaxis: {
     gridcolor: '#f0f0ea', linecolor: '#d5d3ca', linewidth: 1, showgrid: true, gridwidth: 1,
@@ -1142,7 +1148,10 @@ function renderMap(map) {
       y: map.lens2_crossings.map((c) => c.close),
       type: "scatter", mode: "markers", name: "Lens 2 alarm crossing",
       marker: { color: "#7c3aed", size: 9, line: { color: "#ffffff", width: 1.4 } },
-      hovertemplate: "Lens 2 froth crossed its 62.5% alarm<br>%{x|%b %Y} · S&P %{y:,.0f}<extra></extra>",
+      // Hover is "x unified": the session comes from xaxis.hoverformat in the
+      // box title, and unified mode collapses any <br> here, so this row is
+      // written as a single line with no %{x} of its own.
+      hovertemplate: "Lens 2 froth crossed its 62.5% alarm · S&P %{y:,.0f}<extra></extra>",
     },
   ];
   Plotly.newPlot(plot, traces, {
