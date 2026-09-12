@@ -25,6 +25,7 @@ from weekly_digest import (
     parked_rows,
     parse_recipients,
     rank_movers,
+    render_html,
     render_subject,
     snapshot,
     trigger_metric_text,
@@ -356,6 +357,67 @@ class Moves(unittest.TestCase):
     def test_no_new_print_labelled(self):
         s = self._snap(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
         self.assertEqual(compute_moves(s, s)["sahm_rule"]["text"], "no new print")
+
+    def test_parked_row_reports_no_weekly_delta(self):
+        """Its value moves when the archive advances, which is not a market move.
+
+        NAAIM's widget replays one historical week per calendar week, so the
+        parked row's last-retrievable reading kept changing and the table
+        printed "-7.55 wk" beside "not refreshed for 94 days".
+        """
+        def build(value):
+            lens1 = make_lens1_vals({"sahm_rule": value})
+            lens1["indicators"][1]["stale"] = {"parked": True, "days": 94,
+                                               "reason": "feed unavailable"}
+            return self._snap(lens1, make_lens2(50.0, 4, "below"), make_lens3("benign"))
+
+        mv = compute_moves(build(0.5), build(0.1))["sahm_rule"]
+        self.assertIsNone(mv["delta"])
+        self.assertEqual(mv["arrow"], "flat")
+        self.assertEqual(mv["text"], "—")
+
+    def test_marked_but_unparked_row_still_reports_its_delta(self):
+        def build(value):
+            lens1 = make_lens1_vals({"sahm_rule": value})
+            lens1["indicators"][1]["stale"] = {"parked": False, "days": 2,
+                                               "reason": "one missed read"}
+            return self._snap(lens1, make_lens2(50.0, 4, "below"), make_lens3("benign"))
+
+        mv = compute_moves(build(0.5), build(0.1))["sahm_rule"]
+        self.assertAlmostEqual(mv["delta"], -0.4)
+        self.assertEqual(mv["arrow"], "down")
+
+
+class HtmlBody(unittest.TestCase):
+    """The HTML body has to survive Gmail's stylesheet stripping."""
+
+    def _snap(self):
+        return snapshot(make_lens1(["benign"] * 7), make_lens2(50.0, 4, "below"), make_lens3("benign"))
+
+    def _html(self):
+        new = self._snap()
+        return render_html(new, [], compute_moves(new, new), "narrative", "since 2026-09-05")
+
+    def test_no_flexbox_anywhere(self):
+        """Gmail drops display:flex, which butted each lens title against its summary."""
+        self.assertNotIn("display:flex", self._html())
+
+    def test_lens_header_keeps_title_and_summary_apart(self):
+        html = self._html()
+        for title in ("Recession risk", "Market-peak froth", "Price trend"):
+            self.assertIn(f">{title}</td>", html)
+        self.assertIn("text-align:right", html)
+
+    def test_narrow_screens_get_a_media_query_in_the_head(self):
+        html = self._html()
+        self.assertIn("<head>", html)
+        self.assertIn("max-width:480px", html)
+        self.assertIn("td.digest-hr{display:none!important}", html)
+
+    def test_inline_distance_copy_is_hidden_unless_the_media_query_runs(self):
+        """A client that strips <style> must not show the distance twice."""
+        html = self._html()
+        self.assertIn('class="digest-hr-inline" style="display:none', html)
 
 
 class Movers(unittest.TestCase):

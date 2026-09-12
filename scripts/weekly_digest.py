@@ -509,6 +509,18 @@ def compute_moves(old: dict | None, new: dict) -> dict:
             status_changed = prev.get("status") != cur.get("status")
             meta = INDICATOR_META.get(ind_id, {})
             is_pct = bool(meta.get("delta_pct"))
+            # A parked row carries no weekly move. Its value does still change
+            # week to week — NAAIM's archive advances one historical week per
+            # calendar week — but that is the archive catching up, not managers
+            # changing exposure, and printing "-7.55 wk" beside "not refreshed
+            # for 94 days" reads as a market move the dashboard cannot see.
+            # rank_movers already drops these rows; the table now agrees.
+            if (cur.get("stale") or {}).get("parked"):
+                moves[ind_id] = {"delta": None, "arrow": "flat", "sense": "neutral",
+                                 "is_pct": is_pct, "new_print": False,
+                                 "status_changed": status_changed, "old_status": prev.get("status"),
+                                 "text": "—"}
+                continue
             if ov is None or nv is None:
                 moves[ind_id] = {"delta": None, "arrow": "flat", "sense": "neutral",
                                  "is_pct": is_pct, "new_print": new_print,
@@ -770,22 +782,38 @@ def _delta_html(mv: dict) -> str:
 def _section_html(new: dict, lens_key: str, moves: dict) -> str:
     head = lens_header(new, lens_key)
     title = {"lens1": "Recession risk", "lens2": "Market-peak froth", "lens3": "Price trend"}[lens_key]
+    # Laid out as a two-cell table row, not flexbox. Gmail drops display:flex,
+    # which left the title and its summary butted together with no separator
+    # ("Recession riskWatch - 1 of 6 on watch") in the 2026-09-12 digest. Tables
+    # are the one layout primitive every mail client honours.
     parts = [
-        '<div style="margin:22px 0 6px;display:flex;align-items:baseline;justify-content:space-between;gap:8px">',
-        f'<span style="font-size:15px;font-weight:600">{title}</span>',
-        f'<span style="font-size:12px;color:#6b7280">{head["word"]} · {head["detail"]}</span>',
-        '</div>',
+        '<table role="presentation" class="digest-head" '
+        'style="border-collapse:collapse;width:100%;margin:22px 0 6px"><tr>',
+        f'<td style="padding:0 8px 0 0;font-size:15px;font-weight:600;color:#1f2328;'
+        f'vertical-align:baseline">{title}</td>',
+        f'<td style="padding:0;font-size:12px;color:#6b7280;text-align:right;'
+        f'vertical-align:baseline">{head["word"]} · {head["detail"]}</td>',
+        '</tr></table>',
         '<table style="border-collapse:collapse;width:100%;font-size:14px">',
     ]
     for ind_id, rec in new[lens_key].items():
         hr = distance_text(rec) or ""
+        # The distance to the trigger is carried twice: as its own column for a
+        # wide reader, and hidden inside the name cell for a phone, where five
+        # columns do not fit (measured 414px of content in a 351px column at
+        # 375px wide, which clipped the status chip). NARROW_CSS swaps them.
+        # A client that strips the <style> block keeps the column and shows
+        # neither twice, which is the layout before this change.
+        inline_hr = (f'<span class="digest-hr-inline" style="display:none;color:#6b7280;'
+                     f'font-size:12px">{hr}</span>') if hr else ""
         parts.append(
             '<tr>'
-            f'<td style="padding:6px 8px 6px 0;border-bottom:1px solid #f0f0f0;color:#1f2328">{rec["name"]}</td>'
+            f'<td style="padding:6px 8px 6px 0;border-bottom:1px solid #f0f0f0;color:#1f2328">'
+            f'{rec["name"]}{inline_hr}</td>'
             f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-family:ui-monospace,Menlo,Consolas,monospace;'
             f'font-size:13px;color:#4b5563;white-space:nowrap">{rec["value_text"]}</td>'
             f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">{_delta_html(moves.get(ind_id))}</td>'
-            f'<td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;color:#6b7280;font-size:12px">{hr}</td>'
+            f'<td class="digest-hr" style="padding:6px 8px;border-bottom:1px solid #f0f0f0;color:#6b7280;font-size:12px">{hr}</td>'
             f'<td style="padding:6px 0;border-bottom:1px solid #f0f0f0;text-align:right">{_chip_html(rec["status"])}</td>'
             '</tr>'
         )
@@ -793,8 +821,33 @@ def _section_html(new: dict, lens_key: str, moves: dict) -> str:
     return "".join(parts)
 
 
+# Phone layout. Gmail honours a <style> block in the head, including media
+# queries, on the web client and in its iOS / Android apps; a client that strips
+# it falls back to the wide five-column table, which is what shipped before.
+# The !important flags are needed to beat the inline display:none that keeps the
+# inline copy hidden in exactly that fallback.
+NARROW_CSS = (
+    "@media only screen and (max-width:480px){"
+    "td.digest-hr{display:none!important}"
+    "span.digest-hr-inline{display:block!important;margin-top:2px;line-height:1.35}"
+    # A lens title and its summary do not fit on one phone line: side by side
+    # they each wrap and the summary ends on an orphaned word. Stacked instead.
+    "table.digest-head td{display:block!important;text-align:left!important;padding:0!important}"
+    "table.digest-head td+td{margin-top:2px}"
+    "}"
+)
+
+
 def render_html(new: dict, movers: list[dict], moves: dict, narrative_text: str, baseline_label: str) -> str:
     parts = [
+        '<!doctype html><html><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width,initial-scale=1">',
+        '<title>Regime dashboard — weekly digest</title>',
+        f'<style>{NARROW_CSS}</style></head>',
+        # text-size-adjust stops iOS inflating the body text in landscape, which
+        # would push the tables back over the viewport width.
+        '<body style="margin:0;padding:0;background:#ffffff;'
+        '-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">',
         '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;'
         'max-width:660px;margin:0 auto;color:#1f2328;font-size:15px;line-height:1.5">',
         '<h2 style="font-size:18px;margin:0 0 2px">Regime dashboard — weekly digest</h2>',
@@ -846,7 +899,7 @@ def render_html(new: dict, movers: list[dict], moves: dict, narrative_text: str,
         f'<p style="margin:14px 0 0"><a href="{DASHBOARD_URL}" '
         f'style="color:#1d4ed8;text-decoration:none;font-weight:600">Open the full dashboard →</a></p>'
     )
-    parts.append("</div>")
+    parts.append("</div></body></html>")
     return "".join(parts)
 
 
