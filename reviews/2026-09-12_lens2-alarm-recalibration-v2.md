@@ -1,15 +1,60 @@
 # Lens 2 alarm level on real-time data — running memo (v2)
 
-Date: 2026-09-12 (Saturday) · Project: market-regime-dashboard · Status: FILED, verdict not signed
+Date: 2026-09-12 (Saturday) · Project: market-regime-dashboard · Status: FILED, CONTESTED, recommendation WITHDRAWN
 Pre-registration: `reviews/2026-09-12_alarm-recalibration-v2/PREREG.md`, frozen in commit
 `22e14bf` before any figure existed; two amendments committed in `25c04c7`, also before any
 figure existed. Script `recalibrate_v2.py`, output `result_v2.json`, both in that folder.
 Supersedes the evidential claims of `reviews/2026-09-12_lens2-alarm-recalibration.md`
 (CONTESTED) and answers its adversarial review.
 
-> **Recommendation, and it is a judgement rather than a measurement: move the alarm to
-> 4 of 7 (57.1%).** This reverses the first study. It is not signed, no file has been
-> changed on the strength of it, and two named checks below would strengthen or overturn it.
+> ## ERRATUM — RECOMMENDATION WITHDRAWN. The level is undecidable on outcomes.
+>
+> The adversarial read returned DO NOT SIGN
+> (`reviews/2026-09-12_alarm-recalibration-v2/ADVERSARIAL_REVIEW.md`). Three decisive
+> findings were re-verified against this study's own output before this note was written,
+> and all three hold.
+>
+> **1. The discriminating months are 3 of 5, not 4 of 7.** NFCI is absent before 2011-05-25
+> in the real-time arm, so the 2007-09 composite ran on five gauges. Every one of the seven
+> GFC months reads `pe, rule20, vvg` triggered on a five-gauge denominator. At n=5, 57.1%
+> bites as 3 of 5 and 62.5% as 4 of 5. The sentence "four of seven did, from December 2007"
+> describes a rule that was never evaluated: on today's seven gauges those same three
+> triggered gauges read 3 of 7 = 42.9%, **below the line this memo recommended**. The
+> finding is the missing gauge, not the level — it vanishes on the comparability arm, where
+> 57.1% has no GFC firing at all, and it would vanish with any sixth gauge. Two of the seven
+> months carry `near_line: ['pe']` and should have been reported as months this study cannot
+> call, under its own pre-registered rule. They were counted.
+>
+> **2. The melt-up table is wrong in two of four windows.** It states zero firings at any
+> level in all four. This study's own output has **1998-09 and 1998-10 firing at every
+> candidate level**, inside the 1991-98 window, and 2003-02/03 firing at 42.9% and 50%. That
+> column was never computed — it was inferred from "Lens 3 never confirmed inside those
+> windows", which is also false: the reconstruction has bear months in three of the four.
+> The correct statement is that melt-up firings are identical at both live candidates, not
+> that they cost nothing. Worse, the 1998 firing is not in the filed `act_spans`: the
+> real-time treatment manufactures a joint false positive the dashboard never had, ahead of
+> a +20% year.
+>
+> **3. Lens 1 was already elevated through all seven months.** `data/signal_map.json`
+> `lens1_spans` records Lens 1 elevated 2007-08-31 → 2010-05-28, and the filed `act_spans`
+> cover 2007-12→2008-03 and 2008-06→2009-03. Under the rule as coded, the risk-reduction
+> signal fired in every one of those months at the stored line already. This memo named that
+> check as an open question needing a separate study; it was answerable from a file this
+> study had already opened for its own guard.
+>
+> **Consequence.** Under the full rule, 57.1% and 62.5% produce identical outcomes in every
+> month from 1988 to 2026. H5 is confirmed only for the Lens 2 path in isolation, which is
+> not the rule; for the rule it fails, exactly as the pre-registration predicted — and the
+> pre-registration's own consequence therefore applies: **the level cannot be chosen on
+> signal outcomes at all.** What survives is an arming-month difference in 2021, in one IPO
+> arm, which this memo itself classifies as not an outcome.
+>
+> The recommendation to move to 4 of 7 is withdrawn. `alarm_share_pct` remains 62.5 and no
+> file was changed on the strength of this record. The text below is left as filed.
+>
+> Both studies today produced a confident recommendation out of the structure of a small
+> denominator, in opposite directions. That pattern, not either answer, is the finding worth
+> carrying forward.
 
 ## What changed, and why the answer moved
 
