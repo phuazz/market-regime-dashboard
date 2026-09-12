@@ -1,7 +1,8 @@
 name: Emit state contract
 
-# Publishes data/state.json — the three lenses and the combined risk-reduction
-# read, in the shape a private consumer (the command centre) reads them in.
+# Publishes data/state.json and its served copy docs/data/state.json — the
+# three lenses and the combined risk-reduction read, in the shape a private
+# consumer (the command centre) reads them in.
 #
 # WHY THIS EXISTS. That consumer used to reach INTO this repo for exact JSON
 # pointers in lens1/lens2/lens3.json, and separately re-implemented this repo's
@@ -78,7 +79,11 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "State Contract Emitter"
-          git add data/state.json
+          # Both copies: emit_state.py mirrors into docs/, the tree Pages
+          # serves. Committing only data/ left the served contract a cycle
+          # behind, because the build that would have copied it runs in the
+          # refresh workflow, ahead of this one.
+          git add data/state.json docs/data/state.json
           if git diff --cached --quiet; then
             echo "State unchanged — nothing to commit."
             exit 0

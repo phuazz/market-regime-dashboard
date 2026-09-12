@@ -12,7 +12,9 @@ else: rename a key or change the firing rule, and the break surfaces over
 there, days later, in a file nobody was editing at the time.
 
 This writes `data/state.json` beside the data it describes, so a rename breaks
-here, in this repo's CI, at the moment of the rename.
+here, in this repo's CI, at the moment of the rename. It also mirrors the file
+into `docs/data/state.json`, the copy actually served over HTTPS, so the
+published contract cannot lag the committed one.
 
 THE COMBINED READ, WHICH THIS REPO ALREADY COMPUTES
 ---------------------------------------------------
@@ -222,6 +224,47 @@ def unchanged(payload: dict) -> bool:
     return strip(prev) == strip(payload)
 
 
+def published_for(out: Path) -> Path:
+    """Where the served copy of `out` lives: docs/data/, the tree Pages serves.
+
+    docs/ is generated, and build.py copies the whole data tree into it — but
+    build.py runs in the refresh workflow, which finishes BEFORE the emitter.
+    Leaving the mirror to the next build published a state a full cycle behind
+    the committed one: measured 2026-09-12, docs/data/state.json still served
+    11 September while data/state.json held 12 September. Whoever writes the
+    contract publishes it.
+
+    Derived from `out` rather than fixed, so a test that redirects OUT into a
+    temporary directory redirects the mirror with it and cannot write into the
+    repository's real docs/ tree.
+    """
+    return out.parent.parent / "docs" / "data" / out.name
+
+
+def publish(text: str) -> bool:
+    """Mirror the canonical emission into docs/. True when it wrote.
+
+    Runs on the unchanged path too. The mirror falls behind whenever a build
+    has not followed an emission, and an emission that changes nothing is
+    exactly when nothing else would come along to fix it. Absent a docs/data
+    directory it does nothing, which is what makes it inert under test.
+    """
+    target = published_for(OUT)
+    if not target.parent.is_dir():
+        return False
+    if target.exists() and target.read_text(encoding="utf-8") == text:
+        return False
+    target.write_text(text, encoding="utf-8")
+    return True
+
+
+def _shown(path: Path) -> Path:
+    try:
+        return path.relative_to(REPO)
+    except ValueError:
+        return path
+
+
 def main(argv: list[str]) -> int:
     try:
         payload = build()
@@ -243,14 +286,15 @@ def main(argv: list[str]) -> int:
 
     if unchanged(payload):
         print("emit_state: state unchanged since the last emission — leaving it as it is.")
+        if publish(OUT.read_text(encoding="utf-8")):
+            print(f"emit_state: refreshed {_shown(published_for(OUT))}, which had fallen behind.")
         return 0
 
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    try:
-        shown = OUT.relative_to(REPO)
-    except ValueError:
-        shown = OUT
-    print(f"emit_state: wrote {shown}")
+    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    OUT.write_text(text, encoding="utf-8")
+    print(f"emit_state: wrote {_shown(OUT)}")
+    if publish(text):
+        print(f"emit_state: published {_shown(published_for(OUT))}")
     return 0
 
 

@@ -258,3 +258,63 @@ def test_check_mode_writes_nothing(files, monkeypatch, tmp_path):
     monkeypatch.setattr(emit_state, "OUT", out)
     assert emit_state.main(["--check"]) == 0
     assert not out.exists()
+
+
+# --- the served copy ---------------------------------------------------------
+#
+# docs/data/state.json is the one a consumer reads over HTTPS. build.py copies
+# the data tree into docs/, but it runs in the refresh workflow, ahead of the
+# emitter, so the served contract used to lag the committed one by a full cycle.
+
+def _repo(tmp_path):
+    """A tmp tree shaped like the repository: data/ beside docs/data/."""
+    (tmp_path / "data").mkdir()
+    (tmp_path / "docs" / "data").mkdir(parents=True)
+    return tmp_path / "data" / "state.json"
+
+
+def test_the_emission_is_mirrored_into_the_served_tree(files, monkeypatch, tmp_path):
+    out = _repo(tmp_path)
+    monkeypatch.setattr(emit_state, "OUT", out)
+    assert emit_state.main([]) == 0
+    served = emit_state.published_for(out)
+    assert served.read_text(encoding="utf-8") == out.read_text(encoding="utf-8")
+
+
+def test_a_lagging_served_copy_is_refreshed_even_when_the_state_is_unchanged(
+        files, monkeypatch, tmp_path):
+    """The case that produced the bug: nothing to emit, mirror still behind."""
+    out = _repo(tmp_path)
+    monkeypatch.setattr(emit_state, "OUT", out)
+    assert emit_state.main([]) == 0
+    served = emit_state.published_for(out)
+    served.write_text('{"stale": "from an earlier cycle"}', encoding="utf-8")
+
+    assert emit_state.main([]) == 0          # unchanged state: nothing emitted
+    assert served.read_text(encoding="utf-8") == out.read_text(encoding="utf-8")
+
+
+def test_check_mode_writes_neither_copy(files, monkeypatch, tmp_path):
+    out = _repo(tmp_path)
+    monkeypatch.setattr(emit_state, "OUT", out)
+    assert emit_state.main(["--check"]) == 0
+    assert not out.exists()
+    assert not emit_state.published_for(out).exists()
+
+
+def test_no_docs_tree_is_not_an_error(files, monkeypatch, tmp_path):
+    """A checkout without docs/ still emits; the mirror is simply skipped."""
+    out = tmp_path / "state.json"
+    monkeypatch.setattr(emit_state, "OUT", out)
+    assert emit_state.main([]) == 0
+    assert out.exists()
+
+
+def test_the_committed_copies_agree():
+    """Guard on the tree: what is served must equal what was emitted."""
+    repo = Path(__file__).resolve().parent.parent
+    canonical = repo / "data" / "state.json"
+    served = repo / "docs" / "data" / "state.json"
+    assert json.loads(served.read_text(encoding="utf-8")) == \
+        json.loads(canonical.read_text(encoding="utf-8")), \
+        "docs/data/state.json is behind data/state.json — run python scripts/emit_state.py"
