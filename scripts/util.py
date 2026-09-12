@@ -39,6 +39,49 @@ CANONICAL_ORDER = {
     3: ["sma_trend_sp500"],
 }
 
+# The Lens 2 composite's membership, named rather than inferred from whichever
+# rows happen to carry in_composite on the day.
+#
+# WHY THIS EXISTS. The alarm is a SHARE, so its bite depends on how many gauges
+# are in the set, and a share threshold on a small denominator is lumpy: 62.5%
+# is exactly 5 of 8 at eight gauges but 5 of 7 at seven, because 4 of 7 is 57.1%
+# and sits below the line. When NAAIM parked on 2026-08-25 the count fell from
+# eight to seven and the alarm tightened with it, unannounced and undecided; the
+# row was removed outright on 2026-09-12 and the recalibration
+# (reviews/2026-09-12_lens2-alarm-recalibration.md) endorsed 62.5% on the seven,
+# but the silence is the defect this list guards against.
+#
+# tests/test_composite_alarm.py fails if a member is added or deleted without
+# this list being updated, which makes the next change a decision rather than an
+# accident. A member that PARKS is not a change to the set and does not fail the
+# guard — parking is temporary and already reported by the weekly digest, which
+# names the effective bite while it lasts.
+COMPOSITE_SET = (
+    "consumer_confidence_proxy",
+    "retail_euphoria_aaii",
+    "growth_expectation_pe",
+    "deal_ipo_froth",
+    "rule_of_20",
+    "value_vs_growth",
+    "credit_complacency_nfci",
+)
+
+
+def minimum_triggered(alarm_share_pct: float, gauge_count: int) -> int:
+    """Gauges that must trigger to arm the alarm, at this set size.
+
+    Mirrors lens2.summarise exactly, INCLUDING its rounding of the share to one
+    decimal before the comparison: re-deriving it from raw floats would disagree
+    with the live code at a boundary, and a guard that computes the rule its own
+    way is not a guard.
+    """
+    if gauge_count <= 0:
+        raise ValueError("gauge_count must be positive")
+    for triggered in range(gauge_count + 1):
+        if round(100.0 * triggered / gauge_count, 1) >= alarm_share_pct:
+            return triggered
+    return gauge_count + 1          # unreachable at any alarm at or below 100
+
 
 def load_json(path: Path) -> dict | None:
     if not path.exists():

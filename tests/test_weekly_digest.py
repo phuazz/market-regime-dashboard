@@ -13,7 +13,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
+from util import COMPOSITE_SET
 from weekly_digest import (
+    _parked_sentence,
+    alarm_bite_sentence,
     combined_state,
     compute_moves,
     diff_snapshots,
@@ -325,6 +328,35 @@ class ParkedRows(unittest.TestCase):
             "delta": 4.68, "arrow": "up", "sense": "worse", "is_pct": False,
             "new_print": True, "status_changed": False, "old_status": "context", "text": "+4.68 wk"}}
         self.assertEqual(rank_movers(new, moves), [])
+
+    def test_a_whole_gauge_set_says_nothing_about_the_bite(self):
+        new = snapshot(make_lens1(["benign"] * 7),
+                       make_lens2(42.9, 3, "below", gauges=len(COMPOSITE_SET)),
+                       make_lens3("benign"))
+        self.assertEqual(alarm_bite_sentence(new), "")
+
+    def test_a_parked_gauge_names_what_the_alarm_now_demands(self):
+        """The silent re-cut, said out loud for as long as it lasts.
+
+        A parked gauge changes what the share demands. Here the set is down to
+        six, where 62.5% needs 4 (66.7%) rather than the 5 of 7 it needs whole —
+        this direction is a LOOSENING, which is exactly why it is worth printing
+        rather than inferring.
+        """
+        new = snapshot(make_lens1(["benign"] * 7),
+                       make_lens2(50.0, 3, "below", gauges=6),
+                       make_lens3("benign"))
+        sentence = alarm_bite_sentence(new)
+        self.assertIn("6 of 7 gauges", sentence)
+        self.assertIn("needs 4 of 6 rather than 5 of 7", sentence)
+
+    def test_the_bite_line_rides_with_the_parked_sentence(self):
+        new = snapshot(make_lens1(["benign"] * 7),
+                       make_lens2(50.0, 3, "below", gauges=6),
+                       make_lens3("benign"))
+        text = _parked_sentence([self._rec(days=30)], new)
+        self.assertIn("stopped refreshing", text)
+        self.assertIn("rather than 5 of 7", text)
 
     def test_snapshot_carries_the_stale_block_through(self):
         lens1 = make_lens1(["benign"] * 7)

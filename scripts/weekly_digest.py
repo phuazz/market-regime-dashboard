@@ -54,6 +54,9 @@ from datetime import date, datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from util import COMPOSITE_SET, minimum_triggered  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
 DASHBOARD_URL = "https://phuazz.github.io/market-regime-dashboard/"
@@ -708,11 +711,34 @@ def parked_rows(new: dict) -> list[dict]:
     return sorted(rows, key=lambda r: -r["stale"]["days"])
 
 
-def _parked_sentence(rows: list[dict]) -> str:
+def alarm_bite_sentence(new: dict) -> str:
+    """What the froth alarm demands while a gauge is out of the roll-up.
+
+    The alarm is a share, so a parked gauge re-cuts it: at eight gauges 62.5% is
+    5 of 8, at seven it is 5 of 7, because 4 of 7 is 57.1% and sits below the
+    line. That happened on 2026-08-25 when NAAIM parked and nobody noticed for
+    three weeks. A permanent change to the set is caught by
+    tests/test_composite_alarm.py; this is the temporary case, which that guard
+    deliberately tolerates so an upstream outage cannot halt the refresh.
+    Empty while the set is whole.
+    """
+    comp = new.get("composite") or {}
+    live, full = comp.get("gauge_count"), len(COMPOSITE_SET)
+    alarm = comp.get("alarm_share_pct")
+    if not live or alarm is None or live >= full:
+        return ""
+    return (f" While that lasts the froth roll-up runs on {live} of {full} gauges, so the "
+            f"{fmt_share(alarm)}% alarm needs {minimum_triggered(alarm, live)} of {live} "
+            f"rather than {minimum_triggered(alarm, full)} of {full}.")
+
+
+def _parked_sentence(rows: list[dict], new: dict | None = None) -> str:
     named = ", ".join(f"{r['name']} ({r['stale']['days']} days)" for r in rows)
     verb = "row has" if len(rows) == 1 else "rows have"
+    bite = alarm_bite_sentence(new) if new else ""
     return (f"{len(rows)} {verb} stopped refreshing and {'is' if len(rows) == 1 else 'are'} "
-            f"parked — shown as context, outside the roll-up, on the last successful read: {named}.")
+            f"parked — shown as context, outside the roll-up, on the last successful read: "
+            f"{named}.{bite}")
 
 
 def render_text(new: dict, movers: list[dict], moves: dict, narrative_text: str, baseline_label: str) -> str:
@@ -721,7 +747,7 @@ def render_text(new: dict, movers: list[dict], moves: dict, narrative_text: str,
     parked = parked_rows(new)
     if parked:
         lines.append("DATA HEALTH")
-        lines.append(f"  {_parked_sentence(parked)}")
+        lines.append(f"  {_parked_sentence(parked, new)}")
         lines.append("")
 
     lines.append("THIS WEEK'S MOVES")
@@ -860,7 +886,7 @@ def render_html(new: dict, movers: list[dict], moves: dict, narrative_text: str,
         parts.append(
             f'<p style="padding:10px 14px;background:#fdf0ee;border-left:3px solid #c0392b;'
             f'border-radius:0 6px 6px 0;margin:8px 0 0;color:#c0392b;font-size:13px">'
-            f'{_parked_sentence(parked)}</p>'
+            f'{_parked_sentence(parked, new)}</p>'
         )
 
     parts.append('<h3 style="font-size:15px;margin:22px 0 6px">This week’s moves</h3>')

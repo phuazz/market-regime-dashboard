@@ -56,15 +56,18 @@
     "confirmed_by_zh": true
   },
   "lens2_composite": {
-    "description": "Composite = share of in-composite gauges triggered. Alarm adopted at 62.5% (5 of 8) by ZH on 2026-07-03 from the filed calibration study (reviews/2026-07-03_lens2-alarm-calibration.md): an arming line for Lens 3 confirmation, not a standalone signal. Re-run the calibration at any gauge addition or removal.",
+    "description": "Composite = share of in-composite gauges triggered. Alarm adopted at 62.5% by ZH on 2026-07-03 from the filed calibration (reviews/2026-07-03_lens2-alarm-calibration.md): an arming line for Lens 3 confirmation, not a standalone signal. The share is what is stored; what it BITES depends on the set size, so alarm_bite below states it in counts. Re-run the calibration at any gauge addition or removal.",
     "alarm_share_pct": 62.5,
     "candidate_shares_pct": [
       62.5,
       75.0,
       87.5
     ],
-    "candidate_rationale": "Candidates evaluated 1990-2026 point-in-time: 62.5% captured every 2000-window arm and maps to the 4-of-7 line that marked both 2021 arms once the IPO gauge is counted; 75% never fires on the modern gauge set; 87.5% fired only in melt-ups.",
-    "confirmed_by_zh": true
+    "candidate_rationale": "Candidates evaluated 1990-2026 point-in-time: 62.5% captured every 2000-window arm; 75% never fires on the modern gauge set; 87.5% fired only in melt-ups. The 2026-09-12 recalibration re-ran this on the seven-gauge set with the IPO gauge COMPUTED rather than mapped in by assertion, and found 5 of 7 the only candidate that arms at both real tops without adding a post-2006 melt-up arm; the first arm in 2021 is 2021-03 at both 4-of-7 and 5-of-7, so the lower line buys continuity rather than earliness.",
+    "confirmed_by_zh": true,
+    "expected_gauge_count": 7,
+    "alarm_bite": "5 of 7",
+    "gauge_count_note": "Guarded by tests/test_composite_alarm.py against scripts/util.py COMPOSITE_SET. The count fell from 8 to 7 on 2026-08-25 when the NAAIM row parked, which re-cut the alarm from 5-of-8 to 5-of-7 silently; the row was removed on 2026-09-12. Changing this number is a decision, not an edit: the 2026-09-12 recalibration (reviews/2026-09-12_lens2-alarm-recalibration.md, verdict pending owner sign-off) endorsed 62.5% on the seven, and a further change needs its own record."
   },
   "consumer_confidence_proxy": {
     "trigger_rule": "Michigan sentiment at or above trigger_percentile of its full monthly history.",
