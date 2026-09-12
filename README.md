@@ -152,8 +152,8 @@ when the CDN is unreachable.
   multpl by-month tables), the RPG−RPV value/growth spread (computed from
   Yahoo closes, daily since 2006), and US IPO proceeds (Renaissance annual,
   from 2016).
-- **Accumulating** — the four survey-provider gauges whose licences forbid
-  redistributing back-history (AAII, NAAIM, S&P Global PMI, Conference
+- **Accumulating** — the three survey-provider gauges whose licences forbid
+  redistributing back-history (AAII, S&P Global PMI, Conference
   Board LEI). These show a clean status panel until enough points
   accumulate (from July 2026), then plot; their full histories are used
   in-memory for calibration but never written to the repo.
@@ -183,7 +183,6 @@ npx serve docs                                # test the built output
 | S&P 500 trend (Lens 3) | Yahoo chart API `^GSPC` (daily, from 1970) | FRED `SP500`, checked on every run | Daily |
 | Consumer confidence (Lens 2) | FRED `UMCSENT` (CB proxy) | Michigan release press prints | Monthly |
 | Retail euphoria (Lens 2) | AAII workbook, current week + in-memory decile calibration | AAII weekly article | Weekly |
-| Manager bullishness (Lens 2) | NAAIM public headline | Aggregator mirrors (lagged) | Weekly |
 | Growth-expectation froth (Lens 2) | multpl trailing P/E vs its own 1871 table | Provider dispersion documented | Daily |
 | Rule of 20 (Lens 2) | multpl P/E + FRED `CPIAUCSL` | BLS API for CPI | Monthly |
 | Deal & IPO froth (Lens 2) | Renaissance Capital stats page | Matches the published annual record | Monthly |

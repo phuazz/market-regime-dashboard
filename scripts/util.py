@@ -29,7 +29,6 @@ CANONICAL_ORDER = {
     2: [
         "consumer_confidence_proxy",
         "retail_euphoria_aaii",
-        "manager_bullishness_naaim",
         "growth_expectation_pe",
         "deal_ipo_froth",
         "rule_of_20",

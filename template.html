@@ -666,8 +666,6 @@ const HISTORY_MAP = {
   consumer_confidence_proxy: { file: "umcsent.json", lines: () => [] },
   retail_euphoria_aaii: { file: "aaii_spread.json", lines: () => [
     { y: 0, label: "bears lead (eased)", color: BLUE, dash: "dot" }] },
-  manager_bullishness_naaim: { file: "naaim_exposure.json", lines: (th) => [
-    { y: th.manager_bullishness_naaim.trigger_level, label: "all-in", color: RED }] },
   growth_expectation_pe: { file: "multpl_pe.json", lines: () => [] },
   value_vs_growth: { file: "rpg_rpv_spread.json", lines: (th) => [
     { y: th.value_vs_growth.trigger_pp, label: "froth", color: RED },

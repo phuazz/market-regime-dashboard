@@ -3,6 +3,15 @@
 Usage:
     python scripts/alarm_calibration.py
 
+CANNOT BE RE-RUN AS WRITTEN (2026-09-12). fetch_naaim_history below scrapes a
+USE_Data workbook link from naaim.org; that link left the page when NAAIM moved
+the index to subscription access on 2026-08-01, and the live NAAIM gauge was
+removed from the dashboard the same day this note was added. Re-running means
+reconstructing the composite without that gauge — a new study with its own
+ledger row and record, not an edit to this script's filed result. The findings
+in reviews/2026-07-03_lens2-alarm-calibration.md stand as the record of the run
+this script performed, on a gauge set that included NAAIM.
+
 Reconstructs the froth composite monthly with point-in-time discipline and
 evaluates candidate alarm levels (50 / 62.5 / 75 / 87.5 percent of gauges
 triggered) against S&P 500 forward returns over 1, 3, 6, and 12 months.

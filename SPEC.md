@@ -54,7 +54,7 @@ indicators triggered. Alarm level: **ZH to set** (do not default to 80%).
 |---|---|---|---|
 | Consumer confidence | Conference Board CC (licensed). Free proxy: FRED `UMCSENT` | Monthly | Elevated relative to history |
 | Retail euphoria | AAII bull-bear survey (aaii.com) | Weekly | Bulls-minus-bears in top decile |
-| Manager bullishness | NAAIM Exposure Index (naaim.org) | Weekly | Near or above 90–100 (all-in) |
+| ~~Manager bullishness~~ | ~~NAAIM Exposure Index (naaim.org)~~ | — | Removed 2026-09-12, see below |
 | Growth-expectation froth | Forward P/E percentile — vendor feed; free proxy: trailing P/E from multpl | Monthly | High historical percentile |
 | Deal & IPO froth | Needs a free proxy: IPO count (Stock Analysis / Renaissance) or SIFMA issuance | Monthly/Qtrly | Issuance at cycle highs |
 | Rule of 20 | Trailing P/E (multpl) + YoY CPI (FRED `CPIAUCSL`) | Monthly | (P/E + CPI) well above 20 |
@@ -63,6 +63,17 @@ indicators triggered. Alarm level: **ZH to set** (do not default to 80%).
 | Tightening credit (SLOOS) | FRED `DRTSCILM` | Quarterly | Net tightening = watch (froth-off) |
 
 Notes:
+- **Manager bullishness (NAAIM) was removed on 2026-09-12.** NAAIM moved current readings to
+  subscription access on 2026-08-01 and publishes the free series on a stated three-month delay,
+  so no current value is retrievable from public data and no mirror may be used in its place. The
+  row had already dropped out of the composite on 2026-08-25 when the staleness guard parked it,
+  taking the gauge count from 8 to 7 — which raised the effective alarm from 5 of 8 gauges to 5 of
+  7, since 4 of 7 is 57.1% and sits below the 62.5% line. **Open: the 62.5% alarm was calibrated
+  on a seven-gauge set that included NAAIM and excluded the IPO gauge, so it has never been
+  calibrated against the set now running.** `scripts/alarm_calibration.py` cannot be re-run as
+  written — its NAAIM history workbook link is gone from the public page as well — so a
+  recalibration means reconstructing the composite without that gauge, which is a study to file,
+  not a patch.
 - Khoo lists the inverted yield curve inside the froth lens as well. **Do not double-count it** — it
   already sits in Lens 1. If retained here, treat it as a complacency read only and document the
   choice.

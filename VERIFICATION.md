@@ -245,7 +245,17 @@ output of 2026-07-02: all three checks PASS.
   discipline: the workbook is used in-memory to calibrate the decile line
   (2,030 weeks since 1987); the raw history is not redistributed.
 
-### NAAIM Exposure Index (manager bullishness)
+### NAAIM Exposure Index (manager bullishness) — RETIRED 2026-09-12
+- Gauge removed from the dashboard. NAAIM's page states the index moved to
+  subscription access on 2026-08-01 and that the public series carries a
+  three-month delay. Verified 2026-09-12: the table, chart and number widgets
+  at index.naaim.org all return 79.27 dated 2026-06-10, the table's newest row
+  advances by one historical week per calendar week, and index.naaim.org now
+  serves a sign-in form. The historical workbook link the alarm calibration
+  used is no longer on the page either. Mirrors (YCharts, CEIC, MacroMicro)
+  either paywall the series or carry it under licence, so none is a permissible
+  substitute. The verification below is retained as the record of the gauge as
+  it stood while it was live.
 - naaim.org headline (originating source) = 84.69 this week. Aggregator
   mirrors (YCharts, MacroMicro) carry the same series with up to a week of
   lag; late-June mirrored prints in the high 90s are consistent with this

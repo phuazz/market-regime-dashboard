@@ -11,7 +11,6 @@ from lens2 import (
     classify_aaii,
     classify_confidence,
     classify_ipo,
-    classify_naaim,
     classify_nfci,
     classify_pe,
     classify_rule_of_20,
@@ -32,11 +31,6 @@ class TestClassifiers(unittest.TestCase):
         self.assertEqual(classify_aaii(15.0, 28.3, params)[0], "quiet")
         self.assertEqual(classify_aaii(-0.1, 28.3, params)[0], "eased")
         self.assertEqual(classify_aaii(0.0, 28.3, params)[0], "quiet")
-
-    def test_naaim_boundary(self):
-        params = {"trigger_level": 90}
-        self.assertEqual(classify_naaim(89.9, params)[0], "quiet")
-        self.assertEqual(classify_naaim(90.0, params)[0], "triggered")
 
     def test_pe_percentile_boundary(self):
         params = {"trigger_percentile": 90}

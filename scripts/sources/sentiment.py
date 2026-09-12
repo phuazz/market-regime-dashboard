@@ -4,7 +4,11 @@ Licence discipline: the AAII workbook is fetched at runtime and used
 in-memory to calibrate percentile triggers; the raw history is never
 written to disk or committed (AAII terms of service). Only the current
 headline and derived statistics are published. The same
-headline-plus-derivation pattern applies to NAAIM and multpl.
+headline-plus-derivation pattern applies to multpl.
+
+The NAAIM Exposure Index was removed on 2026-09-12. NAAIM put current
+readings behind a subscription on 2026-08-01 and delayed the public series
+by three months, so no current value is retrievable from public data.
 """
 from __future__ import annotations
 
@@ -14,18 +18,9 @@ from datetime import date, datetime
 
 import xlrd
 
-from sources.scrape import ScrapeError, StaleFeedError, fetch_bytes, fetch_text
+from sources.scrape import ScrapeError, fetch_bytes, fetch_text
 
 AAII_XLS_URL = "https://www.aaii.com/files/surveys/sentiment.xls"
-NAAIM_URL = "https://naaim.org/programs/naaim-exposure-index/"
-# The number left the main page in 2026: naaim.org now embeds three widgets from
-# index.naaim.org. /embeddable/number renders client-side and comes back empty to
-# a plain fetch; /embeddable/table is static HTML and carries a dated series.
-NAAIM_TABLE_URL = "https://index.naaim.org/embeddable/table"
-# Weekly series. Three cycles of slack absorbs a missed post or a holiday week;
-# beyond that the reading is not "current" in any sense the dashboard should
-# imply, and saying so beats publishing a stale number as though it were live.
-NAAIM_MAX_AGE_DAYS = 21
 MULTPL_PE_URL = "https://www.multpl.com/s-p-500-pe-ratio"
 MULTPL_PE_TABLE_URL = "https://www.multpl.com/s-p-500-pe-ratio/table/by-month"
 RENAISSANCE_STATS_URL = "https://www.renaissancecapital.com/IPO-Center/Stats"
@@ -75,69 +70,6 @@ def fetch_aaii() -> dict:
         "spread_percentile": round(percentile_rank(spreads, spread_pp), 1),
         "history_weeks": len(weeks),
     }
-
-
-def fetch_naaim(today: date | None = None) -> dict:
-    """Return the current NAAIM Exposure Index headline, with its real date.
-
-    Rewritten 2026-08-11. The previous implementation anchored on the phrase
-    "Exposure Index number is" on naaim.org; that phrase no longer appears
-    anywhere on the page, so the builder had failed every run since at least
-    2026-08-04 and the dashboard had been retaining a previous value for this
-    row. NAAIM now embeds the widget from index.naaim.org.
-
-    The dated table is used rather than the number widget, for two reasons.
-    /embeddable/number renders client-side and returns an empty document to a
-    plain fetch. And the table carries a real week-ending date per row, which
-    removes the old "as-of stamped at collection time" approximation the
-    builder had to apologise for -- a genuine gain in provenance.
-
-    Licence discipline (module docstring): the table exposes ~130 weeks of
-    history, and none of it is returned here. Only the newest row is taken,
-    preserving the headline-plus-derivation pattern; back-filling the series
-    would redistribute NAAIM's history.
-
-    Raises ScrapeError with the parsed date and its age when the newest row is
-    older than NAAIM_MAX_AGE_DAYS, which is a different fault from a layout
-    change and must not be reported as one: a stale upstream is a sourcing
-    decision for the operator, not a parser to repair.
-    """
-    text = fetch_text(NAAIM_TABLE_URL)
-    # Date cell followed by the NAAIM number cell. US MM/DD/YYYY, parsed with
-    # strptime -- never split by hand (Python months are 1-indexed).
-    rows = re.findall(
-        r"(\d{2}/\d{2}/\d{4})\s*</td>\s*<td[^>]*>\s*(-?[0-9]{1,3}(?:\.[0-9]{1,2})?)\s*<",
-        text,
-    )
-    if not rows:
-        raise ScrapeError(
-            f"NAAIM layout changed: no dated rows parsed from {NAAIM_TABLE_URL}"
-        )
-    parsed = []
-    for raw_date, raw_value in rows:
-        try:
-            parsed.append((datetime.strptime(raw_date, "%m/%d/%Y").date(), float(raw_value)))
-        except ValueError:
-            continue
-    if not parsed:
-        raise ScrapeError("NAAIM layout changed: dated rows found but none parsed")
-    parsed.sort()
-    week_ending, exposure = parsed[-1]
-
-    age_days = ((today or date.today()) - week_ending).days
-    if age_days > NAAIM_MAX_AGE_DAYS:
-        raise StaleFeedError(
-            f"NAAIM feed is stale, not misparsed: newest dated row is "
-            f"{week_ending.isoformat()}, {age_days} days old (budget {NAAIM_MAX_AGE_DAYS}). "
-            f"Parsed {len(parsed)} rows from {NAAIM_TABLE_URL}. As at 2026-08-11 the "
-            f"/embeddable/number widget also returns an empty body, so no current reading is "
-            f"retrievable from NAAIM's published widgets. Whether NAAIM has paused the survey "
-            f"or its migration is incomplete cannot be determined from here -- this dashboard "
-            f"did scrape a value in late July, so do not assume the series ended in April.",
-            reading={"exposure": exposure, "as_of": week_ending.isoformat()},
-            age_days=age_days,
-        )
-    return {"exposure": exposure, "as_of": week_ending.isoformat()}
 
 
 def fetch_multpl_pe() -> dict:

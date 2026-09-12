@@ -312,11 +312,16 @@ class ParkedRows(unittest.TestCase):
         self.assertEqual(parked_rows(new), [])
 
     def test_parked_row_is_not_ranked_as_a_mover(self):
-        """Its delta is a retrieval artefact, not a move in the market."""
-        rec = dict(self._rec(days=97), id="manager_bullishness_naaim", name="Manager Bullishness",
+        """Its delta is a retrieval artefact, not a move in the market.
+
+        Written for the NAAIM row, whose last-retrievable reading moved as the
+        publisher's archive advanced. That row was removed on 2026-09-12; the
+        rule stands for any row update_data parks.
+        """
+        rec = dict(self._rec(days=97), id="deal_ipo_froth", name="Deal & IPO Froth",
                    value=82.02, status="context")
-        new = {"lens1": {}, "lens2": {"manager_bullishness_naaim": rec}, "lens3": {}}
-        moves = {"manager_bullishness_naaim": {
+        new = {"lens1": {}, "lens2": {"deal_ipo_froth": rec}, "lens3": {}}
+        moves = {"deal_ipo_froth": {
             "delta": 4.68, "arrow": "up", "sense": "worse", "is_pct": False,
             "new_print": True, "status_changed": False, "old_status": "context", "text": "+4.68 wk"}}
         self.assertEqual(rank_movers(new, moves), [])

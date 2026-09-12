@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import update_data
 from lens2 import summarise
+from util import CANONICAL_ORDER
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -306,6 +307,18 @@ class TestBuilderAttributionIsComplete(unittest.TestCase):
         unknown = sorted({row["builder"] for _, row in self._rows()
                           if row.get("builder") and row["builder"] not in known})
         self.assertEqual(unknown, [], "A builder was renamed or removed. Run update_data and commit.")
+
+    def test_no_committed_row_sits_outside_the_canonical_order(self):
+        """A retired row does not delete itself: the merge keeps it.
+
+        write_lens merges by id and appends anything it does not recognise, so
+        dropping a builder leaves its last row at the bottom of the lens, still
+        rendering, with no builder able to refresh it. Removing the NAAIM gauge
+        on 2026-09-12 is how that gap was found.
+        """
+        orphans = [f"lens{lens}:{row['id']}" for lens, row in self._rows()
+                   if row["id"] not in CANONICAL_ORDER[lens]]
+        self.assertEqual(orphans, [], "Delete the row from data/lens*.json, or add it to CANONICAL_ORDER.")
 
 
 if __name__ == "__main__":

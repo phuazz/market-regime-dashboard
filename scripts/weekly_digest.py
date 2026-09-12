@@ -95,7 +95,6 @@ INDICATOR_META = {
     # Lens 2 — market-peak froth
     "consumer_confidence_proxy": {"polarity": 1,  "trigger": ("chart_line", "the 75th-pct trigger")},
     "retail_euphoria_aaii":      {"polarity": 1,  "trigger": ("chart_line", "the top-decile line")},
-    "manager_bullishness_naaim": {"polarity": 1,  "trigger": ("level", 90.0, "below", "the 90 all-in line")},
     "growth_expectation_pe":     {"polarity": 1,  "trigger": ("chart_line", "the 90th-pct trigger")},
     "deal_ipo_froth":            {"polarity": 0,  "trigger": None},
     "rule_of_20":                {"polarity": 1,  "trigger": None},

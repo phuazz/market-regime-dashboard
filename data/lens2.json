@@ -53,33 +53,6 @@
       "builder": "build_aaii"
     },
     {
-      "stale": {
-        "kind": "stale_feed",
-        "parked": true,
-        "days": 94,
-        "as_of": "2026-06-10",
-        "reason": "NAAIM has published no dated reading inside the freshness budget."
-      },
-      "id": "manager_bullishness_naaim",
-      "name": "Manager Bullishness",
-      "qualifier": "NAAIM exposure — feed unavailable",
-      "lens": 2,
-      "in_composite": false,
-      "value": 79.27,
-      "unit": "index",
-      "signed": false,
-      "decimals": 2,
-      "cadence": "weekly",
-      "as_of": "2026-06-10",
-      "status": "context",
-      "description": "Active money managers' reported average equity exposure on a 0-200 scale. Near 100 means managers are all-in with little cash left to deploy — crowded positioning.",
-      "threshold": "Parked: not evaluated against its trigger while the feed is unavailable.",
-      "source_url": "https://index.naaim.org/embeddable/table",
-      "secondary_source_url": "https://naaim.org/",
-      "notes": "PARKED 2026-09-12 — NAAIM's feed has not published a dated reading since 2026-06-10 (94 days). The value shown is that last dated observation, not a current one, and this row is excluded from the Lens 2 composite until the feed resumes. Reason: NAAIM moved its widgets to index.naaim.org; the dated table and chart both end 2026-06-10 and the number widget returns an empty document. Unparks automatically on the first run that finds a reading inside the freshness budget. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_naaim"
-    },
-    {
       "id": "growth_expectation_pe",
       "chart_line": {
         "value": 23.69,

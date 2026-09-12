@@ -76,11 +76,6 @@
     "eased_below_pp": 0,
     "confirmed_by_zh": true
   },
-  "manager_bullishness_naaim": {
-    "trigger_rule": "NAAIM exposure at or above trigger_level (all-in positioning).",
-    "trigger_level": 90,
-    "confirmed_by_zh": true
-  },
   "growth_expectation_pe": {
     "trigger_rule": "Trailing P/E at or above trigger_percentile of monthly history since 1871 (multpl).",
     "trigger_percentile": 90,
