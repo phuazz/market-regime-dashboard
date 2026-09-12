@@ -1,6 +1,48 @@
 # Lens 2 alarm level on the gauge set now running — running memo
 
-Date: 2026-09-12 · Project: market-regime-dashboard · Status: FILED, verdict not yet signed off
+> ## CONTESTED — DO NOT SIGN. Erratum, 2026-09-12, same day
+>
+> The adversarial review commissioned on this record
+> (`reviews/2026-09-12_alarm-recalibration/ADVERSARIAL_REVIEW.md`) returned DO NOT SIGN, and
+> its decisive findings were independently re-verified before this note was written. Two of
+> the three reasons given under "Reading" below do not survive real-time data:
+>
+> 1. **"No post-2006 melt-up false arm" is false.** The reconstruction scores NFCI on
+>    today's vintage. NFCI is heavily revised, one-directionally, over 2016-2019: at
+>    2017-08-25 it was −0.87 on the vintage of the day (rank 4.5, triggered) against −0.56
+>    today (rank 29.6, quiet); at 2018-06-29, −0.78 then (rank 8.3, triggered) against −0.54
+>    now. On real-time data set B at 5 of 7 arms in 2017-08, 2017-12 and 2018-06.
+> 2. **"The first arm is 2021-03 under both levels" is false in real time.** The 2021-03-26
+>    NFCI print was −0.635 on the 2021-04-02 vintage, rank 24.3 — outside the loosest
+>    quintile. Set B was 4 of 7 that month, not 5 of 7. On the data of the day, 5-of-7 first
+>    arms in 2021-09: six months later than 4-of-7, which is the reverse of the "continuity,
+>    not earliness" claim the recommendation leans on.
+> 3. The third reason — no standalone forward-return edge — is symmetric and cuts both ways.
+>
+> Four further errors, all verified: the gauge count fell on **2026-08-11** (commit
+> `d2937e7`, the NAAIM builder parking its own row), not 2026-08-25 (when the general
+> staleness guard was added) — and for the week of 2026-08-13 the live composite read 4 of
+> 7, so the two candidate lines differed in the live reading four weeks before this study,
+> which this memo does not disclose. The combined rule is contemporaneous
+> (`forward_returns.py:152`, `(l1 or l2) and l3`), so the sentence below about being "armed
+> and waiting well before confirmation" describes a rule the dashboard does not implement;
+> Lens 3 first confirmed in 2022-03, when the composite was 2 of 7 under every candidate.
+> The IPO gauge as reconstructed is not the live rule and under-counts the live composite by
+> one gauge in every month where both are observable. And the sensitivity paragraph's
+> "changes nothing at 62.5%" holds for set B only — under set A the no-lag variant adds a
+> 2020-07/08 arm inside a named melt-up control.
+>
+> **Nothing was changed in the dashboard on the strength of this record, and nothing should
+> be.** `alarm_share_pct` remains 62.5 because that is what was adopted on 2026-07-03, not
+> because this revisit endorsed it. The verdict language this record put into
+> `data/thresholds.json` and `scripts/util.py` before review has been backed out.
+>
+> The text below is left as filed. A re-filed record needs NFCI on ALFRED vintages, the IPO
+> gauge under the live rule or its divergence declared, the joint rule's contemporaneity
+> stated, the date corrected, the 42.9% candidate restored to the results table, and the
+> recommendation restated as the judgement the pre-registration promised.
+
+Date: 2026-09-12 · Project: market-regime-dashboard · Status: FILED, CONTESTED, verdict not signed
 Pre-registration: `reviews/2026-09-12_alarm-recalibration/PREREG.md`, frozen in commit
 `53bae29` before any figure was computed.
 Script: `reviews/2026-09-12_alarm-recalibration/recalibrate.py` (frozen in the same commit).

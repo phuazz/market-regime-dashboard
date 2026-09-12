@@ -4,12 +4,13 @@ The alarm is stored as a SHARE (62.5%), so what it actually demands depends on
 how many gauges are in the composite, and a share threshold on a small
 denominator is lumpy. 62.5% is exactly 5 of 8 at eight gauges; at seven the
 lowest share at or above it is 5 of 7, because 4 of 7 is 57.1% and sits below
-the line. When the NAAIM row parked on 2026-08-25 the count fell from eight to
-seven and the alarm tightened with it — unannounced, undecided, and invisible in
-every artefact the dashboard publishes. The row was removed on 2026-09-12 and
-the recalibration endorsed 62.5% on the seven
-(reviews/2026-09-12_lens2-alarm-recalibration.md), but the silence is the defect
-these tests exist to prevent repeating.
+the line. When the NAAIM builder parked its own row on 2026-08-11 the count fell
+from eight to seven and the alarm tightened with it — unannounced, undecided, and
+invisible in every artefact the dashboard publishes. For the week of 2026-08-13
+the live composite read 4 of 7, which arms under one candidate line and not the
+other, and nobody saw it. The row was removed on 2026-09-12. These tests exist to
+prevent the silence, not to defend any particular level: the 2026-09-12
+recalibration is CONTESTED and unsigned, and nothing here depends on its answer.
 
 WHAT IS GUARDED HERE, AND WHAT IS NOT. A permanent change to the set — a gauge
 added or deleted — fails these tests, so the next one is a decision rather than
@@ -42,7 +43,7 @@ class MinimumTriggered(unittest.TestCase):
 
     def test_the_counts_that_62_5_percent_has_meant(self):
         self.assertEqual(minimum_triggered(62.5, 8), 5)   # as adopted, 2026-07-03
-        self.assertEqual(minimum_triggered(62.5, 7), 5)   # as running since 2026-08-25
+        self.assertEqual(minimum_triggered(62.5, 7), 5)   # as running since 2026-08-11
         self.assertEqual(minimum_triggered(62.5, 6), 4)   # were another gauge to go
 
     def test_the_same_share_demands_a_larger_fraction_of_a_smaller_set(self):

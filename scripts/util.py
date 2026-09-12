@@ -45,11 +45,14 @@ CANONICAL_ORDER = {
 # WHY THIS EXISTS. The alarm is a SHARE, so its bite depends on how many gauges
 # are in the set, and a share threshold on a small denominator is lumpy: 62.5%
 # is exactly 5 of 8 at eight gauges but 5 of 7 at seven, because 4 of 7 is 57.1%
-# and sits below the line. When NAAIM parked on 2026-08-25 the count fell from
-# eight to seven and the alarm tightened with it, unannounced and undecided; the
-# row was removed outright on 2026-09-12 and the recalibration
-# (reviews/2026-09-12_lens2-alarm-recalibration.md) endorsed 62.5% on the seven,
-# but the silence is the defect this list guards against.
+# and sits below the line. When the NAAIM builder parked its own row on
+# 2026-08-11 the count fell from eight to seven and the alarm tightened with it,
+# unannounced and undecided; for the week of 2026-08-13 the live composite read
+# 4 of 7, which arms under one candidate line and not the other. The row was
+# removed outright on 2026-09-12. The silence is the defect this list guards
+# against, and it is the defect regardless of where the level lands: the
+# recalibration of 2026-09-12 is CONTESTED and unsigned (see its adversarial
+# review), so nothing here rests on its answer.
 #
 # tests/test_composite_alarm.py fails if a member is added or deleted without
 # this list being updated, which makes the next change a decision rather than an
