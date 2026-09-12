@@ -68,12 +68,21 @@ Notes:
   so no current value is retrievable from public data and no mirror may be used in its place. The
   row had already dropped out of the composite on 2026-08-25 when the staleness guard parked it,
   taking the gauge count from 8 to 7 — which raised the effective alarm from 5 of 8 gauges to 5 of
-  7, since 4 of 7 is 57.1% and sits below the 62.5% line. **Open: the 62.5% alarm was calibrated
-  on a seven-gauge set that included NAAIM and excluded the IPO gauge, so it has never been
-  calibrated against the set now running.** `scripts/alarm_calibration.py` cannot be re-run as
-  written — its NAAIM history workbook link is gone from the public page as well — so a
-  recalibration means reconstructing the composite without that gauge, which is a study to file,
-  not a patch.
+  7, since 4 of 7 is 57.1% and sits below the 62.5% line.
+- **The alarm level is PARKED by owner decision, 2026-09-12. 62.5% stands on the 2026-07-03
+  adoption. The revisit trigger is a gauge change, and `tests/test_composite_alarm.py` is that
+  trigger: if it fails, this question is due.** The level was studied twice on 2026-09-12 and
+  both recommendations were withdrawn after adversarial review — the first because it scored
+  NFCI on today's re-estimated vintage rather than the data of the day, the second because its
+  finding was a five-gauge denominator artefact and Lens 1 had already fired in every month it
+  turned on. Under the rule as coded, 4-of-7 and 5-of-7 produce identical outcomes in every
+  month from 1988 to 2026, so the level is not decidable on evidence and any move is a
+  judgement. Records: `reviews/2026-09-12_lens2-alarm-recalibration.md` and `-v2.md`, each with
+  its adversarial review. Three findings from that work stand on their own: NFCI has no
+  real-time existence before 2011-05-25 (so the credit gauge in every pre-2011 month of the
+  2026-07-03 reconstruction is a hindsight construct), the combined rule is contemporaneous and
+  carries no memory of an earlier arm, and `scripts/alarm_calibration.py` can no longer be
+  re-run as written because NAAIM withdrew its history workbook.
 - Khoo lists the inverted yield curve inside the froth lens as well. **Do not double-count it** — it
   already sits in Lens 1. If retained here, treat it as a complacency read only and document the
   choice.

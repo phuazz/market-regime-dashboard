@@ -9,8 +9,12 @@ from eight to seven and the alarm tightened with it — unannounced, undecided, 
 invisible in every artefact the dashboard publishes. For the week of 2026-08-13
 the live composite read 4 of 7, which arms under one candidate line and not the
 other, and nobody saw it. The row was removed on 2026-09-12. These tests exist to
-prevent the silence, not to defend any particular level: the 2026-09-12
-recalibration is CONTESTED and unsigned, and nothing here depends on its answer.
+prevent the silence, not to defend any particular level. The level itself was
+studied twice on 2026-09-12 and both recommendations were withdrawn after
+adversarial review; it is PARKED by owner decision, 62.5% standing on the
+2026-07-03 adoption, **with a gauge change as the agreed revisit trigger. These
+tests are that trigger.** A failure here is not only a bookkeeping error: it
+means the alarm's bite has moved and the parked question is due.
 
 WHAT IS GUARDED HERE, AND WHAT IS NOT. A permanent change to the set — a gauge
 added or deleted — fails these tests, so the next one is a decision rather than
@@ -87,14 +91,19 @@ class CommittedCompositeSet(unittest.TestCase):
         self.assertEqual(missing, [], "A composite gauge left data/lens2.json. If that is "
                                       "deliberate, remove it from util.COMPOSITE_SET, update "
                                       "lens2_composite.expected_gauge_count, and file the "
-                                      "decision — the alarm's bite changes with the count.")
+                                      "decision. The alarm's bite changes with the count, and "
+                                      "a gauge change is the agreed trigger to revisit the "
+                                      "parked alarm-level question (see thresholds.json "
+                                      "lens2_composite.gauge_count_note).")
 
     def test_no_row_is_in_the_composite_without_being_a_named_member(self):
         extra = sorted(row["id"] for row in self.lens2["indicators"]
                        if row.get("in_composite") and row["id"] not in COMPOSITE_SET)
         self.assertEqual(extra, [], "A gauge entered the composite without being named in "
                                     "util.COMPOSITE_SET. Adding one loosens the alarm: at eight "
-                                    "gauges 62.5% is 5 of 8, at seven it is 5 of 7.")
+                                    "gauges 62.5% is 5 of 8, at seven it is 5 of 7. A gauge "
+                                    "change is the agreed trigger to revisit the parked "
+                                    "alarm-level question.")
 
     def test_a_member_is_either_in_the_composite_or_parked_with_a_reason(self):
         """The only acceptable absence is a declared, temporary one."""
