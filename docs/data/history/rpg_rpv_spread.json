@@ -3,7 +3,7 @@
   "name": "Growth minus value, six-month price-return spread",
   "unit": "pp",
   "source_url": "https://finance.yahoo.com/quote/RPG/",
-  "updated_at": "2026-09-11T01:22:22Z",
+  "updated_at": "2026-09-12T01:23:58Z",
   "dates": [
     "2006-09-05",
     "2006-09-06",
@@ -5038,7 +5038,8 @@
     "2026-09-03",
     "2026-09-04",
     "2026-09-08",
-    "2026-09-09"
+    "2026-09-09",
+    "2026-09-10"
   ],
   "values": [
     -7.7,
@@ -10074,6 +10075,7 @@
     4.72,
     9.0,
     6.72,
-    5.2
+    5.2,
+    3.3
   ]
 }
