@@ -42,7 +42,6 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 from alarm_calibration import (          # noqa: E402  the filed run's own helpers
     expanding_percentile_rank,
-    fetch_aaii_history,
     last_at_or_before,
     month_ends_from_daily,
     series_upto,
@@ -56,6 +55,7 @@ from dateutil.relativedelta import relativedelta  # noqa: E402
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "result_v2.json"
 NAAIM_FROZEN = Path(r"C:\dev\sentiment-composite\archive\naaim.csv")
+AAII_CACHED = Path(r"C:\dev\sentiment-composite\archive\aaii.csv")
 IPO_HISTORY = REPO / "data" / "history" / "renaissance_ipo_proceeds.json"
 
 # Vintage cache. Outside the repo by design: it is bulky, derived, and refetchable.
@@ -68,6 +68,10 @@ SET_B = CORE                        # the seven live today, less IPO
 CANDIDATES = (42.9, 50.0, 57.1, 62.5, 71.4, 75.0, 87.5)
 ADOPTED = 62.5
 VINTAGE_LAG_DAYS = 7                # declared in PREREG; sensitivity at 3 and 14
+# ALFRED's earliest NFCI vintage, located by bisection. The index was introduced in
+# 2011 and its history backfilled to 1971, so before this date the gauge did not exist
+# for anyone to read. PREREG amendment 2.
+FIRST_NFCI_VINTAGE = "2011-05-25"
 SENSITIVITY_LAGS = (3, 14)
 NEAR_LINE_RANK_PP = 5.0             # a gauge this close to its line is "cannot call"
 
@@ -118,8 +122,18 @@ def nfci_at(month_end: str, lag_days: int) -> tuple[float, float] | None:
 
     The rank is computed from the vintage's OWN history, so the line moves as it moved in
     life: the Chicago Fed re-estimates the whole series, not just its tail.
+
+    None before FIRST_NFCI_VINTAGE. ALFRED holds no vintage before 2011-05-25 because the
+    NFCI did not exist before 2011 — the history to 1971 is backfilled. In a real-time
+    reading the gauge is therefore simply absent in that era, not quiet. See PREREG
+    amendment 2: this makes the credit-complacency gauge in every pre-2011 month of both
+    prior studies a hindsight construct.
     """
+    if month_end < FIRST_NFCI_VINTAGE:
+        return None
     vintage = (date.fromisoformat(month_end) + timedelta(days=lag_days)).isoformat()
+    if vintage < FIRST_NFCI_VINTAGE:
+        vintage = FIRST_NFCI_VINTAGE
     if vintage > date.today().isoformat():
         vintage = date.today().isoformat()
     rows = alfred_nfci(vintage)
@@ -136,6 +150,23 @@ def nfci_at(month_end: str, lag_days: int) -> tuple[float, float] | None:
 def clean_series(dates, values):
     pairs = sorted((d, v) for d, v in zip(dates, values) if v is not None)
     return [d for d, _ in pairs], [v for _, v in pairs]
+
+
+def load_cached_aaii() -> tuple[list[str], list[float]]:
+    """AAII bull-bear spread from the sibling project's cache. PREREG amendment 1.
+
+    aaii.com returns 403 and an HTML body to this client; the CI runner still fetches it,
+    so the series is fine and this is a bot block on this address. The survey is never
+    revised, so a cached copy equals a live fetch, and it was cross-checked against this
+    repository's own scraped history (8 overlapping weeks, max difference 0.045 pp) before
+    the run. Used in memory, never written here.
+    """
+    if not AAII_CACHED.exists():
+        raise SystemExit(f"Cached AAII history not found at {AAII_CACHED}")
+    with AAII_CACHED.open(encoding="utf-8", newline="") as handle:
+        rows = sorted((r["date"], float(r["bullish"]) - float(r["bearish"]))
+                      for r in csv.DictReader(handle))
+    return [d for d, _ in rows], [v for _, v in rows]
 
 
 def load_frozen_naaim() -> tuple[list[str], list[float]]:
@@ -204,7 +235,7 @@ def lens3_bear_months(dates: list[str], closes: list[float],
 def build_grid(nfci_mode: str, lag_days: int = VINTAGE_LAG_DAYS) -> list[dict]:
     """nfci_mode: 'vintage' (as published then) or 'current' (today's estimates)."""
     print(f"Building grid: NFCI {nfci_mode}, lag {lag_days}d", file=sys.stderr)
-    aaii_d, aaii_v = fetch_aaii_history()
+    aaii_d, aaii_v = load_cached_aaii()
     naaim_d, naaim_v = load_frozen_naaim()
     pe_d, pe_v, _ = sentiment.fetch_multpl_pe_history()
     umc_d, umc_v = clean_series(*fetch_series("UMCSENT"))

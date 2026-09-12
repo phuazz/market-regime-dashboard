@@ -70,6 +70,51 @@ cannot move it across its line in the months that decide the answer. Any month w
 current-vintage gauge sits within 5 percentage points of rank of its line is listed in the
 results as a month the study cannot call, rather than being silently counted.
 
+## Amendment 1, recorded before any figure existed — the AAII source
+
+`fetch_aaii_history()` failed on the first run: `https://www.aaii.com/files/surveys/sentiment.xls`
+returns **403 and an HTML body** to this client. It is not a broken series — the GitHub
+Actions runner fetched it successfully on 2026-09-12 (the live row carries as-of
+2026-09-10) — so this is a bot block on this machine's address. The adversarial reviewer
+hit the same wall.
+
+AAII is therefore read from the sibling sentiment-composite project's cached copy
+(`C:\dev\sentiment-composite\archive\aaii.csv`, 2,037 weekly rows, 1987-07-24 to
+2026-08-20), spread computed as bullish minus bearish, used in memory and never written
+into this repository — the same discipline the NAAIM history already runs under.
+
+Two-source verified before use, as the house rule requires: on all eight weeks where the
+cache overlaps this repository's own independently scraped `data/history/aaii_spread.json`,
+the two agree to within 0.045 pp, which is display rounding (the repo stores one decimal).
+The survey is never revised, so a cached copy equals a live fetch for every date it covers,
+and its 2026-08-20 end is months after the last decisive month in this study.
+
+## Amendment 2, recorded before any figure existed — NFCI did not exist in real time before 2011
+
+The run stopped at its first pre-2011 month-end: ALFRED returns 404 for every NFCI vintage
+before **2011-05-25**, located by bisection. The Chicago Fed introduced the NFCI in 2011 and
+backfilled the history to 1971. There is no vintage before that because there was no series.
+
+This is not a data-access problem, it is a finding, and it applies to both prior studies:
+**the credit-complacency gauge in the 1990-2011 reconstruction is a hindsight construct, not
+a gauge anyone could have read.** The 2026-07-03 calibration's "five gauges from 1990" were
+four in real time, and its 2000-top conclusion rests in part on a series that did not exist
+in 2000. The same is true of the 2026-09-12 run.
+
+Handling, declared now and before any result:
+
+- **Primary (real-time):** NFCI enters the composite only from 2011-05-25, its first
+  vintage. Before that the gauge is absent and the denominator is smaller — which is what a
+  reader actually had. Note this changes what a share threshold means in that era, which is
+  the same lumpiness this whole study is about.
+- **Comparability arm:** NFCI on today's backfilled vintage throughout, which is what both
+  prior studies did, reported beside the primary so the effect is isolated rather than
+  confounded with the gauge-set question.
+
+Neither arm is privileged in the write-up. The 2000 window is not a discriminating window
+for the set question in any case (NAAIM's history starts 2006-07), but the melt-up controls
+1991-98 and 2003-04 sit squarely in the affected era and their results change.
+
 ## Hypotheses
 
 **H3.** On data available at the time, 5 of 7 (the stored 62.5%) arms at the 2021 top no
