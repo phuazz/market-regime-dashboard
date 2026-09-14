@@ -1,0 +1,1214 @@
+{
+  "prereg": "reviews/2026-09-13_rate-shock_PREREG.md (Amendments 1 and 2)",
+  "window": {
+    "start": "1970-01-02",
+    "end": "2026-09-10",
+    "sessions": 14148
+  },
+  "thin": true,
+  "registered_failures": [
+    {
+      "probe": "spx_obs",
+      "label": "^GSPC observation count",
+      "realised": "14,295 (bar 15,000)",
+      "status": "FAILED-AS-REGISTERED",
+      "cause": "equity history begins 1970-01-02, so the registered 1962 window is unattainable from the registered source (PREREG Amendment 2)"
+    },
+    {
+      "probe": "spx_start",
+      "label": "^GSPC starts on or before 1962-01-31",
+      "realised": "first observation 1970-01-02",
+      "status": "FAILED-AS-REGISTERED",
+      "cause": "equity history begins 1970-01-02, so the registered 1962 window is unattainable from the registered source (PREREG Amendment 2)"
+    },
+    {
+      "probe": "confirm_sessions",
+      "label": "confirmatory arm 1970-1994 common sessions",
+      "realised": "6,233 (bar 8,000)",
+      "status": "FAILED-AS-REGISTERED",
+      "cause": "equity history begins 1970-01-02, so the registered 1962 window is unattainable from the registered source (PREREG Amendment 2)"
+    }
+  ],
+  "basis": "^GSPC price-only (no dividends); conditional and base on the identical basis",
+  "base_rates": {
+    "n": 13895,
+    "median_252": 0.113,
+    "p_dd20": 0.1593
+  },
+  "drawdowns": {
+    "n": 8,
+    "episodes": [
+      {
+        "peak_date": "1970-01-05",
+        "trough_date": "1970-05-26",
+        "depth": -0.2586
+      },
+      {
+        "peak_date": "1973-01-11",
+        "trough_date": "1974-10-03",
+        "depth": -0.482
+      },
+      {
+        "peak_date": "1980-11-28",
+        "trough_date": "1982-08-12",
+        "depth": -0.2711
+      },
+      {
+        "peak_date": "1987-08-25",
+        "trough_date": "1987-12-04",
+        "depth": -0.3351
+      },
+      {
+        "peak_date": "2000-03-24",
+        "trough_date": "2002-10-09",
+        "depth": -0.4915
+      },
+      {
+        "peak_date": "2007-10-09",
+        "trough_date": "2009-03-09",
+        "depth": -0.5678
+      },
+      {
+        "peak_date": "2020-02-19",
+        "trough_date": "2020-03-23",
+        "depth": -0.3392
+      },
+      {
+        "peak_date": "2022-01-03",
+        "trough_date": "2022-10-12",
+        "depth": -0.2543
+      }
+    ]
+  },
+  "cells_computed": [
+    "A1:p90",
+    "A1:p95",
+    "A1:p99",
+    "A1:bca_100bp_REPLICATION",
+    "A2:p90",
+    "A2:p95",
+    "A2:p99",
+    "A3:p90",
+    "A3:p95",
+    "A3:p99"
+  ],
+  "arms": {
+    "A1": {
+      "thresholds": {
+        "p90": {
+          "threshold": 66.0,
+          "n_triggers": 38,
+          "triggers_per_decade": {
+            "1970s": 7,
+            "1980s": 8,
+            "1990s": 7,
+            "2000s": 7,
+            "2010s": 3,
+            "2020s": 6
+          },
+          "median_252": 0.1103,
+          "p_dd20": 0.1579,
+          "forward_medians": {
+            "63": 0.0179,
+            "126": 0.0357,
+            "252": 0.1103
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "126": {
+                "preceded": 4,
+                "share": 0.5
+              },
+              "252": {
+                "preceded": 5,
+                "share": 0.625
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        },
+        "p95": {
+          "threshold": 92.0,
+          "n_triggers": 23,
+          "triggers_per_decade": {
+            "1970s": 4,
+            "1980s": 8,
+            "1990s": 2,
+            "2000s": 3,
+            "2010s": 3,
+            "2020s": 3
+          },
+          "median_252": 0.1486,
+          "p_dd20": 0.1304,
+          "forward_medians": {
+            "63": 0.0353,
+            "126": 0.0757,
+            "252": 0.1486
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 0,
+                "share": 0.0
+              },
+              "126": {
+                "preceded": 2,
+                "share": 0.25
+              },
+              "252": {
+                "preceded": 2,
+                "share": 0.25
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          },
+          "nulls": {
+            "N1_uniform_draws": 2000,
+            "N2_stratified_draws": 2000
+          },
+          "H1a_power": {
+            "power": 0.779,
+            "critical_value": 0.2609,
+            "null_sd": 0.0631,
+            "mde": 0.1547,
+            "exaggeration_ratio": 1.16,
+            "status": "DISCLOSURE"
+          },
+          "H1b_power": {
+            "power": 0.464,
+            "critical_value": 0.0602,
+            "null_sd": 0.0316,
+            "mde": -0.0794,
+            "exaggeration_ratio": 1.54,
+            "status": "DISCLOSURE"
+          }
+        },
+        "p99": {
+          "threshold": 163.0,
+          "n_triggers": 6,
+          "triggers_per_decade": {
+            "1970s": 1,
+            "1980s": 5
+          },
+          "median_252": -0.0034,
+          "p_dd20": 0.1667,
+          "forward_medians": {
+            "63": 0.0837,
+            "126": 0.0141,
+            "252": -0.0034
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "126": {
+                "preceded": 2,
+                "share": 0.25
+              },
+              "252": {
+                "preceded": 2,
+                "share": 0.25
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        },
+        "bca_100bp_REPLICATION": {
+          "threshold": 100.0,
+          "n_triggers": 20,
+          "triggers_per_decade": {
+            "1970s": 3,
+            "1980s": 7,
+            "1990s": 2,
+            "2000s": 3,
+            "2010s": 2,
+            "2020s": 3
+          },
+          "median_252": 0.1183,
+          "p_dd20": 0.1,
+          "forward_medians": {
+            "63": 0.0249,
+            "126": 0.0464,
+            "252": 0.1183
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 0,
+                "share": 0.0
+              },
+              "126": {
+                "preceded": 2,
+                "share": 0.25
+              },
+              "252": {
+                "preceded": 2,
+                "share": 0.25
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        }
+      },
+      "h3": {
+        "max_observed": 314.0,
+        "deciles": [
+          {
+            "decile": 1,
+            "n": 1403,
+            "median_252": 0.1851,
+            "p_dd20": 0.119
+          },
+          {
+            "decile": 2,
+            "n": 1387,
+            "median_252": 0.1265,
+            "p_dd20": 0.2192
+          },
+          {
+            "decile": 3,
+            "n": 1371,
+            "median_252": 0.113,
+            "p_dd20": 0.1918
+          },
+          {
+            "decile": 4,
+            "n": 1391,
+            "median_252": 0.1057,
+            "p_dd20": 0.1653
+          },
+          {
+            "decile": 5,
+            "n": 1404,
+            "median_252": 0.1021,
+            "p_dd20": 0.1104
+          },
+          {
+            "decile": 6,
+            "n": 1368,
+            "median_252": 0.0981,
+            "p_dd20": 0.1323
+          },
+          {
+            "decile": 7,
+            "n": 1418,
+            "median_252": 0.095,
+            "p_dd20": 0.1721
+          },
+          {
+            "decile": 8,
+            "n": 1324,
+            "median_252": 0.0984,
+            "p_dd20": 0.1858
+          },
+          {
+            "decile": 9,
+            "n": 1391,
+            "median_252": 0.1034,
+            "p_dd20": 0.138
+          },
+          {
+            "decile": 10,
+            "n": 1375,
+            "median_252": 0.1208,
+            "p_dd20": 0.1222
+          }
+        ],
+        "upper_deciles_monotone": false
+      }
+    },
+    "A2": {
+      "thresholds": {
+        "p90": {
+          "threshold": 0.1379,
+          "n_triggers": 37,
+          "triggers_per_decade": {
+            "1970s": 3,
+            "1980s": 5,
+            "1990s": 3,
+            "2000s": 9,
+            "2010s": 9,
+            "2020s": 8
+          },
+          "median_252": 0.123,
+          "p_dd20": 0.1389,
+          "forward_medians": {
+            "63": 0.0459,
+            "126": 0.0594,
+            "252": 0.123
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "126": {
+                "preceded": 5,
+                "share": 0.625
+              },
+              "252": {
+                "preceded": 5,
+                "share": 0.625
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": true
+              }
+            ]
+          }
+        },
+        "p95": {
+          "threshold": 0.2198,
+          "n_triggers": 23,
+          "triggers_per_decade": {
+            "1970s": 2,
+            "1980s": 2,
+            "1990s": 1,
+            "2000s": 4,
+            "2010s": 8,
+            "2020s": 6
+          },
+          "median_252": 0.1297,
+          "p_dd20": 0.1739,
+          "forward_medians": {
+            "63": 0.0494,
+            "126": 0.0486,
+            "252": 0.1297
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 3,
+                "share": 0.375
+              },
+              "126": {
+                "preceded": 4,
+                "share": 0.5
+              },
+              "252": {
+                "preceded": 4,
+                "share": 0.5
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": true
+              }
+            ]
+          },
+          "nulls": {
+            "N1_uniform_draws": 2000,
+            "N2_stratified_draws": 2000
+          },
+          "H1a_power": {
+            "power": 0.792,
+            "critical_value": 0.2609,
+            "null_sd": 0.0596,
+            "mde": 0.1518,
+            "exaggeration_ratio": 1.15,
+            "status": "DISCLOSURE"
+          },
+          "H1b_power": {
+            "power": 0.684,
+            "critical_value": 0.0752,
+            "null_sd": 0.0253,
+            "mde": -0.0592,
+            "exaggeration_ratio": 1.26,
+            "status": "DISCLOSURE"
+          }
+        },
+        "p99": {
+          "threshold": 0.4957,
+          "n_triggers": 6,
+          "triggers_per_decade": {
+            "2010s": 2,
+            "2020s": 4
+          },
+          "median_252": 0.1896,
+          "p_dd20": 0.1667,
+          "forward_medians": {
+            "63": 0.0541,
+            "126": 0.107,
+            "252": 0.1896
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 0,
+                "share": 0.0
+              },
+              "126": {
+                "preceded": 0,
+                "share": 0.0
+              },
+              "252": {
+                "preceded": 1,
+                "share": 0.125
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        }
+      },
+      "h3": {
+        "max_observed": 0.8913,
+        "deciles": [
+          {
+            "decile": 1,
+            "n": 1384,
+            "median_252": 0.1698,
+            "p_dd20": 0.2384
+          },
+          {
+            "decile": 2,
+            "n": 1383,
+            "median_252": 0.1091,
+            "p_dd20": 0.1981
+          },
+          {
+            "decile": 3,
+            "n": 1383,
+            "median_252": 0.1286,
+            "p_dd20": 0.1294
+          },
+          {
+            "decile": 4,
+            "n": 1383,
+            "median_252": 0.1256,
+            "p_dd20": 0.1258
+          },
+          {
+            "decile": 5,
+            "n": 1383,
+            "median_252": 0.0884,
+            "p_dd20": 0.1114
+          },
+          {
+            "decile": 6,
+            "n": 1383,
+            "median_252": 0.0937,
+            "p_dd20": 0.1316
+          },
+          {
+            "decile": 7,
+            "n": 1383,
+            "median_252": 0.0889,
+            "p_dd20": 0.1533
+          },
+          {
+            "decile": 8,
+            "n": 1383,
+            "median_252": 0.0971,
+            "p_dd20": 0.1757
+          },
+          {
+            "decile": 9,
+            "n": 1383,
+            "median_252": 0.1097,
+            "p_dd20": 0.1518
+          },
+          {
+            "decile": 10,
+            "n": 1384,
+            "median_252": 0.1285,
+            "p_dd20": 0.1387
+          }
+        ],
+        "upper_deciles_monotone": false
+      }
+    },
+    "A3": {
+      "thresholds": {
+        "p90": {
+          "threshold": 1.1992,
+          "n_triggers": 35,
+          "triggers_per_decade": {
+            "1980s": 7,
+            "1990s": 5,
+            "2000s": 10,
+            "2010s": 6,
+            "2020s": 7
+          },
+          "median_252": 0.0965,
+          "p_dd20": 0.1765,
+          "forward_medians": {
+            "63": 0.0339,
+            "126": 0.0346,
+            "252": 0.0965
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "126": {
+                "preceded": 4,
+                "share": 0.5
+              },
+              "252": {
+                "preceded": 5,
+                "share": 0.625
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        },
+        "p95": {
+          "threshold": 1.6619,
+          "n_triggers": 23,
+          "triggers_per_decade": {
+            "1980s": 6,
+            "1990s": 3,
+            "2000s": 5,
+            "2010s": 3,
+            "2020s": 6
+          },
+          "median_252": 0.1272,
+          "p_dd20": 0.1739,
+          "forward_medians": {
+            "63": 0.0102,
+            "126": 0.0384,
+            "252": 0.1272
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 0,
+                "share": 0.0
+              },
+              "126": {
+                "preceded": 2,
+                "share": 0.25
+              },
+              "252": {
+                "preceded": 4,
+                "share": 0.5
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          },
+          "nulls": {
+            "N1_uniform_draws": 2000,
+            "N2_stratified_draws": 2000
+          },
+          "H1a_power": {
+            "power": 0.792,
+            "critical_value": 0.2609,
+            "null_sd": 0.0595,
+            "mde": 0.1517,
+            "exaggeration_ratio": 1.15,
+            "status": "DISCLOSURE"
+          },
+          "H1b_power": {
+            "power": 0.718,
+            "critical_value": 0.0792,
+            "null_sd": 0.028,
+            "mde": -0.0574,
+            "exaggeration_ratio": 1.26,
+            "status": "DISCLOSURE"
+          }
+        },
+        "p99": {
+          "threshold": 2.6126,
+          "n_triggers": 7,
+          "triggers_per_decade": {
+            "1980s": 2,
+            "2000s": 2,
+            "2020s": 3
+          },
+          "median_252": 0.0859,
+          "p_dd20": 0.1429,
+          "forward_medians": {
+            "63": 0.0601,
+            "126": 0.1095,
+            "252": 0.0859
+          },
+          "h2": {
+            "n_drawdowns": 8,
+            "by_lookback": {
+              "63": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "126": {
+                "preceded": 1,
+                "share": 0.125
+              },
+              "252": {
+                "preceded": 1,
+                "share": 0.125
+              }
+            },
+            "episodes": [
+              {
+                "peak_date": "1970-01-05",
+                "trough_date": "1970-05-26",
+                "depth": -0.2586,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1973-01-11",
+                "trough_date": "1974-10-03",
+                "depth": -0.482,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "1980-11-28",
+                "trough_date": "1982-08-12",
+                "depth": -0.2711,
+                "preceded_by_spike": true
+              },
+              {
+                "peak_date": "1987-08-25",
+                "trough_date": "1987-12-04",
+                "depth": -0.3351,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2000-03-24",
+                "trough_date": "2002-10-09",
+                "depth": -0.4915,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2007-10-09",
+                "trough_date": "2009-03-09",
+                "depth": -0.5678,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2020-02-19",
+                "trough_date": "2020-03-23",
+                "depth": -0.3392,
+                "preceded_by_spike": false
+              },
+              {
+                "peak_date": "2022-01-03",
+                "trough_date": "2022-10-12",
+                "depth": -0.2543,
+                "preceded_by_spike": false
+              }
+            ]
+          }
+        }
+      },
+      "h3": {
+        "max_observed": 3.8327,
+        "deciles": [
+          {
+            "decile": 1,
+            "n": 1125,
+            "median_252": 0.1977,
+            "p_dd20": 0.2516
+          },
+          {
+            "decile": 2,
+            "n": 1125,
+            "median_252": 0.12,
+            "p_dd20": 0.2062
+          },
+          {
+            "decile": 3,
+            "n": 1125,
+            "median_252": 0.1243,
+            "p_dd20": 0.1609
+          },
+          {
+            "decile": 4,
+            "n": 1125,
+            "median_252": 0.1146,
+            "p_dd20": 0.144
+          },
+          {
+            "decile": 5,
+            "n": 1125,
+            "median_252": 0.1224,
+            "p_dd20": 0.1156
+          },
+          {
+            "decile": 6,
+            "n": 1124,
+            "median_252": 0.1123,
+            "p_dd20": 0.1308
+          },
+          {
+            "decile": 7,
+            "n": 1125,
+            "median_252": 0.1155,
+            "p_dd20": 0.1156
+          },
+          {
+            "decile": 8,
+            "n": 1125,
+            "median_252": 0.1178,
+            "p_dd20": 0.1404
+          },
+          {
+            "decile": 9,
+            "n": 1125,
+            "median_252": 0.1007,
+            "p_dd20": 0.1902
+          },
+          {
+            "decile": 10,
+            "n": 1125,
+            "median_252": 0.1049,
+            "p_dd20": 0.0996
+          }
+        ],
+        "upper_deciles_monotone": false
+      }
+    }
+  }
+}
