@@ -363,7 +363,7 @@ design read. The §0b table is therefore incomplete as frozen, and this amendmen
    moved. Updating a registered lean towards a chart seen after the freeze is the precise failure
    this document exists to prevent.
 
-**One successor question, named and explicitly NOT tested here.** The chart's shape suggests the
+**One successor question, named and explicitly NOT tested here (Amendment 1).** The chart's shape suggests the
 operative variable is the **magnitude** of the rate move in either direction — a volatility effect —
 rather than a rise specifically. This registration is spike-only by construction: every trigger in
 §4 is a crossing from below a high threshold. A two-tailed test is a different hypothesis, and
@@ -372,3 +372,55 @@ pre-registration** inheriting this record, and its own answer to the question th
 it is tradable at all: whether the relationship is coincident or forward. A coincident relationship
 between a monthly rate change and the same month's equity return is a correlation, not a signal —
 the rate change is not known until the month it describes has ended.
+
+## Amendment 2, recorded before any figure existed — the equity history does not reach 1962
+
+Recorded **2026-09-14 (Monday, weekday verified with a date library)**, after the Step-0 probes ran
+and before the battery was written. Step-0 probes are availability checks and are explicitly **not
+looks** under D1, so nothing about any outcome informed this amendment: no forward return, no
+trigger, no drawdown and no bucket had been computed when it was written. Owner decision taken in
+session on the same day.
+
+**What failed.** Three of seven probes, all one cause. `^GSPC` through this repository's Yahoo path
+starts **1970-01-02**, not 1962: `period1=0` is the Unix epoch and the endpoint refuses a pre-epoch
+request rather than serving earlier bars. So §3's registered window is unattainable from §3's
+registered source — 14,295 equity observations against a 15,000 bar, and a 1962–1994 confirmatory
+arm of 6,233 common sessions against a bar of 8,000. The bar was set on my own unverified
+assumption about what the source serves, which is precisely the assumption §3 exists to test before
+a result can be fitted around it. It also matches this repository's own history: `forward_returns.py`
+has always been bounded at 1970 for the same reason.
+
+Two alternatives were checked and closed before the amendment was proposed. A negative `period1` is
+refused by the API. Stooq now sits behind a JavaScript proof-of-work bot check, which is not
+something to defeat. A third, moving the equity source to the licensed Norgate history, was put to
+the owner and declined: this repository is public, so licensed history could not be committed here
+and the study would have to move to the private vault, contradicting §10.
+
+**What is amended, and it is one thing.** The study window becomes **1970-01-02 to the last
+complete session**. The confirmatory arm becomes **1970-01-02 to 1994-12-31** (6,233 common
+sessions); the SEEN arm is unchanged at 1995 onward.
+
+**What is NOT amended, deliberately.** The three registered bars keep their registered values. They
+are **not** rewritten to numbers the data happens to clear — that would be restating a threshold
+after watching it fail, which the register names boundary-shopping, and it would erase the weakness
+from the output. Instead:
+
+- Probe `^GSPC observation count` (bar 15,000): **FAILED-AS-REGISTERED**, realised 14,295.
+- Probe `^GSPC starts on or before 1962-01-31`: **FAILED-AS-REGISTERED**, realised 1970-01-02.
+- Probe confirmatory-arm sessions (bar 8,000): **FAILED-AS-REGISTERED**, realised 6,233.
+- Every confirmatory claim in this study therefore carries a standing **THIN** flag, and the three
+  failures are reported in the results file and repeated beside the verdict rather than held in a
+  footnote.
+- The exemption is named and bounded: it covers these three probes and this cause only. Any other
+  Step-0 failure still halts the study with no partial run, exactly as §3 registers.
+
+**The cost, stated plainly because it falls on the primary deliverable.** Losing 1962–1969 removes
+a stretch containing at least two well-known declines of 20 per cent or more in the S&P 500 — the
+1962 break and the 1966 bear. H2 is a *share of drawdowns*, so its denominator is exactly where the
+loss bites: the count is computed over a smaller drawdown set than registered, and the write-up
+must give the realised drawdown count beside the share every time it is quoted. A share over ten
+events is a different object from a share over thirteen, and the reader is entitled to see which
+one is on the page.
+
+**No gate, threshold, arm, null or verdict rule moves.** The freeze otherwise holds in full, and
+the §8 predictions stand exactly as registered on 2026-09-13.
