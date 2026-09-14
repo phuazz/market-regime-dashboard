@@ -311,3 +311,64 @@ deployment consequence routes through the adoption clause in §6 only.
 
 **Owner sign-off: given 2026-09-13 in session. This commit is the freeze** — from here the document
 is immutable except for logged correctness fixes, which force a rerun of the whole battery.
+
+---
+
+## Amendment 1, recorded before any figure existed — a second vendor chart arrived, and it is a LOOK
+
+Received **2026-09-14 (Monday, weekday verified with a date library)**, before `rate_shock_study.py`
+existed, before any Step-0 probe had been run, and before any figure in this study had been
+computed. Recorded here rather than absorbed silently, because the SEEN-data doctrine treats the
+declaration as the thing that makes a confirmatory claim meaningful.
+
+**What arrived.** A Goldman Sachs chart, "When does it hurt?", captioned as a reminder on when
+rising rates start to hurt stocks. It plots the **average 1-month S&P 500 return** by bucket of the
+**z-score of the 1-month change in the 10-year US Treasury yield, scored against the past three
+years**, with paired bars for nominal and real yields, over buckets `<(2), (2)-(1), (1)-(0.5),
+(0.5)-0, 0-0.5, 0.5-1, 1-2, >2`, and an annotation that 2σ today is approximately 60bp. Licensed
+vendor material: no value, bar or bucket of theirs is reproduced in this study's outputs, and as
+with the BCA +100bp line, anything of theirs is a replication target and never an adopted threshold.
+
+**Why it is a look and not merely context.** Under D1 a LOOK is any human read of an outcome
+statistic computed on a panel with a rule definition. This is exactly that: a rule (z-scored rate
+change, bucketed) and an outcome statistic (average S&P return) on the US 10-year-versus-S&P panel.
+Under D2 the unit is the pair (panel, statistic family), and the family here — a **volatility-scaled**
+rate-change statistic — is the family of this study's **A3 arm**, which §4 names primary for any
+design read. The §0b table is therefore incomplete as frozen, and this amendment extends it.
+
+| Panel | Statistic family | Cells read | Verdict / direction | Use here |
+|---|---|---|---|---|
+| 10-year yield z-scored 1m change × S&P 1m return, **window unstated** | vol-scaled rate-change buckets, nominal and real | all eight buckets, both yield types, as bucket means | direction: **both tails negative**, middle positive — an inverted-U | **PRIOR, not evidence.** Extends the §0b declaration to the A3 family |
+
+**Three consequences, none of which touches a parameter, gate or verdict rule. The freeze holds.**
+
+1. **The confirmatory panel is downgraded, not voided.** §0b declared 1962–1994 confirmatory
+   because the BCA chart does not show it. This chart states no window at all, so it may reach into
+   that period. Under D4 a family read on a superset is seen to the extent of the overlap. The
+   overlap is partial and the statistic differs — 1-month change against my 63-session change, a
+   3-year scaling window against my 10-year one, bucket means against my trigger-episode statistics
+   — so the honest grade is **probably unseen, window unstated**, and 1962–1994 is reported as a
+   weaker confirmation than §0b claimed. **The post-freeze accrual is now the only uncontaminated
+   confirmation**, which was already the accrual clause's claim and is now the binding one.
+2. **The conservative reading is registered, and it is the one that constrains this study more.**
+   The chart does not say whether its outcome is the *same* month's equity return or the *following*
+   month's. A coincident statistic would tell me almost nothing about my forward statistic and would
+   be the convenient assumption; a forward statistic makes this a near-neighbour read of my A3
+   family. **It is treated as a look at both readings.** Assuming coincidence would let me claim
+   later that an A3 result was unforeseen when it may not have been.
+3. **No prediction is revised.** The §8 predictions were written on 2026-09-13 and stand exactly as
+   registered. The chart's inverted-U shape — large falls in yields as damaging as large rises — is
+   consistent with prediction 1, that necessity fails because bears arrive without rate spikes and
+   sometimes with yields collapsing. That consistency is noted and the 70 per cent odds are **not**
+   moved. Updating a registered lean towards a chart seen after the freeze is the precise failure
+   this document exists to prevent.
+
+**One successor question, named and explicitly NOT tested here.** The chart's shape suggests the
+operative variable is the **magnitude** of the rate move in either direction — a volatility effect —
+rather than a rise specifically. This registration is spike-only by construction: every trigger in
+§4 is a crossing from below a high threshold. A two-tailed test is a different hypothesis, and
+adding it now would be a post-hoc hypothesis fitted to a chart. It requires **fresh
+pre-registration** inheriting this record, and its own answer to the question that decides whether
+it is tradable at all: whether the relationship is coincident or forward. A coincident relationship
+between a monthly rate change and the same month's equity return is a correlation, not a signal —
+the rate change is not known until the month it describes has ended.
