@@ -39,7 +39,12 @@ from sources.prices import fetch_yahoo_daily
 DGS10_SERIES = "DGS10"
 SPX_SYMBOL = "^GSPC"
 
-WINDOW_START = date(1962, 1, 1)
+# Amendment 2 (2026-09-14): the window starts 1970, not 1962. ^GSPC through this path
+# begins 1970-01-02 — period1=0 is the Unix epoch and the endpoint refuses a pre-epoch
+# request — so the registered 1962 start is unattainable from the registered source. The
+# amendment moves the WINDOW only. The bars below keep their registered values and are
+# reported as failed rather than rewritten to numbers the data clears.
+WINDOW_START = date(1970, 1, 1)
 SEEN_ARM_START = date(1995, 1, 1)      # the BCA chart's window; SEEN, no confirmatory status
 CONFIRM_ARM_END = date(1994, 12, 31)   # downgraded to probably-unseen by Amendment 1
 
@@ -52,13 +57,23 @@ PERCENTILES = (90, 95, 99)             # our thresholds; headline p95
 HEADLINE_PERCENTILE = 95
 BCA_REPLICATION_BP = 100.0             # their published line — replication target ONLY
 
-# Step-0 FAIL_STOP bars (PREREG §3).
+# Step-0 FAIL_STOP bars, AS REGISTERED (PREREG §3). These are deliberately left at the
+# values frozen on 2026-09-13 even where the data cannot clear them. Restating a bar after
+# watching it fail is boundary-shopping, and it would erase the weakness from the output.
 MIN_DGS10_OBS = 15_000
 MIN_SPX_OBS = 15_000
 MIN_CONFIRM_SESSIONS = 8_000
 MIN_ALIGNMENT_SHARE = 0.98
 FIRST_DATE_NO_LATER_THAN = date(1962, 1, 31)
 MAX_SESSION_GAP = 15                   # consecutive-observation gap, in observations of the other series
+
+# Amendment 2's exemption: NAMED probes, ONE cause, nothing else. These three fail because
+# the equity history starts in 1970; they are reported FAILED-AS-REGISTERED and do not halt
+# the study, and every confirmatory claim it makes carries a standing THIN flag. Any other
+# Step-0 failure still stops the run with no partial result, exactly as §3 registers.
+AMENDMENT_2_EXEMPT = {"spx_obs", "spx_start", "confirm_sessions"}
+AMENDMENT_2_CAUSE = ("equity history begins 1970-01-02, so the registered 1962 window is "
+                     "unattainable from the registered source (PREREG Amendment 2)")
 
 
 class Step0Failure(RuntimeError):
@@ -110,8 +125,14 @@ def _max_gap(sessions: list[str], universe: list[str]) -> tuple[int, str]:
 
 
 def step0(verbose: bool = True) -> dict:
-    """Run every pre-registered probe. Raises Step0Failure on the first bar missed."""
-    checks: list[tuple[str, bool, str]] = []
+    """Run every pre-registered probe.
+
+    Raises Step0Failure if any NON-EXEMPT bar is missed. The three probes named in
+    `AMENDMENT_2_EXEMPT` are reported as FAILED-AS-REGISTERED and carried, which is the
+    owner's recorded decision and not a softening of the protocol: the exemption is tied to
+    one documented cause, and the resulting THIN flag travels with every confirmatory claim.
+    """
+    checks: list[tuple[str, str, bool, str]] = []
 
     yields = load_yields()
     spx = load_spx()
@@ -122,19 +143,19 @@ def step0(verbose: bool = True) -> dict:
     s_first = isoparse(s_dates[0]).date()
 
     checks.append((
-        f"{DGS10_SERIES} observation count",
+        "dgs10_obs", f"{DGS10_SERIES} observation count",
         len(y_dates) >= MIN_DGS10_OBS,
         f"{len(y_dates):,} (bar {MIN_DGS10_OBS:,})"))
     checks.append((
-        f"{DGS10_SERIES} starts on or before {FIRST_DATE_NO_LATER_THAN}",
+        "dgs10_start", f"{DGS10_SERIES} starts on or before {FIRST_DATE_NO_LATER_THAN}",
         y_first <= FIRST_DATE_NO_LATER_THAN,
         f"first observation {y_first}"))
     checks.append((
-        f"{SPX_SYMBOL} observation count",
+        "spx_obs", f"{SPX_SYMBOL} observation count",
         len(s_dates) >= MIN_SPX_OBS,
         f"{len(s_dates):,} (bar {MIN_SPX_OBS:,})"))
     checks.append((
-        f"{SPX_SYMBOL} starts on or before {FIRST_DATE_NO_LATER_THAN}",
+        "spx_start", f"{SPX_SYMBOL} starts on or before {FIRST_DATE_NO_LATER_THAN}",
         s_first <= FIRST_DATE_NO_LATER_THAN,
         f"first observation {s_first}"))
 
@@ -143,6 +164,7 @@ def step0(verbose: bool = True) -> dict:
     seen = [d for d in sessions if d >= SEEN_ARM_START.isoformat()]
 
     checks.append((
+        "confirm_sessions",
         f"confirmatory arm {WINDOW_START.year}-{CONFIRM_ARM_END.year} common sessions",
         len(confirm) >= MIN_CONFIRM_SESSIONS,
         f"{len(confirm):,} (bar {MIN_CONFIRM_SESSIONS:,})"))
@@ -151,41 +173,59 @@ def step0(verbose: bool = True) -> dict:
     in_window = [d for d in s_dates if d >= WINDOW_START.isoformat()]
     share = len(sessions) / len(in_window) if in_window else 0.0
     checks.append((
-        "yield/equity session alignment",
+        "alignment", "yield/equity session alignment",
         share >= MIN_ALIGNMENT_SHARE,
         f"{share:.4%} of {len(in_window):,} equity sessions (bar {MIN_ALIGNMENT_SHARE:.0%})"))
 
     gap, where = _max_gap(sessions, in_window)
     checks.append((
-        "largest run of equity sessions with no yield print",
+        "max_gap", "largest run of equity sessions with no yield print",
         gap <= MAX_SESSION_GAP,
         f"{gap} sessions{(' at ' + where) if where else ''} (bar {MAX_SESSION_GAP})"))
 
+    registered_failures = [
+        {"probe": cid, "label": label, "realised": detail, "status": "FAILED-AS-REGISTERED",
+         "cause": AMENDMENT_2_CAUSE}
+        for cid, label, ok, detail in checks if not ok and cid in AMENDMENT_2_EXEMPT]
+    halting = [label for cid, label, ok, _ in checks
+               if not ok and cid not in AMENDMENT_2_EXEMPT]
+
     if verbose:
-        for label, ok, detail in checks:
-            print(f"  {'PASS' if ok else 'FAIL'}  {label:<58} {detail}")
+        for cid, label, ok, detail in checks:
+            mark = "PASS" if ok else ("FAIL*" if cid in AMENDMENT_2_EXEMPT else "FAIL")
+            print(f"  {mark:<5} {label:<58} {detail}")
         print(f"\n  common sessions {sessions[0]} to {sessions[-1]}: {len(sessions):,}")
         print(f"  confirmatory arm (to {CONFIRM_ARM_END}): {len(confirm):,}")
         print(f"  seen arm (from {SEEN_ARM_START}):        {len(seen):,}")
+        if registered_failures:
+            print(f"\n  FAIL* = FAILED-AS-REGISTERED under PREREG Amendment 2 "
+                  f"({len(registered_failures)} of them). The bar is left at its registered "
+                  f"value rather than restated.\n  Cause: {AMENDMENT_2_CAUSE}.\n"
+                  f"  Consequence: every confirmatory claim in this study carries a THIN flag.")
 
-    failed = [label for label, ok, _ in checks if not ok]
-    if failed:
+    if halting:
         raise Step0Failure(
-            "Step-0 probes failed, so the study does not run and no partial result is "
-            f"filed (PREREG §3): {'; '.join(failed)}")
+            "Step-0 probes failed outside the Amendment 2 exemption, so the study does not "
+            f"run and no partial result is filed (PREREG §3): {'; '.join(halting)}")
 
     return {"yields": yields, "spx": spx, "sessions": sessions,
-            "confirm_sessions": confirm, "seen_sessions": seen}
+            "confirm_sessions": confirm, "seen_sessions": seen,
+            "registered_failures": registered_failures,
+            "thin": bool(registered_failures)}
 
 
 def main(argv: list[str]) -> int:
     if "--step0" in argv:
         try:
-            step0()
+            probe = step0()
         except Step0Failure as exc:
             print(f"\n  --> STOP: {exc}")
             return 1
-        print("\n  --> step0: all probes pass; the battery may run")
+        # Never print "all probes pass" while three of them did not. This line gets quoted.
+        n = len(probe["registered_failures"])
+        print(f"\n  --> step0: clear to run"
+              + (f"; {n} probe(s) FAILED-AS-REGISTERED and carried under Amendment 2 — "
+                 f"confirmatory claims are THIN" if n else "; all probes pass"))
         return 0
     print(__doc__)
     return 0
