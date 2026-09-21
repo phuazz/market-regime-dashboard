@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-09-19T01:27:03Z",
+  "updated_at": "2026-09-21T18:06:05Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -106,7 +106,16 @@
       "source_url": "https://www.conference-board.org/topics/us-leading-indicators",
       "secondary_source_url": "https://www.prnewswire.com/news/the-conference-board/",
       "notes": "The six-month change of +0.2% is not negative. Monthly change +0.2%. Licence note: only the publicly announced headline figures are displayed; no licensed series is redistributed. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_lei"
+      "builder": "build_lei",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-09-21T18:06:05Z",
+        "status_before": "benign",
+        "days": 0,
+        "reason": "LEI six-month change unavailable; refusing to classify without it",
+        "group": "monthly",
+        "parked": false
+      }
     },
     {
       "id": "labour_market",
@@ -141,12 +150,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 41.09,
+      "value": 40.94,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-09-11",
+      "as_of": "2026-09-18",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
