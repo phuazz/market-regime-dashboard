@@ -3,7 +3,7 @@
   "name": "University of Michigan consumer sentiment",
   "unit": "index",
   "source_url": "https://fred.stlouisfed.org/series/UMCSENT",
-  "updated_at": "2026-09-21T18:06:03Z",
+  "updated_at": "2026-09-28T19:30:02Z",
   "dates": [
     "1952-11-01",
     "1953-02-01",
@@ -679,7 +679,8 @@
     "2026-04-01",
     "2026-05-01",
     "2026-06-01",
-    "2026-07-01"
+    "2026-07-01",
+    "2026-08-01"
   ],
   "values": [
     86.2,
@@ -1356,6 +1357,7 @@
     49.8,
     44.8,
     49.5,
-    55.2
+    55.2,
+    51.7
   ]
 }
