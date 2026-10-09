@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-10-08T02:50:35Z",
+  "updated_at": "2026-10-09T03:01:57Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -38,18 +38,18 @@
       "qualifier": "AAII bull-bear survey",
       "lens": 2,
       "in_composite": true,
-      "value": -11.8,
+      "value": 1.3,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "weekly",
-      "as_of": "2026-10-01",
-      "status": "eased",
+      "as_of": "2026-10-08",
+      "status": "quiet",
       "description": "Share of individual investors bullish minus bearish in the weekly AAII survey. Extreme bullishness is a contrarian warning — when everyone is optimistic, the buyers are already in.",
       "threshold": "Triggered when the spread reaches the top decile of the full weekly history (currently +28.1 pp); eased when bears outnumber bulls.",
       "source_url": "https://www.aaii.com/sentimentsurvey",
       "secondary_source_url": "https://www.aaii.com/files/surveys/sentiment.xls",
-      "notes": "Bears outnumber bulls (spread -11.8 pp) — retail euphoria is off. This week: bulls 34.6%, bears 46.5%; spread percentile 16 across 2,043 weeks since 1987. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "The bull-bear spread of +1.3 pp is below the top-decile line (+28.1 pp). This week: bulls 40.3%, bears 39.0%; spread percentile 39 across 2,044 weeks since 1987. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_aaii"
     },
     {
@@ -122,18 +122,18 @@
       "qualifier": "RPG minus RPV, 6 months",
       "lens": 2,
       "in_composite": true,
-      "value": 12.0,
+      "value": 7.7,
       "unit": "pp",
       "signed": true,
       "decimals": 1,
       "cadence": "daily",
-      "as_of": "2026-10-07",
-      "status": "triggered",
+      "as_of": "2026-10-08",
+      "status": "quiet",
       "description": "Six-month price-return gap between S&P 500 pure growth (RPG) and pure value (RPV). Sustained growth leadership marks froth-on speculation; value leadership eases it.",
       "threshold": "Triggered when growth leads by 10 pp or more over 126 trading sessions (about six months); eased when value leads.",
       "source_url": "https://finance.yahoo.com/quote/RPG/",
       "secondary_source_url": "https://stockanalysis.com/etf/rpg/",
-      "notes": "Growth leads value by +12.0 pp over six months — the crowding pattern of froth-on leadership. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "Growth leads value by +7.7 pp over six months, below the 10 pp froth line. Price returns, not total returns: RPV distributes a materially higher yield, so the spread slightly flatters growth (well inside the trigger margin). Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_value_growth"
     },
     {
@@ -183,9 +183,9 @@
   ],
   "composite": {
     "gauge_count": 7,
-    "triggered_count": 4,
-    "eased_count": 1,
-    "share_pct": 57.1,
+    "triggered_count": 3,
+    "eased_count": 0,
+    "share_pct": 42.9,
     "alarm_share_pct": 62.5,
     "alarm_state": "below"
   }
