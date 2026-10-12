@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-10-10T02:35:43Z",
+  "updated_at": "2026-10-12T21:08:32Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -91,7 +91,7 @@
       "decimals": 1,
       "cadence": "monthly",
       "as_of": "2026-07-01",
-      "status": "benign",
+      "status": "context",
       "description": "Composite of ten forward-looking inputs built to turn down before the economy does. Status is driven by the six-month growth rate, not the monthly level.",
       "threshold": "Six-month change below zero = watch. At or below -2.0% over six months (about -4% annualised, aligned with the Conference Board's published recession-signal research) = elevated.",
       "trigger_metric": {
@@ -111,10 +111,11 @@
         "kind": "builder_failure",
         "since": "2026-09-21T18:06:05Z",
         "status_before": "benign",
-        "days": 14,
+        "days": 21,
         "reason": "LEI six-month change unavailable; refusing to classify without it",
         "group": "monthly",
-        "parked": false
+        "parked": true,
+        "message": "STALE — the refresh for this row has failed since 2026-09-21 (21 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: LEI six-month change unavailable; refusing to classify without it"
       }
     },
     {
@@ -150,12 +151,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 41.38,
+      "value": 41.87,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-02",
+      "as_of": "2026-10-09",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
