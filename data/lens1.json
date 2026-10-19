@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-10-17T01:26:34Z",
+  "updated_at": "2026-10-19T18:35:34Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -111,11 +111,11 @@
         "kind": "builder_failure",
         "since": "2026-09-21T18:06:05Z",
         "status_before": "benign",
-        "days": 21,
+        "days": 28,
         "reason": "LEI six-month change unavailable; refusing to classify without it",
         "group": "monthly",
         "parked": true,
-        "message": "STALE — the refresh for this row has failed since 2026-09-21 (21 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: LEI six-month change unavailable; refusing to classify without it"
+        "message": "STALE — the refresh for this row has failed since 2026-09-21 (28 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: LEI six-month change unavailable; refusing to classify without it"
       }
     },
     {
@@ -151,18 +151,18 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 41.87,
+      "value": 40.54,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-09",
+      "as_of": "2026-10-16",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
       "source_url": "https://www.multpl.com/shiller-pe",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio",
-      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.42, median 16.13), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer.",
+      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.44, median 16.13), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer.",
       "builder": "build_cape"
     }
   ]
