@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-10-21T01:51:43Z",
+  "updated_at": "2026-10-22T01:42:28Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -21,7 +21,16 @@
       "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
       "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
       "notes": "The spread is positive (+0.86) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_yield_curve"
+      "builder": "build_yield_curve",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-10-22T01:42:28Z",
+        "status_before": "benign",
+        "days": 0,
+        "reason": "Unexpected fredgraph header for T10Y3M: ['<!doctype html>']",
+        "group": "daily",
+        "parked": false
+      }
     },
     {
       "id": "sahm_rule",
@@ -59,7 +68,16 @@
       "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
       "notes": "OAS of 3.29 is below the 4.00 watch level with a 63-trading-day change of +61 bp. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-10-23 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_hy_oas"
+      "builder": "build_hy_oas",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-10-22T01:42:28Z",
+        "status_before": "benign",
+        "days": 0,
+        "reason": "Unexpected fredgraph header for BAMLH0A0HYM2: ['<!doctype html>']",
+        "group": "daily",
+        "parked": false
+      }
     },
     {
       "id": "pmi_manufacturing_proxy",
@@ -144,7 +162,16 @@
       "source_url": "https://fred.stlouisfed.org/series/UNRATE",
       "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm",
       "notes": "Watch: payroll 3-month average +51k. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_labour"
+      "builder": "build_labour",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-10-22T01:42:28Z",
+        "status_before": "watch",
+        "days": 0,
+        "reason": "Unexpected fredgraph header for UNRATE: ['<!doctype html>']",
+        "group": "daily",
+        "parked": false
+      }
     },
     {
       "id": "shiller_cape",

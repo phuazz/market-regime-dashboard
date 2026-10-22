@@ -2,7 +2,7 @@
   "lens": 3,
   "title": "Price trend",
   "subtitle": "Confirmation that the market is actually rolling over.",
-  "updated_at": "2026-10-21T01:51:43Z",
+  "updated_at": "2026-10-22T01:42:28Z",
   "indicators": [
     {
       "id": "sma_trend_sp500",
@@ -21,7 +21,16 @@
       "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
       "secondary_source_url": "https://fred.stlouisfed.org/series/SP500",
       "notes": "Uptrend intact: the 50-day SMA (7,704) is above the 150-day (7,414). Cross-checked against FRED SP500 over 5 sessions (max diff 0.000%). Feeds verified against each other and logged in VERIFICATION.md.",
-      "builder": "build_sma_trend"
+      "builder": "build_sma_trend",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-10-22T01:42:28Z",
+        "status_before": "benign",
+        "days": 0,
+        "reason": "Unexpected fredgraph header for SP500: ['<!doctype html>']",
+        "group": "daily",
+        "parked": false
+      }
     }
   ]
 }
