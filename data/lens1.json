@@ -2,35 +2,26 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-10-22T01:42:28Z",
+  "updated_at": "2026-10-23T01:46:37Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
       "name": "Yield Curve (10yr - 3mo)",
       "qualifier": "term spread",
       "lens": 1,
-      "value": 0.86,
+      "value": 0.74,
       "unit": "pct",
       "signed": true,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-20",
+      "as_of": "2026-10-22",
       "status": "benign",
       "description": "The 10-year minus 3-month Treasury constant-maturity spread. A negative reading (inversion) has historically preceded US recessions; the risk window extends through the re-steepening that follows a sustained inversion.",
       "threshold": "Below zero = watch. Within 12 months after a sustained inversion (at least 60 consecutive daily observations below zero) ends = elevated. Otherwise benign.",
       "source_url": "https://fred.stlouisfed.org/series/T10Y3M",
       "secondary_source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-      "notes": "The spread is positive (+0.86) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_yield_curve",
-      "stale": {
-        "kind": "builder_failure",
-        "since": "2026-10-22T01:42:28Z",
-        "status_before": "benign",
-        "days": 0,
-        "reason": "Unexpected fredgraph header for T10Y3M: ['<!doctype html>']",
-        "group": "daily",
-        "parked": false
-      }
+      "notes": "The spread is positive (+0.74) and no sustained inversion ended within the trailing 12 months. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_yield_curve"
     },
     {
       "id": "sahm_rule",
@@ -56,28 +47,19 @@
       "name": "High-Yield Credit Spreads",
       "qualifier": "HY OAS",
       "lens": 1,
-      "value": 3.29,
+      "value": 3.27,
       "unit": "pct",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "status": "benign",
       "description": "Option-adjusted spread of the ICE BofA US High Yield Index over Treasuries. The cleanest market-priced stress gauge: it widens sharply into downturns, and unusually tight spreads signal complacency rather than safety.",
       "threshold": "At or above 4.00, or widening 100 bp over 63 trading days = watch. At or above 5.50, or widening 200 bp = elevated. At or below 3.00 adds a complacency note without changing status.",
       "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/5735/bofa-us-high-yield-index-optionadjusted-spread",
-      "notes": "OAS of 3.29 is below the 4.00 watch level with a 63-trading-day change of +61 bp. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-10-23 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_hy_oas",
-      "stale": {
-        "kind": "builder_failure",
-        "since": "2026-10-22T01:42:28Z",
-        "status_before": "benign",
-        "days": 0,
-        "reason": "Unexpected fredgraph header for BAMLH0A0HYM2: ['<!doctype html>']",
-        "group": "daily",
-        "parked": false
-      }
+      "notes": "OAS of 3.27 is below the 4.00 watch level with a 63-trading-day change of +48 bp. Absolute levels are fixed anchors near the published long-run median and 75th percentile; the keyless FRED endpoint serves this ICE-licensed series from 2023-10-23 only, so window percentiles would drift. Series identity verified against two sources (VERIFICATION.md).",
+      "builder": "build_hy_oas"
     },
     {
       "id": "pmi_manufacturing_proxy",
@@ -162,16 +144,7 @@
       "source_url": "https://fred.stlouisfed.org/series/UNRATE",
       "secondary_source_url": "https://www.bls.gov/news.release/empsit.nr0.htm",
       "notes": "Watch: payroll 3-month average +51k. Inputs: UNRATE, PAYEMS, UEMP27OV (BLS), CCSA (DOL), all via FRED and cross-checked at the originating agencies. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_labour",
-      "stale": {
-        "kind": "builder_failure",
-        "since": "2026-10-22T01:42:28Z",
-        "status_before": "watch",
-        "days": 0,
-        "reason": "Unexpected fredgraph header for UNRATE: ['<!doctype html>']",
-        "group": "daily",
-        "parked": false
-      }
+      "builder": "build_labour"
     },
     {
       "id": "shiller_cape",
