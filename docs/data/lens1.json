@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-10-24T01:51:09Z",
+  "updated_at": "2026-10-26T18:33:13Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -71,7 +71,7 @@
       "signed": false,
       "decimals": 1,
       "cadence": "monthly",
-      "as_of": "2026-09-01",
+      "as_of": "2026-10-01",
       "status": "benign",
       "description": "Purchasing managers' survey of US manufacturing; readings below 50 indicate contraction. The ISM headline is licensed, so the S&P Global US Manufacturing PMI headline is used as the documented free proxy.",
       "threshold": "Below 50 = watch. Below 48 and lower than three months earlier = elevated.",
@@ -111,11 +111,11 @@
         "kind": "builder_failure",
         "since": "2026-09-21T18:06:05Z",
         "status_before": "benign",
-        "days": 28,
-        "reason": "LEI six-month change unavailable; refusing to classify without it",
+        "days": 35,
+        "reason": "Conference Board layout changed: LEI headline sentence not found",
         "group": "monthly",
         "parked": true,
-        "message": "STALE — the refresh for this row has failed since 2026-09-21 (28 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: LEI six-month change unavailable; refusing to classify without it"
+        "message": "STALE — the refresh for this row has failed since 2026-09-21 (35 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: Conference Board layout changed: LEI headline sentence not found"
       }
     },
     {
@@ -151,12 +151,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 40.54,
+      "value": 40.36,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-16",
+      "as_of": "2026-10-23",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
