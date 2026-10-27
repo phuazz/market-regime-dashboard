@@ -3,7 +3,7 @@
   "name": "Total nonfarm payrolls",
   "unit": "thousands",
   "source_url": "https://fred.stlouisfed.org/series/PAYEMS",
-  "updated_at": "2026-10-24T01:51:07Z",
+  "updated_at": "2026-10-27T02:20:01Z",
   "dates": [
     "1939-01-01",
     "1939-02-01",
