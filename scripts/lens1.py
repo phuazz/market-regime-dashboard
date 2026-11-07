@@ -422,23 +422,83 @@ def three_month_average_rise(values: list[float]) -> float:
     return round(avg3[-1] - min(avg3[-13:-1]), 2)
 
 
+def prior_year_same_month(as_of: date) -> date:
+    """Same calendar month one year earlier.
+
+    Python datetime months are 1-indexed. The step uses relativedelta, which
+    clamps a leap day (2024-02-29 minus one year is 2023-02-28).
+    """
+    return as_of - relativedelta(years=1)
+
+
+def yoy_percent_if_observed(dates: list[str], values: list[float]) -> float | None:
+    """Percent change versus the same month one year earlier.
+
+    Returns None when that month has no observation. A neighbouring month is
+    not substituted and no value is interpolated.
+    """
+    target = prior_year_same_month(date.fromisoformat(dates[-1])).isoformat()
+    if target not in dates:
+        return None
+    base = values[dates.index(target)]
+    return round((values[-1] / base - 1.0) * 100.0, 1)
+
+
+def unpublished_yoy_note(series_id: str, target: str, value: float | None) -> str:
+    """Name a year-ago month that was not published. Empty when the change exists."""
+    if value is not None:
+        return ""
+    return (
+        f" No {series_id} observation is published for {target}, so no "
+        f"year-over-year change is calculated."
+    )
+
+
+def _unavailable_internal_sentence(uemp_yoy: float | None, ccsa_26wk: float | None) -> str:
+    """Name labour internals that have no reading. Empty when both are present.
+
+    A missing reading is not given a number and is not treated as a breach.
+    """
+    if uemp_yoy is None and ccsa_26wk is None:
+        return (
+            "Long-term unemployed year-over-year change and continued claims "
+            "change over 26 weeks are unavailable, so those inputs are omitted "
+            "from the internals check."
+        )
+    if uemp_yoy is None:
+        return (
+            "Long-term unemployed year-over-year change is unavailable, so that "
+            "input is omitted from the internals check."
+        )
+    if ccsa_26wk is None:
+        return (
+            "Continued claims change over 26 weeks is unavailable, so that "
+            "input is omitted from the internals check."
+        )
+    return ""
+
+
 def classify_labour(inputs: dict, params: dict) -> tuple[str, str]:
     rise = inputs["rise"]
     payroll = inputs["payroll_3mo_avg_thousands"]
     uemp_yoy = inputs["uemp27ov_yoy_pct"]
     ccsa_26wk = inputs["ccsa_26wk_pct"]
 
+    # Both internals must be present and above their lines. A missing reading
+    # cannot satisfy the rule and must not be formatted as a number.
     internals_soft = (
         uemp_yoy is not None
         and ccsa_26wk is not None
         and uemp_yoy > params["watch_uemp27ov_yoy_pct"]
         and ccsa_26wk > params["watch_ccsa_26wk_pct"]
     )
+    gap = _unavailable_internal_sentence(uemp_yoy, ccsa_26wk)
     if rise >= params["elevated_rise"] or payroll < 0:
-        return "elevated", (
+        detail = (
             f"Unemployment rise of {rise:+.2f} pp or negative three-month average payroll "
             f"change ({payroll:+.0f}k) signals a turning labour market."
         )
+        return "elevated", f"{detail} {gap}" if gap else detail
     if rise >= params["watch_rise"] or payroll < params["watch_payroll_3mo_avg_thousands"] or internals_soft:
         reasons = []
         if rise >= params["watch_rise"]:
@@ -450,7 +510,21 @@ def classify_labour(inputs: dict, params: dict) -> tuple[str, str]:
                 f"internals softening (long-term unemployed {uemp_yoy:+.0f}% YoY, "
                 f"continued claims {ccsa_26wk:+.1f}% over 26 weeks)"
             )
-        return "watch", "Watch: " + "; ".join(reasons) + "."
+        detail = "Watch: " + "; ".join(reasons) + "."
+        return "watch", f"{detail} {gap}" if gap else detail
+    if gap:
+        available = []
+        if uemp_yoy is not None:
+            available.append(f"long-term unemployed {uemp_yoy:+.0f}% YoY")
+        if ccsa_26wk is not None:
+            available.append(f"continued claims {ccsa_26wk:+.1f}% over 26 weeks")
+        extra = ""
+        if available:
+            extra = " Available internals: " + ", ".join(available) + "."
+        return "benign", (
+            f"Headline is steady: unemployment rise {rise:+.2f} pp, payroll "
+            f"3-month average {payroll:+.0f}k.{extra} {gap}"
+        )
     return "benign", (
         f"Headline and internals are steady: unemployment rise {rise:+.2f} pp, payroll "
         f"3-month average {payroll:+.0f}k, long-term unemployed "
@@ -475,13 +549,10 @@ def build_labour(thresholds: dict) -> dict:
                        "https://fred.stlouisfed.org/series/CCSA", ccsa_dates, ccsa_values)
 
     payroll_changes = [b - a for a, b in zip(payems_values[-4:-1], payems_values[-3:])]
-    uemp_latest_date = date.fromisoformat(uemp_dates[-1])
-    # Same month one year earlier, via relativedelta (months are 1-indexed).
-    yoy_target = (uemp_latest_date - relativedelta(years=1)).isoformat()
-    uemp_yoy_pct = None
-    if yoy_target in uemp_dates:
-        base = uemp_values[uemp_dates.index(yoy_target)]
-        uemp_yoy_pct = round((uemp_values[-1] / base - 1.0) * 100.0, 1)
+    # Same month one year earlier (months are 1-indexed; see prior_year_same_month).
+    # A month the agencies leave blank stays blank. It is not filled in.
+    yoy_target = prior_year_same_month(date.fromisoformat(uemp_dates[-1])).isoformat()
+    uemp_yoy_pct = yoy_percent_if_observed(uemp_dates, uemp_values)
     ccsa_26wk_pct = (
         round((ccsa_values[-1] / ccsa_values[-27] - 1.0) * 100.0, 1) if len(ccsa_values) >= 27 else None
     )
@@ -493,6 +564,7 @@ def build_labour(thresholds: dict) -> dict:
         "ccsa_26wk_pct": ccsa_26wk_pct,
     }
     status, detail = classify_labour(inputs, params)
+    detail += unpublished_yoy_note("UEMP27OV", yoy_target, uemp_yoy_pct)
     return {
         "id": "labour_market",
         "name": "Labour Market",
