@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-11-07T03:03:17Z",
+  "updated_at": "2026-11-09T22:09:54Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -33,7 +33,7 @@
       "signed": true,
       "decimals": 2,
       "cadence": "monthly",
-      "as_of": "2026-09-01",
+      "as_of": "2026-10-01",
       "status": "benign",
       "description": "Rise of the three-month average unemployment rate above its low of the previous twelve months. The published 0.50 trigger has fired at the start of every US recession since 1970 (Sahm 2019).",
       "threshold": "At or above 0.50 = elevated (published Sahm trigger). 0.35-0.50 = watch.",
@@ -111,11 +111,11 @@
         "kind": "builder_failure",
         "since": "2026-09-21T18:06:05Z",
         "status_before": "benign",
-        "days": 42,
+        "days": 49,
         "reason": "Conference Board layout changed: LEI headline sentence not found",
         "group": "monthly",
         "parked": true,
-        "message": "STALE — the refresh for this row has failed since 2026-09-21 (42 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: Conference Board layout changed: LEI headline sentence not found"
+        "message": "STALE — the refresh for this row has failed since 2026-09-21 (49 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: Conference Board layout changed: LEI headline sentence not found"
       }
     },
     {
@@ -160,18 +160,18 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 40.13,
+      "value": 39.85,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-10-30",
+      "as_of": "2026-11-09",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
       "source_url": "https://www.multpl.com/shiller-pe",
       "secondary_source_url": "https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio",
-      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.44, median 16.13), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer.",
+      "notes": "Method note: the headline is multpl's daily CAPE on the latest price with lagged earnings; the chart is the monthly Shiller series (public Yale dataset), so the last monthly point sits slightly below the daily figure in a rising market. Cross-checked within tolerance at first use; see VERIFICATION.md. The reading is far above long-run norms (multpl long-run mean 17.45, median 16.14), which historically maps to weak decade-ahead returns — a caveat on future returns, not a recession timer.",
       "builder": "build_cape"
     }
   ]
