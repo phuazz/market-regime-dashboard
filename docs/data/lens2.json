@@ -2,7 +2,7 @@
   "lens": 2,
   "title": "Market-peak froth",
   "subtitle": "Public-data gauges of euphoria and complacency.",
-  "updated_at": "2026-11-14T03:28:11Z",
+  "updated_at": "2026-11-16T21:51:04Z",
   "indicators": [
     {
       "id": "consumer_confidence_proxy",
@@ -62,18 +62,18 @@
       "qualifier": "trailing P/E percentile, proxy",
       "lens": 2,
       "in_composite": true,
-      "value": 25.75,
+      "value": 25.3,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-11-09",
+      "as_of": "2026-11-16",
       "status": "triggered",
       "description": "How many dollars investors pay per dollar of earnings. A high historical percentile means optimism is already priced. Forward P/E needs a vendor feed, so the trailing multiple from multpl is the documented free proxy.",
       "threshold": "Triggered at or above the 90th percentile of monthly history since 1871.",
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month",
-      "notes": "The trailing multiple sits at the 93th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "The trailing multiple sits at the 92th percentile of monthly history since 1871 — a lot of optimism is already priced. Proxy substitution: trailing, not forward, earnings. Recent months in the calibration history are multpl estimates pending final earnings (marked on their table). Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_pe"
     },
     {
@@ -94,7 +94,17 @@
       "source_url": "https://www.renaissancecapital.com/IPO-Center/Stats",
       "secondary_source_url": "https://stockanalysis.com/ipos/statistics/",
       "notes": "Annualised issuance pace ranks at the 100th percentile of the prior years available — deal-making at cycle highs. Year to date: $148.6bn across 10 months (121 IPOs); annualised $178bn. Chart shows full-year proceeds with the current year as a year-to-date point. History window is short (10 prior years) — a coarse gauge, flagged per SPEC. Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_ipo"
+      "builder": "build_ipo",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-11-16T21:51:04Z",
+        "status_before": "triggered",
+        "was_in_composite": true,
+        "days": 0,
+        "reason": "Renaissance layout changed: no Highcharts config found",
+        "group": "monthly",
+        "parked": false
+      }
     },
     {
       "id": "rule_of_20",
@@ -114,7 +124,17 @@
       "source_url": "https://www.multpl.com/s-p-500-pe-ratio",
       "secondary_source_url": "https://fred.stlouisfed.org/series/CPIAUCSL",
       "notes": "P/E plus inflation totals 29.5, well above the 20 fair-value line and at the 87th percentile of history since 1948. Inputs: trailing P/E 25.75 (multpl), CPI +3.7% YoY (FRED CPIAUCSL, cross-checked at the BLS API). Series identity verified against two sources (VERIFICATION.md).",
-      "builder": "build_rule_of_20"
+      "builder": "build_rule_of_20",
+      "stale": {
+        "kind": "builder_failure",
+        "since": "2026-11-16T21:51:04Z",
+        "status_before": "triggered",
+        "was_in_composite": true,
+        "days": 0,
+        "reason": "CPI year-on-year change unavailable for the latest month",
+        "group": "monthly",
+        "parked": false
+      }
     },
     {
       "id": "value_vs_growth",
