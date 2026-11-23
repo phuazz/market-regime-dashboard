@@ -4,7 +4,7 @@
   "unit": "index",
   "source_url": "https://www.pmi.spglobal.com/",
   "collection": "Accumulated from monthly public press headlines; no licensed history is redistributed.",
-  "updated_at": "2026-11-16T21:51:01Z",
+  "updated_at": "2026-11-23T23:40:24Z",
   "points": [
     {
       "as_of": "2026-05-01",
@@ -36,6 +36,11 @@
       "as_of": "2026-10-01",
       "value": 55.9,
       "recorded_at": "2026-10-26T18:33:09Z"
+    },
+    {
+      "as_of": "2026-11-01",
+      "value": 54.5,
+      "recorded_at": "2026-11-23T23:40:24Z"
     }
   ]
 }

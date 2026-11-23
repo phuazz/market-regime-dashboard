@@ -2,7 +2,7 @@
   "lens": 1,
   "title": "Recession risk",
   "subtitle": "Leading and coincident indicators of an economic downturn.",
-  "updated_at": "2026-11-21T04:11:29Z",
+  "updated_at": "2026-11-23T23:40:26Z",
   "indicators": [
     {
       "id": "yield_curve_10y3m",
@@ -66,18 +66,18 @@
       "name": "Manufacturing PMI",
       "qualifier": "S&P Global, ISM proxy",
       "lens": 1,
-      "value": 55.9,
+      "value": 54.5,
       "unit": "index",
       "signed": false,
       "decimals": 1,
       "cadence": "monthly",
-      "as_of": "2026-10-01",
+      "as_of": "2026-11-01",
       "status": "benign",
       "description": "Purchasing managers' survey of US manufacturing; readings below 50 indicate contraction. The ISM headline is licensed, so the S&P Global US Manufacturing PMI headline is used as the documented free proxy.",
       "threshold": "Below 50 = watch. Below 48 and lower than three months earlier = elevated.",
       "source_url": "https://tradingeconomics.com/united-states/manufacturing-pmi",
       "secondary_source_url": "https://www.pmi.spglobal.com/Public/Release/PressReleases",
-      "notes": "PMI of 55.9 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md).",
+      "notes": "PMI of 54.5 is above the 50 expansion line. Proxy substitution: ISM headline is licensed; the S&P Global headline is a different survey that can diverge from ISM. Series identity verified against two sources (VERIFICATION.md).",
       "builder": "build_pmi"
     },
     {
@@ -111,11 +111,11 @@
         "kind": "builder_failure",
         "since": "2026-09-21T18:06:05Z",
         "status_before": "benign",
-        "days": 56,
-        "reason": "Conference Board layout changed: LEI headline sentence not found",
+        "days": 63,
+        "reason": "LEI six-month change unavailable; refusing to classify without it",
         "group": "monthly",
         "parked": true,
-        "message": "STALE — the refresh for this row has failed since 2026-09-21 (56 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: Conference Board layout changed: LEI headline sentence not found"
+        "message": "STALE — the refresh for this row has failed since 2026-09-21 (63 days), so the value and date shown are its last successful read rather than a current one. The row is demoted to context and sits outside the lens roll-up until a refresh succeeds, which happens automatically. Reason: LEI six-month change unavailable; refusing to classify without it"
       }
     },
     {
@@ -151,12 +151,12 @@
       "name": "Valuation",
       "qualifier": "Shiller CAPE",
       "lens": 1,
-      "value": 39.16,
+      "value": 38.21,
       "unit": "ratio",
       "signed": false,
       "decimals": 2,
       "cadence": "daily",
-      "as_of": "2026-11-16",
+      "as_of": "2026-11-23",
       "status": "context",
       "description": "Price divided by the ten-year average of inflation-adjusted earnings. A high reading means an expensive market and weak long-run return expectations — it does not time tops, and markets can stay expensive for years.",
       "threshold": "Context only — never a timing trigger. Flagged when above 30 as a long-run return caveat.",
